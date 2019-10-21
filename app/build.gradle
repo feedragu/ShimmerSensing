@@ -4,9 +4,7 @@ android {
     compileSdkVersion 29
 
     buildToolsVersion "29.0.2"
-    dexOptions {
-        incremental true
-    }
+
     defaultConfig {
         applicationId "com.example.shimmersensing"
         minSdkVersion 23

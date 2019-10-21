@@ -11,16 +11,15 @@
     <androidx.appcompat.widget.Toolbar
         android:id="@+id/toolbar_shimmer"
         android:layout_width="0dp"
-        android:layout_height="0dp"
+        android:layout_height="1dp"
         android:background="#00FFFFFF"
         android:minHeight="?attr/actionBarSize"
         android:theme="@style/ToolBarTheme"
         android:transitionName="toolbar_shimmer"
-        app:layout_constraintBottom_toTopOf="@+id/ivImage"
+        app:layout_constraintBottom_toTopOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/textView"

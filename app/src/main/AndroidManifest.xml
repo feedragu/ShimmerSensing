@@ -20,6 +20,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        <activity   android:name="com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog"
+            android:theme="@android:style/Theme.Holo.Light.Dialog">
+        </activity>
     </application>
     <uses-permission android:name="android.permission.INTERNET"   android:required="true" />
     <uses-permission android:name="android.permission.BLUETOOTH"  android:required="true" />

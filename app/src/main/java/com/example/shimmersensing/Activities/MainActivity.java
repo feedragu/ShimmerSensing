@@ -69,12 +69,12 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
         slide.setPropagation(new CircularPropagation());
 
         Fade fade =new Fade();
-        fade.setDuration(100);
+        fade.setDuration(350);
 
         slide.setInterpolator(new LinearInterpolator());
         Transition transition = new TransitionSet()
-                .addTransition(fade)
-                .addTransition(slide);
+                .addTransition(fade);
+                //.addTransition(slide)
 
         getWindow().setExitTransition(transition);
     }
