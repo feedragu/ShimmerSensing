@@ -20,6 +20,7 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="251dp"
+            android:background="#fff"
             tools:layout_editor_absoluteY="1dp">
 
             <ImageView
@@ -37,6 +38,7 @@
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:text="TextView"
+                android:textColor="#000000"
                 android:textSize="18sp"
                 android:textStyle="italic|bold"
                 android:transitionName="shimmer_text"
