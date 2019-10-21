@@ -14,6 +14,7 @@ import android.transition.Transition;
 import android.transition.TransitionSet;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 
 import com.example.shimmersensing.R;
 
@@ -41,7 +42,8 @@ public class ShimmerSpec extends AppCompatActivity {
 //        //fade.setDuration(115);
 //        Slide slide =new Slide();
 //        slide.setSlideEdge(Gravity.BOTTOM);
-        final Rect epicenter=new Rect(getCurrentFocus().getLeft(), getCurrentFocus().getTop(), getCurrentFocus().getRight(), getCurrentFocus().getBottom());;
+        View layout=findViewById(R.id.view_layout);
+        final Rect epicenter=new Rect(layout.getLeft(), layout.getTop(), layout.getRight(), layout.getBottom());;
         Explode explode = new Explode() {
             {
                 super.setEpicenterCallback(new Transition.EpicenterCallback() {
