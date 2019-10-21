@@ -14,6 +14,7 @@ import android.transition.Fade;
 import android.transition.Slide;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.Utilities.RecyclerAdapter;
@@ -50,6 +51,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
         Slide slide =new Slide();
         slide.setSlideEdge(Gravity.TOP);
         slide.setDuration(270);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getSupportActionBar().hide();
         getWindow().setSharedElementExitTransition(new ChangeImageTransform());
         getWindow().setExitTransition(slide);
         getWindow().setSharedElementEnterTransition(new ChangeImageTransform());
