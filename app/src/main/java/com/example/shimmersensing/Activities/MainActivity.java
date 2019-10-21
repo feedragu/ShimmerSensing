@@ -53,17 +53,13 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
         Slide slide =new Slide();
         slide.setSlideEdge(Gravity.TOP);
         //slide.setDuration(350);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setTitle("");
-
-        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
 
 //        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 //                WindowManager.LayoutParams.FLAG_FULLSCREEN);
-        getSupportActionBar().hide();
         getWindow().setSharedElementExitTransition(new ChangeImageTransform());
-        getWindow().setExitTransition(slide);
+        getWindow().setExitTransition(null);
         getWindow().setSharedElementEnterTransition(new ChangeImageTransform());
+        getWindow().setEnterTransition(null);
     }
 
     @Override

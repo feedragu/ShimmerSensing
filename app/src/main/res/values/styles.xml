@@ -6,11 +6,16 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
-        <item name="android:windowContentTransitions">true</item>
+        <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
         <item name="android:windowBackground">@color/transparent</item>
         <item name="android:colorBackground">@color/transparent</item>
         <item name="android:windowIsTranslucent">true</item>
     </style>
 
+    <style name="ToolBarTheme"  parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="colorControlNormal">@color/toolbar_arrow</item>
+    </style>
 </resources>

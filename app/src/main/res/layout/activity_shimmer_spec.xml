@@ -22,12 +22,15 @@
                 android:id="@+id/ivImage"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="71dp"
                 android:scaleType="centerInside"
                 android:src="@drawable/shimmer_sensor"
                 android:transitionName="shimmer_sensor"
+                app:layout_constraintBottom_toTopOf="@+id/tvTitle"
                 app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.0"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toBottomOf="@+id/toolbar_shimmer" />
 
             <TextView
                 android:id="@+id/tvTitle"
@@ -51,9 +54,12 @@
                 android:layout_height="wrap_content"
                 android:background="?attr/colorPrimary"
                 android:minHeight="?attr/actionBarSize"
-                android:theme="?attr/actionBarTheme"
+                android:theme="@style/ToolBarTheme"
+                app:layout_constraintBottom_toTopOf="@+id/ivImage"
                 app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent" />
+                app:layout_constraintHorizontal_bias="0.0"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
