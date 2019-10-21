@@ -1,5 +1,6 @@
 package com.example.shimmersensing.Activities;
 
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
@@ -7,6 +8,7 @@ import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.transition.ChangeImageTransform;
 import android.transition.Explode;
@@ -50,9 +52,14 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
 //        fade.setDuration(0);
         Slide slide =new Slide();
         slide.setSlideEdge(Gravity.TOP);
-        slide.setDuration(270);
-        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
-                WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        //slide.setDuration(350);
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("");
+
+        getSupportActionBar().setBackgroundDrawable(new ColorDrawable(getResources().getColor(android.R.color.transparent)));
+
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
+//                WindowManager.LayoutParams.FLAG_FULLSCREEN);
         getSupportActionBar().hide();
         getWindow().setSharedElementExitTransition(new ChangeImageTransform());
         getWindow().setExitTransition(slide);

@@ -3,6 +3,7 @@ package com.example.shimmersensing.Activities;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.transition.AutoTransition;
 import android.transition.ChangeBounds;
@@ -22,14 +23,20 @@ public class ShimmerSpec extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_shimmer_spec);
-//        ActionBar actionBar = getSupportActionBar();
-//        actionBar.setTitle("Shimmer specification");
+
+        ActionBar actionBar = getSupportActionBar();
+        actionBar.setTitle("");
+        getSupportActionBar().hide();
+        androidx.appcompat.widget.Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
+        mToolbar.setBackgroundColor(getResources().getColor(android.R.color.transparent));
+
 //        Fade fade = new Fade();
 //        fade.setStartDelay(0);
 //        fade.setMode(Fade.MODE_OUT);
 //        fade.setDuration(0);
+
         Fade fade =new Fade();
-        fade.setDuration(115);
+        //fade.setDuration(115);
         getWindow().setSharedElementExitTransition(new ChangeImageTransform());
         getWindow().setEnterTransition(fade);
 
