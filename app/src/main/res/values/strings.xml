@@ -1,0 +1,4 @@
+<resources>
+    <string name="app_name">ShimmerSensing</string>
+    <string name="cardview_image">shimmer_cardview</string>
+</resources>
