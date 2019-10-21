@@ -16,9 +16,13 @@ buildscript {
 
 allprojects {
     repositories {
+        mavenLocal()
+        mavenCentral()
         google()
         jcenter()
-        
+        maven {
+            url "http://dl.bintray.com/shimmerengineering/Shimmer"
+        }
     }
 }
 
