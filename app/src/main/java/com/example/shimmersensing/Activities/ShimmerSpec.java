@@ -49,6 +49,7 @@ public class ShimmerSpec extends AppCompatActivity {
 
     ShimmerBluetoothManagerAndroid btManager;
     Shimmer shimmerDevice;
+    ShimmerDevice shimmerDev;
     String shimmerBtAdd = "00:00:00:00:00:00";  //Put the address of the Shimmer device you want to connect here
 
     final static String LOG_TAG = "BluetoothManagerExample";
@@ -171,12 +172,12 @@ public class ShimmerSpec extends AppCompatActivity {
 
 
 
-    public void startStreaming(View v) throws InterruptedException, IOException{
-        shimmerDevice.startStreaming();
+    public void startStreaming() throws InterruptedException, IOException{
+        shimmerDev.startStreaming();
     }
 
     public void stopStreaming(View v) throws IOException {
-        shimmerDevice.stopStreaming();
+        shimmerDev.stopStreaming();
     }
 
     @SuppressLint("HandlerLeak")
@@ -190,20 +191,39 @@ public class ShimmerSpec extends AppCompatActivity {
                 case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
                     if ((msg.obj instanceof ObjectCluster)) {
 
-                        //Print data to Logcat
                         ObjectCluster objectCluster = (ObjectCluster) msg.obj;
 
-                        //Retrieve all possible formats for the current sensor device:
-                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
-                        FormatCluster timeStampCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
-                        double timeStampData = timeStampCluster.mData;
-                        Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
-                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_X);
-                        FormatCluster accelXCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
-                        if (accelXCluster!=null) {
-                            double accelXData = accelXCluster.mData;
-                            Log.i(LOG_TAG, "Accel LN X: " + accelXData);
+                        double gsrConductance = 0;
+                        double gsrResistance = 0;
+                        double ppg = 0;
+                        double temperature = 0;
+
+                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_CONDUCTANCE);
+                        FormatCluster formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            gsrConductance = formatCluster.mData;
                         }
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_RESISTANCE);
+                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            gsrResistance = formatCluster.mData;
+                        }
+                        allFormats = objectCluster.getCollectionOfFormatClusters("PPG_A13");
+                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            ppg = formatCluster.mData;
+                        }
+                        allFormats = objectCluster.getCollectionOfFormatClusters("Temperature_BMP280");
+                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            temperature = formatCluster.mData;
+                        }
+
+                        Log.d(LOG_TAG, "DATA_PACKET: " +
+                                "\n GSR CONDUCTANCE: " + gsrConductance +
+                                "\n GSR RESISTANCE: " + gsrResistance +
+                                "\n PPG: " + ppg +
+                                "\n TEMPERATURE: " + temperature);
                     }
                     break;
                 case Shimmer.MESSAGE_TOAST:
@@ -213,6 +233,7 @@ public class ShimmerSpec extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
                     break;
                 case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
+                    Log.i("handler_test", ""+msg.what);
                     ShimmerBluetooth.BT_STATE state = null;
                     String macAddress = "";
 
@@ -226,6 +247,7 @@ public class ShimmerSpec extends AppCompatActivity {
 
                     switch (state) {
                         case CONNECTED:
+
                             break;
                         case CONNECTING:
                             break;
@@ -240,7 +262,7 @@ public class ShimmerSpec extends AppCompatActivity {
                     }
                     break;
                     default:
-                        Log.i("handler_test", ""+msg.what);
+
                         break;
             }
             super.handleMessage(msg);
