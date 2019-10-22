@@ -5,6 +5,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.content.Intent;
 import android.graphics.Color;
@@ -39,12 +40,15 @@ import com.shimmerresearch.driver.ShimmerDevice;
 
 import com.example.shimmersensing.R;
 
+import java.io.IOException;
 import java.util.Collection;
+
+import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
 
 public class ShimmerSpec extends AppCompatActivity {
 
     ShimmerBluetoothManagerAndroid btManager;
-    ShimmerDevice shimmerDevice;
+    Shimmer shimmerDevice;
     String shimmerBtAdd = "00:00:00:00:00:00";  //Put the address of the Shimmer device you want to connect here
 
     final static String LOG_TAG = "BluetoothManagerExample";
@@ -105,6 +109,8 @@ public class ShimmerSpec extends AppCompatActivity {
         }
     }
 
+
+
     @Override
     public void onBackPressed() {
         //To support reverse transitions when user clicks the device back button
@@ -140,80 +146,105 @@ public class ShimmerSpec extends AppCompatActivity {
             }
         }
     }
+
+    /**
+     * Get the result from the paired devices dialog
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(requestCode == 2) {
+            if (resultCode == Activity.RESULT_OK) {
+                //Get the Bluetooth mac address of the selected device:
+                String macAdd = data.getStringExtra(EXTRA_DEVICE_ADDRESS);
+                shimmerDevice = new Shimmer(mHandler);
+                Log.i("shimmer_sensing", "connected right now");
+                shimmerDevice.connect(macAdd, "default");
+                //shimmerDevice.startStreaming();
+            }
+
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+
+
+    public void startStreaming(View v) throws InterruptedException, IOException{
+        shimmerDevice.startStreaming();
+    }
+
+    public void stopStreaming(View v) throws IOException {
+        shimmerDevice.stopStreaming();
+    }
+
+    @SuppressLint("HandlerLeak")
     Handler mHandler = new Handler() {
 
-            @Override
-            public void handleMessage(Message msg) {
+        @Override
+        public void handleMessage(Message msg) {
 
-                switch (msg.what) {
-                    case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
-                        if ((msg.obj instanceof ObjectCluster)) {
+            switch (msg.what) {
 
-                            ObjectCluster objectCluster = (ObjectCluster) msg.obj;
+                case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
+                    if ((msg.obj instanceof ObjectCluster)) {
 
-                            //Retrieve all possible formats for the current sensor device:
-                            Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
-                            FormatCluster timeStampCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                            double timeStampData = timeStampCluster.mData;
-                            Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
-                            allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_X);
-                            FormatCluster accelXCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                            if (accelXCluster != null) {
-                                double accelXData = accelXCluster.mData;
-                                Log.i(LOG_TAG, "Accel LN X: " + accelXData);
-                            }
+                        //Print data to Logcat
+                        ObjectCluster objectCluster = (ObjectCluster) msg.obj;
+
+                        //Retrieve all possible formats for the current sensor device:
+                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
+                        FormatCluster timeStampCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
+                        double timeStampData = timeStampCluster.mData;
+                        Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_X);
+                        FormatCluster accelXCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
+                        if (accelXCluster!=null) {
+                            double accelXData = accelXCluster.mData;
+                            Log.i(LOG_TAG, "Accel LN X: " + accelXData);
                         }
+                    }
+                    break;
+                case Shimmer.MESSAGE_TOAST:
+                    Log.i("handler_test", ""+msg.what);
+                    /** Toast messages sent from {@link Shimmer} are received here. E.g. device xxxx now streaming.
+                     *  Note that display of these Toast messages is done automatically in the Handler in {@link com.shimmerresearch.android.shimmerService.ShimmerService} */
+                    Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
+                    break;
+                case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
+                    ShimmerBluetooth.BT_STATE state = null;
+                    String macAddress = "";
+
+                    if (msg.obj instanceof ObjectCluster) {
+                        state = ((ObjectCluster) msg.obj).mState;
+                        macAddress = ((ObjectCluster) msg.obj).getMacAddress();
+                    } else if (msg.obj instanceof CallbackObject) {
+                        state = ((CallbackObject) msg.obj).mState;
+                        macAddress = ((CallbackObject) msg.obj).mBluetoothAddress;
+                    }
+
+                    switch (state) {
+                        case CONNECTED:
+                            break;
+                        case CONNECTING:
+                            break;
+                        case STREAMING:
+                            break;
+                        case STREAMING_AND_SDLOGGING:
+                            break;
+                        case SDLOGGING:
+                            break;
+                        case DISCONNECTED:
+                            break;
+                    }
+                    break;
+                    default:
+                        Log.i("handler_test", ""+msg.what);
                         break;
-                    case Shimmer.MESSAGE_TOAST:
-                        /** Toast messages sent from {@link Shimmer} are received here. E.g. device xxxx now streaming.
-                         *  Note that display of these Toast messages is done automatically in the Handler in {@link com.shimmerresearch.android.shimmerService.ShimmerService} */
-                        Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
-                        break;
-                    case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
-                        ShimmerBluetooth.BT_STATE state = null;
-                        String macAddress = "";
-
-                        if (msg.obj instanceof ObjectCluster) {
-                            state = ((ObjectCluster) msg.obj).mState;
-                            macAddress = ((ObjectCluster) msg.obj).getMacAddress();
-                        } else if (msg.obj instanceof CallbackObject) {
-                            state = ((CallbackObject) msg.obj).mState;
-                            macAddress = ((CallbackObject) msg.obj).mBluetoothAddress;
-                        }
-
-                        Log.d(LOG_TAG, "Shimmer state changed! Shimmer = " + macAddress + ", new state = " + state);
-
-                        switch (state) {
-                            case CONNECTED:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now CONNECTED");
-                                shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
-                                if (shimmerDevice != null) {
-                                    Log.i(LOG_TAG, "Got the ShimmerDevice!");
-                                } else {
-                                    Log.i(LOG_TAG, "ShimmerDevice returned is NULL!");
-                                }
-                                break;
-                            case CONNECTING:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is CONNECTING");
-                                break;
-                            case STREAMING:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now STREAMING");
-                                break;
-                            case STREAMING_AND_SDLOGGING:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now STREAMING AND LOGGING");
-                                break;
-                            case SDLOGGING:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now SDLOGGING");
-                                break;
-                            case DISCONNECTED:
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
-                                break;
-                        }
-                        break;
-                }
-
-                super.handleMessage(msg);
             }
-        };
+            super.handleMessage(msg);
+        }
+    };
 
 }
