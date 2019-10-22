@@ -28,6 +28,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.shimmerresearch.android.Shimmer;
@@ -51,8 +52,7 @@ import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EX
 public class ShimmerSpec extends AppCompatActivity {
 
     ShimmerBluetoothManagerAndroid btManager;
-    Shimmer shimmerDevice;
-    ShimmerDevice shimmerDev;
+    ShimmerDevice shimmerDevice;
     String shimmerBtAdd = "00:00:00:00:00:00";  //Put the address of the Shimmer device you want to connect here
 
     final static String LOG_TAG = "BluetoothManagerExample";
@@ -68,13 +68,19 @@ public class ShimmerSpec extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         View layout=findViewById(R.id.view_layout);
+        final Rect epicenter=new Rect(layout.getLeft(), layout.getTop(), layout.getRight(), layout.getBottom());
+        Explode explode = new Explode() {
+            {
+                super.setEpicenterCallback(new Transition.EpicenterCallback() {
+                    @Override
+                    public Rect onGetEpicenter(Transition transition) {
+                        Log.i("prova", "funziona");
+                        return epicenter;
+                    };
 
-        ActivityCompat.requestPermissions(this, new String[]{
-                Manifest.permission.CAMERA,
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE
-        }, 0);
-
+                });
+            }
+        };
         Slide slide =new Slide();
         slide.setSlideEdge(Gravity.BOTTOM);
         slide.setDuration(400);
@@ -155,16 +161,11 @@ public class ShimmerSpec extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(requestCode == 2) {
             if (resultCode == Activity.RESULT_OK) {
+                btManager.disconnectAllDevices();   //Disconnect all devices first
                 //Get the Bluetooth mac address of the selected device:
                 String macAdd = data.getStringExtra(EXTRA_DEVICE_ADDRESS);
-                Log.i("shimmer_sensing", "connected right now");
-                try {
-                    btManager.connectShimmerThroughBTAddress(macAdd);
-                } catch (Exception e) {
-                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
-                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
-                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
-                }
+                btManager.connectShimmerThroughBTAddress(macAdd);   //Connect to the selected device
+                shimmerBtAdd = macAdd;
             }
 
         }
@@ -173,13 +174,46 @@ public class ShimmerSpec extends AppCompatActivity {
 
 
 
-    public void startStreaming() throws InterruptedException, IOException{
-        shimmerDev.startStreaming();
+
+    @Override
+    protected void onStart() {
+        //Connect the Shimmer using its Bluetooth Address
+//        try {
+//            btManager.connectShimmerThroughBTAddress(shimmerBtAdd);
+//        } catch (Exception e) {
+//            Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
+//            Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
+//                    "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
+//        }
+        super.onStart();
     }
 
-    public void stopStreaming(View v) throws IOException {
-        shimmerDev.stopStreaming();
+    @Override
+    protected void onStop() {
+        //Disconnect the Shimmer device when app is stopped
+        if(shimmerDevice != null) {
+            if(shimmerDevice.isSDLogging()) {
+                shimmerDevice.stopSDLogging();
+                Log.d(LOG_TAG, "Stopped Shimmer Logging");
+            }
+            else if(shimmerDevice.isStreaming()) {
+                shimmerDevice.stopStreaming();
+                Log.d(LOG_TAG, "Stopped Shimmer Streaming");
+            }
+            else {
+                shimmerDevice.stopStreamingAndLogging();
+                Log.d(LOG_TAG, "Stopped Shimmer Streaming and Logging");
+            }
+        }
+        btManager.disconnectAllDevices();
+        Log.i(LOG_TAG, "Shimmer DISCONNECTED");
+        super.onStop();
     }
+
+    /**
+     * Messages from the Shimmer device including sensor data are received here
+     */
+
 
     @SuppressLint("HandlerLeak")
     Handler mHandler = new Handler() {
@@ -188,82 +222,50 @@ public class ShimmerSpec extends AppCompatActivity {
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
-
                 case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
                     if ((msg.obj instanceof ObjectCluster)) {
 
                         ObjectCluster objectCluster = (ObjectCluster) msg.obj;
 
-                        double gsrConductance = 0;
-                        double gsrResistance = 0;
-                        double ppg = 0;
-                        double temperature = 0;
-
-                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_CONDUCTANCE);
-                        FormatCluster formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                        if (formatCluster != null) {
-                            gsrConductance = formatCluster.mData;
+                        //Retrieve all possible formats for the current sensor device:
+                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
+                        FormatCluster timeStampCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
+                        double timeStampData = timeStampCluster.mData;
+                        Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_X);
+                        FormatCluster accelXCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
+                        if (accelXCluster!=null) {
+                            double accelXData = accelXCluster.mData;
+                            Log.i(LOG_TAG, "Accel LN X: " + accelXData);
                         }
-                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_RESISTANCE);
-                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                        if (formatCluster != null) {
-                            gsrResistance = formatCluster.mData;
-                        }
-                        allFormats = objectCluster.getCollectionOfFormatClusters("PPG_A13");
-                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                        if (formatCluster != null) {
-                            ppg = formatCluster.mData;
-                        }
-                        allFormats = objectCluster.getCollectionOfFormatClusters("Temperature_BMP280");
-                        formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                        if (formatCluster != null) {
-                            temperature = formatCluster.mData;
-                        }
-
-                        Log.d(LOG_TAG, "DATA_PACKET: " +
-                                "\n GSR CONDUCTANCE: " + gsrConductance +
-                                "\n GSR RESISTANCE: " + gsrResistance +
-                                "\n PPG: " + ppg +
-                                "\n TEMPERATURE: " + temperature);
                     }
                     break;
                 case Shimmer.MESSAGE_TOAST:
-                    Log.i("handler_test", ""+msg.what);
                     /** Toast messages sent from {@link Shimmer} are received here. E.g. device xxxx now streaming.
                      *  Note that display of these Toast messages is done automatically in the Handler in {@link com.shimmerresearch.android.shimmerService.ShimmerService} */
                     Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
                     break;
                 case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
-
                     ShimmerBluetooth.BT_STATE state = null;
                     String macAddress = "";
 
                     if (msg.obj instanceof ObjectCluster) {
-
                         state = ((ObjectCluster) msg.obj).mState;
                         macAddress = ((ObjectCluster) msg.obj).getMacAddress();
-                        Log.i("get_mac", ""+macAddress);
-                        shimmerBtAdd=macAddress;
                     } else if (msg.obj instanceof CallbackObject) {
-                        Log.i("get_bluetooth", ""+msg.what);
                         state = ((CallbackObject) msg.obj).mState;
                         macAddress = ((CallbackObject) msg.obj).mBluetoothAddress;
                     }
 
+                    Log.d(LOG_TAG, "Shimmer state changed! Shimmer = " + macAddress + ", new state = " + state);
+
                     switch (state) {
                         case CONNECTED:
-                            Log.i(LOG_TAG, "Shimmer [" + shimmerBtAdd + "] is now CONNECTED");
-
-                            if(shimmerDev != null) {
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now CONNECTED");
+                            shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
+                            if(shimmerDevice != null) {
                                 Log.i(LOG_TAG, "Got the ShimmerDevice!");
-                                shimmerDev.startStreaming();
-
-                                for (SensorDetails sensorsDetsils : shimmerDevice.getListOfEnabledSensors()) {
-                                    for (String sensors : sensorsDetsils.mSensorDetailsRef.mListOfChannelsRef) {
-                                        Log.d("Enabled Sensors", sensors);
-                                    }
-                                }
-
+                                shimmerDevice.startStreaming();
                             }
                             else { Log.i(LOG_TAG, "ShimmerDevice returned is NULL!"); }
                             break;
@@ -284,12 +286,11 @@ public class ShimmerSpec extends AppCompatActivity {
                             break;
                     }
                     break;
-                    default:
-
-                        break;
             }
+
             super.handleMessage(msg);
         }
     };
+
 
 }
