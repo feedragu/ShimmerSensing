@@ -2,8 +2,10 @@ package com.example.shimmersensing.Activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
@@ -39,6 +41,7 @@ import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 
 import com.example.shimmersensing.R;
+import com.shimmerresearch.driverUtilities.SensorDetails;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -65,19 +68,13 @@ public class ShimmerSpec extends AppCompatActivity {
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
         View layout=findViewById(R.id.view_layout);
-        final Rect epicenter=new Rect(layout.getLeft(), layout.getTop(), layout.getRight(), layout.getBottom());
-        Explode explode = new Explode() {
-            {
-                super.setEpicenterCallback(new Transition.EpicenterCallback() {
-                    @Override
-                    public Rect onGetEpicenter(Transition transition) {
-                        Log.i("prova", "funziona");
-                        return epicenter;
-                    };
 
-            });
-            }
-        };
+        ActivityCompat.requestPermissions(this, new String[]{
+                Manifest.permission.CAMERA,
+                Manifest.permission.BLUETOOTH,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE
+        }, 0);
+
         Slide slide =new Slide();
         slide.setSlideEdge(Gravity.BOTTOM);
         slide.setDuration(400);
@@ -160,10 +157,14 @@ public class ShimmerSpec extends AppCompatActivity {
             if (resultCode == Activity.RESULT_OK) {
                 //Get the Bluetooth mac address of the selected device:
                 String macAdd = data.getStringExtra(EXTRA_DEVICE_ADDRESS);
-                shimmerDevice = new Shimmer(mHandler);
                 Log.i("shimmer_sensing", "connected right now");
-                shimmerDevice.connect(macAdd, "default");
-                //shimmerDevice.startStreaming();
+                try {
+                    btManager.connectShimmerThroughBTAddress(macAdd);
+                } catch (Exception e) {
+                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
+                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
+                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
+                }
             }
 
         }
@@ -233,31 +234,53 @@ public class ShimmerSpec extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
                     break;
                 case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
-                    Log.i("handler_test", ""+msg.what);
+
                     ShimmerBluetooth.BT_STATE state = null;
                     String macAddress = "";
 
                     if (msg.obj instanceof ObjectCluster) {
+
                         state = ((ObjectCluster) msg.obj).mState;
                         macAddress = ((ObjectCluster) msg.obj).getMacAddress();
+                        Log.i("get_mac", ""+macAddress);
+                        shimmerBtAdd=macAddress;
                     } else if (msg.obj instanceof CallbackObject) {
+                        Log.i("get_bluetooth", ""+msg.what);
                         state = ((CallbackObject) msg.obj).mState;
                         macAddress = ((CallbackObject) msg.obj).mBluetoothAddress;
                     }
 
                     switch (state) {
                         case CONNECTED:
+                            Log.i(LOG_TAG, "Shimmer [" + shimmerBtAdd + "] is now CONNECTED");
 
+                            if(shimmerDev != null) {
+                                Log.i(LOG_TAG, "Got the ShimmerDevice!");
+                                shimmerDev.startStreaming();
+
+                                for (SensorDetails sensorsDetsils : shimmerDevice.getListOfEnabledSensors()) {
+                                    for (String sensors : sensorsDetsils.mSensorDetailsRef.mListOfChannelsRef) {
+                                        Log.d("Enabled Sensors", sensors);
+                                    }
+                                }
+
+                            }
+                            else { Log.i(LOG_TAG, "ShimmerDevice returned is NULL!"); }
                             break;
                         case CONNECTING:
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is CONNECTING");
                             break;
                         case STREAMING:
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now STREAMING");
                             break;
                         case STREAMING_AND_SDLOGGING:
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now STREAMING AND LOGGING");
                             break;
                         case SDLOGGING:
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now SDLOGGING");
                             break;
                         case DISCONNECTED:
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
                             break;
                     }
                     break;
