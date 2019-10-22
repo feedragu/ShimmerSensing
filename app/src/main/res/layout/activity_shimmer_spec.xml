@@ -72,7 +72,6 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="51dp"
                 android:layout_marginBottom="378dp"
-                android:text="50524248247"
                 android:textColor="@android:color/black"
                 android:textSize="20sp"
                 app:layout_constraintBottom_toBottomOf="parent"
@@ -83,18 +82,17 @@
 
 
             <Button
-                android:id="@+id/button"
+                android:id="@+id/connect_start"
                 style="@style/Widget.AppCompat.Button.Colored"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="47dp"
                 android:onClick="connectDevice"
-                android:text="Button"
+                android:text="Connect"
                 app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="@+id/mac_address"
-                app:layout_constraintStart_toStartOf="@+id/mac_address"
-                app:layout_constraintTop_toTopOf="@+id/mac_address"
-                app:layout_constraintVertical_bias="0.01999998"
+                app:layout_constraintEnd_toStartOf="@+id/tvTitle"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/mac_address"
+                app:layout_constraintVertical_bias="0.132"
                 tools:text="connect" />
 
             <Button
@@ -103,12 +101,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:onClick="operMenuSensor"
-                android:text="Button"
-                app:layout_constraintBottom_toBottomOf="@+id/button"
+                android:text="Config Sensor"
+                app:layout_constraintBottom_toBottomOf="@+id/connect_start"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintHorizontal_bias="0.8"
-                app:layout_constraintStart_toEndOf="@+id/button"
-                app:layout_constraintTop_toTopOf="@+id/button" />
+                app:layout_constraintStart_toEndOf="@+id/connect_start"
+                app:layout_constraintTop_toTopOf="@+id/connect_start" />
         </androidx.constraintlayout.widget.ConstraintLayout>
     </androidx.cardview.widget.CardView>
 </androidx.constraintlayout.widget.ConstraintLayout>
