@@ -30,10 +30,18 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.jjoe64.graphview.GraphView;
+import com.jjoe64.graphview.series.DataPoint;
+import com.jjoe64.graphview.series.DataPointInterface;
+import com.jjoe64.graphview.series.LineGraphSeries;
+import com.shimmerresearch.algorithms.Filter;
 import com.shimmerresearch.android.Shimmer;
 import com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog;
 import com.shimmerresearch.android.guiUtilities.ShimmerDialogConfigurations;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
+import com.shimmerresearch.biophysicalprocessing.ECGtoHRAdaptive;
+import com.shimmerresearch.biophysicalprocessing.PPGtoHRAlgorithm;
+import com.shimmerresearch.biophysicalprocessing.PPGtoHRwithHRV;
 import com.shimmerresearch.bluetooth.ShimmerBluetooth;
 import com.shimmerresearch.driver.CallbackObject;
 import com.shimmerresearch.driver.Configuration;
@@ -42,10 +50,13 @@ import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 
 import com.example.shimmersensing.R;
+import com.shimmerresearch.driverUtilities.ChannelDetails;
+import com.shimmerresearch.exceptions.ShimmerException;
 
 import java.util.Collection;
 
 import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
+import static com.shimmerresearch.sensors.SensorPPG.ObjectClusterSensorName.PPG_A13;
 
 public class ShimmerSpec extends AppCompatActivity {
 
@@ -56,8 +67,38 @@ public class ShimmerSpec extends AppCompatActivity {
     boolean connected = false;
     Button connect_start;
     ProgressDialog nDialog;
+    PPGtoHRwithHRV mPPGtoHR;
+    Filter mLPFilter;
+    double[] mLPFc = {5};
+
+
+    private static Integer INVALID_OUTPUT=-1;
+    private static int mNumberOfBeatsToAverage=5;
+    private static Shimmer mShimmerHeartRate;
+    private static PPGtoHRAlgorithm mHeartRateCalculation;
+    private static ECGtoHRAdaptive mHeartRateCalculationECG;
+    static Filter mHPFilter;
+    public static String mBluetoothAddressToHeartRate;
+    static private boolean mEnableHeartRate = false;
+    static private boolean mEnableHeartRateECG = false;
+    static private boolean mNewPPGSignalProcessing = true;
+    static private boolean mNewECGSignalProcessing = true;
+    static private double[] mHPFc = {0.5};
+    static private double[] mLPFcECG = {51.2};
+    static private double[] mHPFcECG = {0.5};
+    private static int mCount = 0;
+    private static int mCountPPGInitial = 0; //skip first 100 samples
+    private static int mRefreshLimit =  10;
+    private static double mCurrentHR = -1;
+    private static String mSensortoHR = "";
+
 
     final static String LOG_TAG = "ShimmerProject";
+    private double sampleRate;
+    private boolean not_config_yet=true;
+    private GraphView graph;
+    private LineGraphSeries<DataPointInterface> mSeries2;
+    private boolean onpause=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +126,27 @@ public class ShimmerSpec extends AppCompatActivity {
                 });
             }
         };
+
+
+        graph = findViewById(R.id.graph);
+
+        mSeries2 = new LineGraphSeries<>();
+        graph.addSeries(mSeries2);
+
+
+        graph.getViewport().setScalable(true);
+        graph.getViewport().setScalableY(false);
+        graph.getViewport().setXAxisBoundsManual(true);
+        graph.getViewport().setYAxisBoundsManual(true);
+        graph.getViewport().setMinX(0);
+        graph.getViewport().setMaxX(2000);
+        graph.getViewport().setMinY(1000);
+        graph.getViewport().setMaxY(1900);
+        graph.getViewport().setMaxYAxisSize(2000);
+
+
+
+
         Slide slide = new Slide();
         slide.setSlideEdge(Gravity.BOTTOM);
         slide.setDuration(400);
@@ -154,8 +216,9 @@ public class ShimmerSpec extends AppCompatActivity {
                 }
             }
         } else {
-            if (shimmerDevice != null) {
+            if (shimmerDevice != null & !onpause) {
                 shimmerDevice.startStreaming();
+                onpause=true;
             }
         }
     }
@@ -177,7 +240,7 @@ public class ShimmerSpec extends AppCompatActivity {
 
                 nDialog = new ProgressDialog(ShimmerSpec.this);
                 nDialog.setMessage("Loading..");
-                nDialog.setTitle("Get Data");
+                nDialog.setTitle("Connecting");
                 nDialog.setIndeterminate(false);
                 nDialog.setCancelable(true);
                 nDialog.show();
@@ -232,8 +295,8 @@ public class ShimmerSpec extends AppCompatActivity {
      */
 
 
-    @SuppressLint("HandlerLeak")
-    Handler mHandler = new Handler() {
+   @SuppressLint("HandlerLeak")
+   Handler mHandler = new Handler() {
 
         @Override
         public void handleMessage(Message msg) {
@@ -247,10 +310,53 @@ public class ShimmerSpec extends AppCompatActivity {
                         double gsrResistance = 0;
                         double ppg = 0;
                         double temperature = 0;
+                        double timestamp=0;
 
-                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_CONDUCTANCE);
-                        FormatCluster formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
-                        if (formatCluster != null) {
+                        Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
+                        FormatCluster formatCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
+//                        double timeStampData = formatCluster.mData;
+//                        Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
+                        timestamp = formatCluster.mData;
+                        double dataPPG = 0;
+                        allFormats = objectCluster.getCollectionOfFormatClusters("PPG_A13");
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster!=null) {
+                            dataPPG = formatCluster.mData;
+                        }
+
+                        double timeStampPPG = 0;
+//                        Collection<FormatCluster> formatClusterTimeStamp = objectCluster.mPropertyCluster.get("Timestamp");
+//                        FormatCluster timeStampCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(formatClusterTimeStamp,"CAL"));
+//                        if (timeStampCluster!=null) {
+//                            timeStampPPG = ((FormatCluster)ObjectCluster.returnFormatCluster(formatClusterTimeStamp,"CAL")).mData;
+//                        }
+
+                        double lpFilteredDataPPG = 0;
+//		            		double hpFilteredDataPPG = 0;
+                        try {
+                            lpFilteredDataPPG = mLPFilter.filterData(dataPPG);
+//								hpFilteredDataPPG = lpFilteredDataPPG;
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+
+                        double heartRate = Double.NaN;
+                        if (mCountPPGInitial < sampleRate*2){ //skip first 2 seconds
+                            mCountPPGInitial++;
+                        } else {
+                            heartRate = mHeartRateCalculation.ppgToHrConversion(lpFilteredDataPPG, timestamp);
+
+                            if (heartRate==INVALID_OUTPUT) {
+                                heartRate=Double.NaN;
+                            }
+
+
+
+                        }
+                        //objectCluster.mPropertyCluster.put("Heart Rate", new FormatCluster("CAL", "bpm", heartRate));
+                        Log.d("shimmerSensingHeartRate", "HR: "+heartRate);
+
+                         if (formatCluster != null) {
                             gsrConductance = formatCluster.mData;
                         }
                         allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GSR_RESISTANCE);
@@ -274,6 +380,9 @@ public class ShimmerSpec extends AppCompatActivity {
                                 "\n GSR RESISTANCE: " + gsrResistance +
                                 "\n PPG: " + ppg +
                                 "\n TEMPERATURE: " + temperature);
+
+
+                        mSeries2.appendData(new DataPoint(timestamp, dataPPG), true, 500);
                     }
                     break;
                 case Shimmer.MESSAGE_TOAST:
@@ -299,7 +408,21 @@ public class ShimmerSpec extends AppCompatActivity {
                             shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
                             if (shimmerDevice != null) {
                                 Log.i(LOG_TAG, "Got the ShimmerDevice!");
-                                connected = true;
+                                if(not_config_yet) {
+                                    sampleRate = shimmerDevice.getSamplingRateShimmer();
+                                    connected = true;
+                                    mNewPPGSignalProcessing = true;
+                                    mCountPPGInitial = 0;
+                                    mHeartRateCalculation = new PPGtoHRAlgorithm(sampleRate, mNumberOfBeatsToAverage, 10); //10 second training period
+                                    not_config_yet=false;
+
+                                try {
+                                    mLPFilter = new Filter(Filter.LOW_PASS, sampleRate, mLPFc);
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+
+                                }
                                 nDialog.dismiss();
                                 macAddr.setText(shimmerBtAdd);
                                 connect_start.setText("Start streaming");
@@ -343,6 +466,37 @@ public class ShimmerSpec extends AppCompatActivity {
         }
     };
 
+//    public void enableHeartRate(String bluetoothAddress, boolean enabled, String sensorToHeartRate){
+//
+//
+//        mEnableHeartRate = enabled;
+//        if(enabled){
+//            mNewPPGSignalProcessing = true;
+//            mCountPPGInitial=0;
+//            mSensortoHR = sensorToHeartRate;
+//            mHeartRateCalculation = new PPGtoHRAlgorithm(sampleRate, mNumberOfBeatsToAverage,10); //10 second training period
+//
+//
+//            try {
+//                mLPFilter = new Filter(Filter.LOW_PASS, sampleRate, mLPFc);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//
+//            try {
+//                mHPFilter = new Filter(Filter.HIGH_PASS, sampleRate, mHPFc);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
+//        else{
+//            mCountPPGInitial=0;
+//            mSensortoHR="";
+//        }
+//
+//
+//    }
+
     public void operMenuSensor(View view) {
 
 
@@ -353,6 +507,7 @@ public class ShimmerSpec extends AppCompatActivity {
                 Log.i("the end", "done");
             } else {
                 shimmerDevice.stopStreaming();
+                onpause=true;
                 ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, ShimmerSpec.this, btManager);
                 Log.i("the end", "done");
 
@@ -371,5 +526,19 @@ public class ShimmerSpec extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onDestroy() {
+        if (shimmerDevice != null) {
+            if (shimmerDevice.isStreaming() | shimmerDevice.isSDLogging()) {
+                shimmerDevice.stopStreaming();
+                try {
+                    shimmerDevice.disconnect();
+                } catch (ShimmerException e) {
+                    e.printStackTrace();
+                }
 
+            }
+        }
+        super.onDestroy();
+    }
 }
