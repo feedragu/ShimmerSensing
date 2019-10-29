@@ -310,7 +310,12 @@ public class ShimmerSpec extends AppCompatActivity {
                         double gsrResistance = 0;
                         double ppg = 0;
                         double temperature = 0;
+                        double accel_x = 6;
+                        double accel_z = 6;
+                        double accel_y = 6;
                         double timestamp=0;
+
+
 
                         Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
                         FormatCluster formatCluster = ((FormatCluster)ObjectCluster.returnFormatCluster(allFormats,"CAL"));
@@ -369,17 +374,40 @@ public class ShimmerSpec extends AppCompatActivity {
                         if (formatCluster != null) {
                             ppg = formatCluster.mData;
                         }
-                        allFormats = objectCluster.getCollectionOfFormatClusters("Temperature_BMP280");
+//                        allFormats = objectCluster.getCollectionOfFormatClusters("Temperature_BMP280");
+//                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+//                        if (formatCluster != null) {
+//                            temperature = formatCluster.mData;
+//                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_X);
                         formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
                         if (formatCluster != null) {
-                            temperature = formatCluster.mData;
+                            accel_x = formatCluster.mData;
                         }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_Z);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            accel_z = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.ACCEL_LN_Y);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            accel_y = formatCluster.mData;
+                        }
+
+
 
                         Log.d(LOG_TAG, "DATA_PACKET: " +
                                 "\n GSR CONDUCTANCE: " + gsrConductance +
                                 "\n GSR RESISTANCE: " + gsrResistance +
                                 "\n PPG: " + ppg +
-                                "\n TEMPERATURE: " + temperature);
+                                "\n TEMPERATURE: " + temperature+
+                                "\n ACCELERATION_X: " + accel_x+
+                                "\n ACCELERATION_Z: " + accel_z+
+                                "\n ACCELERATION_Y: " + accel_y);
 
 
                         mSeries2.appendData(new DataPoint(timestamp, dataPPG), true, 500);
