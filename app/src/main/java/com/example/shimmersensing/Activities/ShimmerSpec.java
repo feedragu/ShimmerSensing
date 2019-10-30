@@ -9,12 +9,16 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -31,6 +35,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.Button;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -106,6 +111,12 @@ public class ShimmerSpec extends AppCompatActivity {
     private LineGraphSeries<DataPointInterface> mSeriesX, mSeriesY, mSeriesZ;
     private Bitmap graph_view_PPG, graph_view_Acc;
     private boolean onpause = false;
+    private Dialog myDialog;
+    private Button btnConfirm;
+    private SeekBar sampling_bar, overlap_bar;
+    private TextView sampling_text, overlap_text;
+    private SharedPreferences pref;
+    private int sampling_time_progress, overlap_time_progress;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -146,7 +157,7 @@ public class ShimmerSpec extends AppCompatActivity {
         graph.getViewport().setXAxisBoundsManual(true);
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
-        graph.getViewport().setMaxX(20);
+        graph.getViewport().setMaxX(10);
         graph.getViewport().setMinY(1000);
         graph.getViewport().setMaxY(1900);
         graph.getViewport().setMaxYAxisSize(2000);
@@ -177,8 +188,8 @@ public class ShimmerSpec extends AppCompatActivity {
         graph2.getViewport().setYAxisBoundsManual(true);
         graph2.getViewport().setMinX(0);
         graph2.getViewport().setMaxX(20);
-        graph2.getViewport().setMinY(-20);
-        graph2.getViewport().setMaxY(20);
+        graph2.getViewport().setMinY(0);
+        graph2.getViewport().setMaxY(25);
         graph2.getViewport().setMaxYAxisSize(20);
 
         graph2.setTitle("Accelerometer Data");
@@ -212,12 +223,16 @@ public class ShimmerSpec extends AppCompatActivity {
         slide2.setInterpolator(new LinearOutSlowInInterpolator());
         getWindow().setExitTransition(slide2);
 
+        myDialog = new Dialog(this);
 // Request permissions
         ActivityCompat.requestPermissions(this, new String[]{
                 Manifest.permission.CAMERA,
                 Manifest.permission.BLUETOOTH,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         }, 0);
+
+        sampling_time_progress = pref.getInt("sampling_time", 20);
+        overlap_time_progress = pref.getInt("overlap_time", 2);
 
         try {
             btManager = new ShimmerBluetoothManagerAndroid(this, mHandler);
@@ -270,6 +285,85 @@ public class ShimmerSpec extends AppCompatActivity {
         }
     }
 
+    public void sampleWindow(View view) {
+        myDialog.setContentView(R.layout.sampling_window_popup);
+        sampling_bar = myDialog.findViewById(R.id.sampling_bar);
+        overlap_bar = myDialog.findViewById(R.id.overlap_bar);
+        sampling_text = myDialog.findViewById(R.id.samplingwindow_sec);
+        overlap_text = myDialog.findViewById(R.id.overlap_sec);
+        sampling_bar.setMax(10);
+        overlap_bar.setMax(5);
+        sampling_time_progress = pref.getInt("sampling_time", -1);
+        overlap_time_progress = pref.getInt("overlap_time", -1);
+        sampling_bar.setProgress(sampling_time_progress-20);
+        overlap_bar.setProgress(overlap_time_progress-1);
+        sampling_text.setText(sampling_time_progress+" s");
+        overlap_text.setText(overlap_time_progress+" s");
+        btnConfirm = myDialog.findViewById(R.id.btnConfirm);
+        btnConfirm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                myDialog.dismiss();
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putInt("sampling_time", sampling_bar.getProgress()+20);
+                editor.putInt("overlap_time", overlap_bar.getProgress()+1);
+                editor.apply();
+            }
+        });
+
+        sampling_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    if (progress >= 0 && progress <= sampling_bar.getMax()) {
+
+                        String progressString = String.valueOf(progress+20);
+                        sampling_text.setText(progressString+ " s");
+                        seekBar.setSecondaryProgress(progress);
+                    }
+                }
+
+            }
+        });
+
+        overlap_bar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (fromUser) {
+                    if (progress >= 0 && progress <= overlap_bar.getMax()) {
+
+                        String progressString = String.valueOf(progress+1);
+                        overlap_text.setText(progressString + " s");
+                        seekBar.setSecondaryProgress(progress);
+                    }
+                }
+
+            }
+        });
+        myDialog.getWindow().setBackgroundDrawable(new ColorDrawable(Color.WHITE));
+        myDialog.show();
+    }
+
     /**
      * Get the result from the paired devices dialog
      *
@@ -305,14 +399,15 @@ public class ShimmerSpec extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        //Connect the Shimmer using its Bluetooth Address
-//        try {
-//            btManager.connectShimmerThroughBTAddress(shimmerBtAdd);
-//        } catch (Exception e) {
-//            Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
-//            Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
-//                    "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
-//        }
+        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+        if(!pref.contains("sampling_time") & !pref.contains("overlap_time")) {
+            editor.putInt("sampling_time", 20);
+            editor.putInt("overlap_time", 2);
+            editor.commit();
+        }else {
+            Log.i("sharedpreferences", "exist: "+pref.getInt("sampling_time", -1));
+        }
         super.onStart();
     }
 
@@ -344,26 +439,10 @@ public class ShimmerSpec extends AppCompatActivity {
                 //ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, MainActivity.this);
                 ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, ShimmerSpec.this, btManager);
                 Log.i("the end", "done");
-                graph.buildDrawingCache();
-                graph_view_PPG = Bitmap.createBitmap(graph.getDrawingCache());
-                graph.setDrawingCacheEnabled(false);
-                graph2.buildDrawingCache();
-                graph_view_Acc = Bitmap.createBitmap(graph2.getDrawingCache());
-                graph2.setDrawingCacheEnabled(false);
-                MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), graph_view_PPG, "PPG_Graph", "");
-                MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), graph_view_Acc, "ACC_Graph", "");
             } else {
                 shimmerDevice.stopStreaming();
                 onpause = true;
                 ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, ShimmerSpec.this, btManager);
-                graph.buildDrawingCache();
-                graph_view_PPG = Bitmap.createBitmap(graph.getDrawingCache());
-                graph.setDrawingCacheEnabled(false);
-                graph2.buildDrawingCache();
-                graph_view_Acc = Bitmap.createBitmap(graph2.getDrawingCache());
-                graph2.setDrawingCacheEnabled(false);
-                MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), graph_view_PPG, "PPG_Graph", "");
-                MediaStore.Images.Media.insertImage(getApplicationContext().getContentResolver(), graph_view_Acc, "ACC_Graph", "");
                 Log.i("the end", "done");
 
             }
