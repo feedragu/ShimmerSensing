@@ -39,6 +39,9 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.shimmersensing.Utilities.ShimmerData;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
@@ -62,7 +65,9 @@ import com.example.shimmersensing.R;
 import com.shimmerresearch.driverUtilities.ChannelDetails;
 import com.shimmerresearch.exceptions.ShimmerException;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
 import static com.shimmerresearch.sensors.SensorPPG.ObjectClusterSensorName.PPG_A13;
@@ -117,6 +122,11 @@ public class ShimmerSpec extends AppCompatActivity {
     private TextView sampling_text, overlap_text;
     private SharedPreferences pref;
     private int sampling_time_progress, overlap_time_progress;
+    private ArrayList<ShimmerData> list;
+
+    Handler handler = new Handler();
+    Runnable runnable;
+    int delay = 20 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -274,6 +284,8 @@ public class ShimmerSpec extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         }, 0);
 
+        list = new ArrayList<>();
+
 
         try {
             btManager = new ShimmerBluetoothManagerAndroid(this, mHandler);
@@ -282,19 +294,26 @@ public class ShimmerSpec extends AppCompatActivity {
         }
     }
 
+
     @Override
     protected void onStart() {
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
         SharedPreferences.Editor editor = pref.edit();
-        if(!pref.contains("sampling_time") & !pref.contains("overlap_time")) {
+        if (!pref.contains("sampling_time") & !pref.contains("overlap_time")) {
             editor.putInt("sampling_time", 20);
             editor.putInt("overlap_time", 2);
             editor.apply();
-        }else {
+        } else {
             sampling_time_progress = pref.getInt("sampling_time", 20);
             overlap_time_progress = pref.getInt("overlap_time", 2);
 
         }
+
+        Gson gson = new Gson();
+        String response=pref.getString("shimmerdata", "");
+        ArrayList<ShimmerData> prova = gson.fromJson(response,
+                new TypeToken<List<ShimmerData>>(){}.getType());
+        Log.d("prova", "onStart: "+prova.size());
         super.onStart();
     }
 
@@ -352,18 +371,18 @@ public class ShimmerSpec extends AppCompatActivity {
         overlap_bar.setMax(5);
         sampling_time_progress = pref.getInt("sampling_time", -1);
         overlap_time_progress = pref.getInt("overlap_time", -1);
-        sampling_bar.setProgress(sampling_time_progress-20);
-        overlap_bar.setProgress(overlap_time_progress-1);
-        sampling_text.setText(sampling_time_progress+" s");
-        overlap_text.setText(overlap_time_progress+" s");
+        sampling_bar.setProgress(sampling_time_progress - 20);
+        overlap_bar.setProgress(overlap_time_progress - 1);
+        sampling_text.setText(sampling_time_progress + " s");
+        overlap_text.setText(overlap_time_progress + " s");
         btnConfirm = myDialog.findViewById(R.id.btnConfirm);
         btnConfirm.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 myDialog.dismiss();
                 SharedPreferences.Editor editor = pref.edit();
-                editor.putInt("sampling_time", sampling_bar.getProgress()+20);
-                editor.putInt("overlap_time", overlap_bar.getProgress()+1);
+                editor.putInt("sampling_time", sampling_bar.getProgress() + 20);
+                editor.putInt("overlap_time", overlap_bar.getProgress() + 1);
                 editor.apply();
             }
         });
@@ -384,8 +403,8 @@ public class ShimmerSpec extends AppCompatActivity {
                 if (fromUser) {
                     if (progress >= 0 && progress <= sampling_bar.getMax()) {
 
-                        String progressString = String.valueOf(progress+20);
-                        sampling_text.setText(progressString+ " s");
+                        String progressString = String.valueOf(progress + 20);
+                        sampling_text.setText(progressString + " s");
                         seekBar.setSecondaryProgress(progress);
                     }
                 }
@@ -409,7 +428,7 @@ public class ShimmerSpec extends AppCompatActivity {
                 if (fromUser) {
                     if (progress >= 0 && progress <= overlap_bar.getMax()) {
 
-                        String progressString = String.valueOf(progress+1);
+                        String progressString = String.valueOf(progress + 1);
                         overlap_text.setText(progressString + " s");
                         seekBar.setSecondaryProgress(progress);
                     }
@@ -454,8 +473,6 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
 
-
-
     @Override
     protected void onStop() {
         //Disconnect the Shimmer device when app is stopped
@@ -476,7 +493,7 @@ public class ShimmerSpec extends AppCompatActivity {
         super.onStop();
     }
 
-    public void operMenuSensor(View view) {
+    public void openMenuSensor(View view) {
 
 
         if (shimmerDevice != null) {
@@ -628,6 +645,9 @@ public class ShimmerSpec extends AppCompatActivity {
                         mSeriesX.appendData(new DataPoint(timestamp / 1000, acceleration), true, 10000);
                         mSeriesGsr.appendData(new DataPoint(timestamp / 1000, gsrConductance), true, 10000);
                         mSeriesGsrResistance.appendData(new DataPoint(timestamp / 1000, gsrResistance), true, 10000);
+                        Long tsLong = System.currentTimeMillis() / 1000;
+                        ShimmerData s = new ShimmerData(dataPPG, gsrResistance, gsrConductance, acceleration, tsLong);
+                        list.add(s);
                     }
                     break;
                 case Shimmer.MESSAGE_TOAST:
@@ -659,6 +679,18 @@ public class ShimmerSpec extends AppCompatActivity {
                                     mNewPPGSignalProcessing = true;
                                     mCountPPGInitial = 0;
                                     mHeartRateCalculation = new PPGtoHRAlgorithm(sampleRate, mNumberOfBeatsToAverage, 10); //10 second training period
+                                    handler.postDelayed(runnable = new Runnable() {
+                                        public void run() {
+                                            SharedPreferences.Editor editor = pref.edit();
+                                            Gson gson = new Gson();
+                                            String json = gson.toJson(list);
+                                            Log.i("prova_json", "run: "+json);
+                                            editor.putString("shimmerdata", json);
+                                            editor.apply();
+
+                                            handler.postDelayed(runnable, delay);
+                                        }
+                                    }, delay);
                                     not_config_yet = false;
 
                                     try {
@@ -727,6 +759,7 @@ public class ShimmerSpec extends AppCompatActivity {
 
 
         }
+        handler.removeCallbacks(runnable); //stop handler when activity not visible
         super.onDestroy();
     }
 }

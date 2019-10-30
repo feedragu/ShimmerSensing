@@ -97,7 +97,7 @@
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:onClick="operMenuSensor"
+                    android:onClick="openMenuSensor"
                     android:text="Config "
                     app:layout_constraintBottom_toBottomOf="@+id/connect_start"
                     app:layout_constraintEnd_toEndOf="parent"
