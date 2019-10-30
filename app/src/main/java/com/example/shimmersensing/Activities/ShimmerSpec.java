@@ -107,8 +107,8 @@ public class ShimmerSpec extends AppCompatActivity {
     private boolean not_config_yet = true;
     private GraphView graph;
     private LineGraphSeries<DataPointInterface> mSeries2;
-    private GraphView graph2;
-    private LineGraphSeries<DataPointInterface> mSeriesX, mSeriesY, mSeriesZ;
+    private GraphView graph2, graph_gsr, graph_gsr_res;
+    private LineGraphSeries<DataPointInterface> mSeriesX, mSeriesY, mSeriesZ, mSeriesGsr, mSeriesGsrResistance;
     private Bitmap graph_view_PPG, graph_view_Acc;
     private boolean onpause = false;
     private Dialog myDialog;
@@ -195,8 +195,51 @@ public class ShimmerSpec extends AppCompatActivity {
         graph2.setTitle("Accelerometer Data");
         graph2.setTitleTextSize(55f);
 
-        graph.setDrawingCacheEnabled(true);
-        graph2.setDrawingCacheEnabled(true);
+        graph_gsr = findViewById(R.id.graph_gsr);
+
+        mSeriesGsr = new LineGraphSeries<>();
+
+
+        mSeriesGsr.setColor(R.color.red);
+
+        graph_gsr.addSeries(mSeriesGsr);
+
+
+        graph_gsr.getViewport().setScalable(true);
+        graph_gsr.getViewport().setScalableY(false);
+        graph_gsr.getViewport().setXAxisBoundsManual(true);
+        graph_gsr.getViewport().setYAxisBoundsManual(true);
+        graph_gsr.getViewport().setMinX(0);
+        graph_gsr.getViewport().setMaxX(10);
+        graph_gsr.getViewport().setMinY(1200);
+        graph_gsr.getViewport().setMaxY(1700);
+        graph_gsr.getViewport().setMaxYAxisSize(20);
+
+        graph_gsr.setTitle("GSR Data");
+        graph_gsr.setTitleTextSize(55f);
+
+        graph_gsr_res = findViewById(R.id.graph_gsr_resistance);
+
+        mSeriesGsrResistance = new LineGraphSeries<>();
+
+
+        mSeriesGsrResistance.setColor(R.color.red);
+
+        graph_gsr_res.addSeries(mSeriesGsrResistance);
+
+
+        graph_gsr_res.getViewport().setScalable(true);
+        graph_gsr_res.getViewport().setScalableY(false);
+        graph_gsr_res.getViewport().setXAxisBoundsManual(true);
+        graph_gsr_res.getViewport().setYAxisBoundsManual(true);
+        graph_gsr_res.getViewport().setMinX(0);
+        graph_gsr_res.getViewport().setMaxX(10);
+        graph_gsr_res.getViewport().setMinY(600);
+        graph_gsr_res.getViewport().setMaxY(1200);
+        graph_gsr_res.getViewport().setMaxYAxisSize(20);
+
+        graph_gsr_res.setTitle("GSR Resistance Data");
+        graph_gsr_res.setTitleTextSize(55f);
 
         Slide slide = new Slide();
         slide.setSlideEdge(Gravity.BOTTOM);
@@ -231,14 +274,28 @@ public class ShimmerSpec extends AppCompatActivity {
                 Manifest.permission.WRITE_EXTERNAL_STORAGE
         }, 0);
 
-        sampling_time_progress = pref.getInt("sampling_time", 20);
-        overlap_time_progress = pref.getInt("overlap_time", 2);
 
         try {
             btManager = new ShimmerBluetoothManagerAndroid(this, mHandler);
         } catch (Exception e) {
             Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
         }
+    }
+
+    @Override
+    protected void onStart() {
+        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
+        SharedPreferences.Editor editor = pref.edit();
+        if(!pref.contains("sampling_time") & !pref.contains("overlap_time")) {
+            editor.putInt("sampling_time", 20);
+            editor.putInt("overlap_time", 2);
+            editor.apply();
+        }else {
+            sampling_time_progress = pref.getInt("sampling_time", 20);
+            overlap_time_progress = pref.getInt("overlap_time", 2);
+
+        }
+        super.onStart();
     }
 
 
@@ -397,19 +454,7 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
 
-    @Override
-    protected void onStart() {
-        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-        if(!pref.contains("sampling_time") & !pref.contains("overlap_time")) {
-            editor.putInt("sampling_time", 20);
-            editor.putInt("overlap_time", 2);
-            editor.commit();
-        }else {
-            Log.i("sharedpreferences", "exist: "+pref.getInt("sampling_time", -1));
-        }
-        super.onStart();
-    }
+
 
     @Override
     protected void onStop() {
@@ -571,7 +616,6 @@ public class ShimmerSpec extends AppCompatActivity {
                                 "\n GSR CONDUCTANCE: " + gsrConductance +
                                 "\n GSR RESISTANCE: " + gsrResistance +
                                 "\n PPG: " + ppg +
-                                "\n TEMPERATURE: " + temperature +
                                 "\n ACCELERATION_X: " + accel_x +
                                 "\n ACCELERATION_Z: " + accel_z +
                                 "\n ACCELERATION_Y: " + accel_y);
@@ -582,6 +626,8 @@ public class ShimmerSpec extends AppCompatActivity {
 
                         double acceleration = Math.sqrt(Math.pow(accel_x, 2) + Math.pow(accel_z, 2) + Math.pow(accel_y, 2));
                         mSeriesX.appendData(new DataPoint(timestamp / 1000, acceleration), true, 10000);
+                        mSeriesGsr.appendData(new DataPoint(timestamp / 1000, gsrConductance), true, 10000);
+                        mSeriesGsrResistance.appendData(new DataPoint(timestamp / 1000, gsrResistance), true, 10000);
                     }
                     break;
                 case Shimmer.MESSAGE_TOAST:
