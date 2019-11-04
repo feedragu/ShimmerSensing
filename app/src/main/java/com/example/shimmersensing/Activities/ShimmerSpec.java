@@ -39,8 +39,10 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.shimmersensing.Utilities.SendDeviceDetails;
 import com.example.shimmersensing.Utilities.ShimmerData;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -64,6 +66,9 @@ import com.shimmerresearch.driver.ShimmerDevice;
 import com.example.shimmersensing.R;
 import com.shimmerresearch.driverUtilities.ChannelDetails;
 import com.shimmerresearch.exceptions.ShimmerException;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -313,7 +318,7 @@ public class ShimmerSpec extends AppCompatActivity {
         String response=pref.getString("shimmerdata", "");
         ArrayList<ShimmerData> prova = gson.fromJson(response,
                 new TypeToken<List<ShimmerData>>(){}.getType());
-        Log.d("prova", "onStart: "+prova.size());
+//        Log.d("prova", "onStart: "+prova.size());
         super.onStart();
     }
 
@@ -336,29 +341,46 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
     public void connectDevice(View view) {
-        if (!connected) {
-            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-            if (mBluetoothAdapter == null) {
-                // Device does not support Bluetooth
-                Log.e(LOG_TAG, "Error. This device does not support Bluetooth");
-                Toast.makeText(this, "Error. This device does not support Bluetooth", Toast.LENGTH_LONG).show();
-            } else {
-                if (!mBluetoothAdapter.isEnabled()) {
-                    // Bluetooth is not enabled
-                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
-                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
-                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
-                } else {
-                    Intent intent = new Intent(getApplicationContext(), ShimmerBluetoothDialog.class);
-                    startActivityForResult(intent, ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER);
-                }
-            }
-        } else {
-            if (shimmerDevice != null & !onpause) {
-                shimmerDevice.startStreaming();
-                onpause = true;
-            }
+        for(int j=0; j<5000; j++) {
+            Long tsLong = System.currentTimeMillis() ;
+            ShimmerData s = new ShimmerData(j, j, j, j, tsLong);
+            list.add(s);
         }
+
+        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+        Log.i("prova_json", "run: "+jsonElements);
+        list.clear();
+
+        try {
+
+
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+//        if (!connected) {
+//            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//            if (mBluetoothAdapter == null) {
+//                // Device does not support Bluetooth
+//                Log.e(LOG_TAG, "Error. This device does not support Bluetooth");
+//                Toast.makeText(this, "Error. This device does not support Bluetooth", Toast.LENGTH_LONG).show();
+//            } else {
+//                if (!mBluetoothAdapter.isEnabled()) {
+//                    // Bluetooth is not enabled
+//                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
+//                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
+//                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
+//                } else {
+//                    Intent intent = new Intent(getApplicationContext(), ShimmerBluetoothDialog.class);
+//                    startActivityForResult(intent, ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER);
+//                }
+//            }
+//        } else {
+//            if (shimmerDevice != null & !onpause) {
+//                shimmerDevice.startStreaming();
+//                onpause = true;
+//            }
+//        }
     }
 
     public void sampleWindow(View view) {
@@ -683,9 +705,9 @@ public class ShimmerSpec extends AppCompatActivity {
                                         public void run() {
                                             SharedPreferences.Editor editor = pref.edit();
                                             Gson gson = new Gson();
-                                            String json = gson.toJson(list);
-                                            Log.i("prova_json", "run: "+json);
-                                            editor.putString("shimmerdata", json);
+                                            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+                                            Log.i("prova_json", "run: "+jsonElements);
+                                            editor.putString("shimmerdata", String.valueOf(jsonElements));
                                             editor.apply();
 
                                             handler.postDelayed(runnable, delay);
