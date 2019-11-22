@@ -125,8 +125,11 @@ public class ShimmerSpec extends AppCompatActivity {
     private ArrayList<ShimmerData> list;
 
     Handler handler = new Handler();
+    Handler handlerTest = new Handler();
     Runnable runnable;
     int delay = 20 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
+    int hztoms = 7; //Delay for 15 seconds.  One second = 1000 milliseconds.
+    int counterCsv=0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -293,30 +296,32 @@ public class ShimmerSpec extends AppCompatActivity {
             Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
         }
 
-        InputStream inputStream = getResources().openRawResource(R.raw.sampledata_gsr_ppg);
-        CSVFile csvFile = new CSVFile(inputStream);
-        List scoreList = csvFile.read();
-        ArrayList<String[]> secondList = new ArrayList();
-        for (int i = 3; i < scoreList.size(); i++) {
-            secondList.add((String[]) scoreList.get(i));
-        }
-        for (String[] array : secondList) {
-            if(array.length > 1) {
-                String test = array[1];
-                char[] s = test.toCharArray();
-                List<String> listCsv = new ArrayList<String>(Arrays.asList(test.split(String.valueOf(s[12]))));
-                Long tsLong = System.currentTimeMillis() / 1000;
-                double acceleration = Math.sqrt(Math.pow(Double.parseDouble(listCsv.get(1)), 2) +
-                        Math.pow(Double.parseDouble(listCsv.get(2)), 2) +
-                        Math.pow(Double.parseDouble(listCsv.get(3)), 2));
-                ShimmerData sData = new ShimmerData(Double.parseDouble(listCsv.get(5)),
-                        Double.parseDouble(listCsv.get(4)),
-                        0, acceleration,
-                        tsLong);
-                list.add(sData);
-            }
-        }
-        Log.i("prova", "onCreate: " + list.size());
+        /** Simulation of sample data from a CSV File
+//        InputStream inputStream = getResources().openRawResource(R.raw.sampledata_gsr_ppg);
+//        CSVFile csvFile = new CSVFile(inputStream);
+//        List scoreList = csvFile.read();
+//        ArrayList<String[]> secondList = new ArrayList();
+//        for (int i = 3; i < scoreList.size(); i++) {
+//            secondList.add((String[]) scoreList.get(i));
+//        }
+//        for (String[] array : secondList) {
+//            if(array.length > 1) {
+//                String test = array[1];
+//                char[] s = test.toCharArray();
+//                List<String> listCsv = new ArrayList<String>(Arrays.asList(test.split(String.valueOf(s[12]))));
+//                Long tsLong = System.currentTimeMillis() / 1000;
+//                double acceleration = Math.sqrt(Math.pow(Double.parseDouble(listCsv.get(1)), 2) +
+//                        Math.pow(Double.parseDouble(listCsv.get(2)), 2) +
+//                        Math.pow(Double.parseDouble(listCsv.get(3)), 2));
+//                ShimmerData sData = new ShimmerData(Double.parseDouble(listCsv.get(6)),
+//                        Double.parseDouble(listCsv.get(4)),
+//                        0, acceleration,
+//                        tsLong);
+//                list.add(sData);
+//            }
+//        }
+//        Log.i("prova", "onCreate: " + list.size());
+         **/
 
     }
 
@@ -341,6 +346,25 @@ public class ShimmerSpec extends AppCompatActivity {
                 new TypeToken<List<ShimmerData>>() {
                 }.getType());
 //        Log.d("prova", "onStart: "+prova.size());
+
+//        handlerTest.postDelayed(runnable = new Runnable() {
+//            public void run() {
+//
+//                int timestamp = counterCsv;
+//
+//                mSeries2.appendData(new DataPoint(timestamp , list.get(counterCsv).getPPG()), true, 10000);
+//
+//
+//
+//                mSeriesX.appendData(new DataPoint(timestamp, list.get(counterCsv).getAccelerometer()), true, 10000);
+//                mSeriesGsr.appendData(new DataPoint(timestamp , list.get(counterCsv).getGsrResistance()), true, 10000);
+//                //mSeriesGsrResistance.appendData(new DataPoint(timestamp , list.get(counterCsv).getGsrResistance()), true, 10000);
+//                counterCsv++;
+//                Log.i("counter", "run: "+counterCsv+" PPG data: "+list.get(counterCsv).getPPG());
+//                handlerTest.postDelayed(runnable, hztoms);
+//            }
+//        }, hztoms);
+
         super.onStart();
     }
 
