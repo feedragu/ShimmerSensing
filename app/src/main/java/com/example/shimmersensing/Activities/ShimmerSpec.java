@@ -11,7 +11,6 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
-import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -22,7 +21,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.provider.MediaStore;
 import android.transition.CircularPropagation;
 import android.transition.Explode;
 import android.transition.Fade;
@@ -39,6 +37,7 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.shimmersensing.Utilities.CSVFile;
 import com.example.shimmersensing.Utilities.SendDeviceDetails;
 import com.example.shimmersensing.Utilities.ShimmerData;
 import com.google.gson.Gson;
@@ -50,7 +49,6 @@ import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.shimmerresearch.algorithms.Filter;
 import com.shimmerresearch.android.Shimmer;
-import com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog;
 import com.shimmerresearch.android.guiUtilities.ShimmerDialogConfigurations;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
 import com.shimmerresearch.biophysicalprocessing.ECGtoHRAdaptive;
@@ -64,18 +62,15 @@ import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 
 import com.example.shimmersensing.R;
-import com.shimmerresearch.driverUtilities.ChannelDetails;
 import com.shimmerresearch.exceptions.ShimmerException;
 
-import org.json.JSONException;
-import org.json.JSONObject;
-
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
 import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
-import static com.shimmerresearch.sensors.SensorPPG.ObjectClusterSensorName.PPG_A13;
 
 public class ShimmerSpec extends AppCompatActivity {
 
@@ -297,6 +292,32 @@ public class ShimmerSpec extends AppCompatActivity {
         } catch (Exception e) {
             Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
         }
+
+        InputStream inputStream = getResources().openRawResource(R.raw.sampledata_gsr_ppg);
+        CSVFile csvFile = new CSVFile(inputStream);
+        List scoreList = csvFile.read();
+        ArrayList<String[]> secondList = new ArrayList();
+        for (int i = 3; i < scoreList.size(); i++) {
+            secondList.add((String[]) scoreList.get(i));
+        }
+        for (String[] array : secondList) {
+            if(array.length > 1) {
+                String test = array[1];
+                char[] s = test.toCharArray();
+                List<String> listCsv = new ArrayList<String>(Arrays.asList(test.split(String.valueOf(s[12]))));
+                Long tsLong = System.currentTimeMillis() / 1000;
+                double acceleration = Math.sqrt(Math.pow(Double.parseDouble(listCsv.get(1)), 2) +
+                        Math.pow(Double.parseDouble(listCsv.get(2)), 2) +
+                        Math.pow(Double.parseDouble(listCsv.get(3)), 2));
+                ShimmerData sData = new ShimmerData(Double.parseDouble(listCsv.get(5)),
+                        Double.parseDouble(listCsv.get(4)),
+                        0, acceleration,
+                        tsLong);
+                list.add(sData);
+            }
+        }
+        Log.i("prova", "onCreate: " + list.size());
+
     }
 
 
@@ -315,9 +336,10 @@ public class ShimmerSpec extends AppCompatActivity {
         }
 
         Gson gson = new Gson();
-        String response=pref.getString("shimmerdata", "");
+        String response = pref.getString("shimmerdata", "");
         ArrayList<ShimmerData> prova = gson.fromJson(response,
-                new TypeToken<List<ShimmerData>>(){}.getType());
+                new TypeToken<List<ShimmerData>>() {
+                }.getType());
 //        Log.d("prova", "onStart: "+prova.size());
         super.onStart();
     }
@@ -341,14 +363,14 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
     public void connectDevice(View view) {
-        for(int j=0; j<5000; j++) {
-            Long tsLong = System.currentTimeMillis() ;
+        for (int j = 0; j < 5000; j++) {
+            Long tsLong = System.currentTimeMillis();
             ShimmerData s = new ShimmerData(j, j, j, j, tsLong);
             list.add(s);
         }
 
         JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-        Log.i("prova_json", "run: "+jsonElements);
+        Log.i("prova_json", "run: " + jsonElements);
         list.clear();
 
         try {
@@ -706,7 +728,7 @@ public class ShimmerSpec extends AppCompatActivity {
                                             SharedPreferences.Editor editor = pref.edit();
                                             Gson gson = new Gson();
                                             JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-                                            Log.i("prova_json", "run: "+jsonElements);
+                                            Log.i("prova_json", "run: " + jsonElements);
                                             editor.putString("shimmerdata", String.valueOf(jsonElements));
                                             editor.apply();
 
