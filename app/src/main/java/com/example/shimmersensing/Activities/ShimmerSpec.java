@@ -400,7 +400,7 @@ public class ShimmerSpec extends AppCompatActivity {
         try {
 
 
-            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+            new SendDeviceDetails().execute("http://192.168.43.28:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
         } catch (Exception e) {
             e.printStackTrace();
         }
