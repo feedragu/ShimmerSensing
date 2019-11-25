@@ -2,6 +2,8 @@ package com.example.shimmersensing.Utilities;
 
 public class ShimmerData {
     private double PPG, gsrResistance, gsrConductance, accelerometer;
+
+
     private long timestamp_shimmer;
 
     public double getPPG() {
@@ -34,6 +36,11 @@ public class ShimmerData {
 
     public void setAccelerometer(double accelerometer) {
         this.accelerometer = accelerometer;
+    }
+
+
+    public long getTimestamp_shimmer() {
+        return timestamp_shimmer;
     }
 
     public ShimmerData(double PPG, double gsrResistance, double gsrConductance, double accelerometer, long timestamp_shimmer) {
