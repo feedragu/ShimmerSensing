@@ -125,7 +125,7 @@ public class ShimmerSpec extends AppCompatActivity {
     Handler handler = new Handler();
     Handler handlerTest = new Handler();
     Runnable runnable;
-    int delay = 20 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
+    int delay = 300 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int hztoms = 7; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int counterCsv = 0;
 
@@ -169,8 +169,8 @@ public class ShimmerSpec extends AppCompatActivity {
         graph.getViewport().setYAxisBoundsManual(true);
         graph.getViewport().setMinX(0);
         graph.getViewport().setMaxX(10);
-        graph.getViewport().setMinY(1000);
-        graph.getViewport().setMaxY(1900);
+        graph.getViewport().setMinY(1200);
+        graph.getViewport().setMaxY(1800);
         graph.getViewport().setMaxYAxisSize(2000);
 
         graph.setTitle("PPG Data");
@@ -795,6 +795,10 @@ public class ShimmerSpec extends AppCompatActivity {
                                             editor.apply();
                                             try {
                                                 new SendDeviceDetails().execute("http://192.168.43.28:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+
+                                                Log.i("im sending 2", "run: send " + list.size());
+                                                list.clear();
+                                                Log.i("im sending 3", "run: send " + list.size());
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }

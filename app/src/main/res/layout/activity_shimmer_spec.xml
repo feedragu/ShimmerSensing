@@ -23,7 +23,14 @@
 
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
-                android:layout_height="462dp">
+                android:layout_height="wrap_content">
+
+                <androidx.constraintlayout.widget.Guideline
+                    android:id="@+id/guideline"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    app:layout_constraintGuide_percent="0.5"/>
 
                 <ImageView
                     android:id="@+id/ivImage"
@@ -85,12 +92,14 @@
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="32dp"
+                    android:layout_marginTop="8dp"
                     android:onClick="connectDevice"
                     android:text="Connect"
-                    app:layout_constraintEnd_toStartOf="@+id/button"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toEndOf="parent"
                     app:layout_constraintStart_toStartOf="parent"
                     app:layout_constraintTop_toBottomOf="@+id/mac_address"
+                    app:layout_constraintVertical_bias="0.16000003"
                     tools:text="connect" />
 
                 <Button
@@ -100,22 +109,23 @@
                     android:layout_height="wrap_content"
                     android:onClick="openMenuSensor"
                     android:text="Config "
-                    app:layout_constraintBottom_toBottomOf="@+id/connect_start"
+                    app:layout_constraintBottom_toBottomOf="parent"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintStart_toEndOf="@+id/button"
-                    app:layout_constraintTop_toTopOf="@+id/connect_start" />
+                    app:layout_constraintStart_toStartOf="@+id/guideline"
+                    app:layout_constraintTop_toTopOf="@+id/button" />
 
                 <Button
                     android:id="@+id/button"
                     style="@style/Widget.AppCompat.Button.Colored"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
                     android:onClick="sampleWindow"
                     android:text="sampling window"
-                    app:layout_constraintBottom_toBottomOf="@+id/connect_start"
-                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintEnd_toStartOf="@+id/guideline"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="@+id/connect_start" />
+                    app:layout_constraintTop_toBottomOf="@+id/connect_start" />
 
 
             </androidx.constraintlayout.widget.ConstraintLayout>
