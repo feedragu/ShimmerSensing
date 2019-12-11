@@ -1,16 +1,12 @@
 package com.example.shimmersensing.Activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.core.app.ActivityCompat;
-import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.bluetooth.BluetoothAdapter;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -37,7 +33,12 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.example.shimmersensing.Utilities.CSVFile;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
+
+import com.example.shimmersensing.R;
 import com.example.shimmersensing.Utilities.SendDeviceDetails;
 import com.example.shimmersensing.Utilities.ShimmerData;
 import com.google.gson.Gson;
@@ -49,6 +50,7 @@ import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
 import com.shimmerresearch.algorithms.Filter;
 import com.shimmerresearch.android.Shimmer;
+import com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog;
 import com.shimmerresearch.android.guiUtilities.ShimmerDialogConfigurations;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
 import com.shimmerresearch.biophysicalprocessing.ECGtoHRAdaptive;
@@ -60,13 +62,9 @@ import com.shimmerresearch.driver.Configuration;
 import com.shimmerresearch.driver.FormatCluster;
 import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
-
-import com.example.shimmersensing.R;
 import com.shimmerresearch.exceptions.ShimmerException;
 
-import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
@@ -129,7 +127,7 @@ public class ShimmerSpec extends AppCompatActivity {
     Runnable runnable;
     int delay = 20 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int hztoms = 7; //Delay for 15 seconds.  One second = 1000 milliseconds.
-    int counterCsv=0;
+    int counterCsv = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -297,30 +295,30 @@ public class ShimmerSpec extends AppCompatActivity {
         }
 
         /** Simulation of sample data from a CSV File
-//        InputStream inputStream = getResources().openRawResource(R.raw.sampledata_gsr_ppg);
-//        CSVFile csvFile = new CSVFile(inputStream);
-//        List scoreList = csvFile.read();
-//        ArrayList<String[]> secondList = new ArrayList();
-//        for (int i = 3; i < scoreList.size(); i++) {
-//            secondList.add((String[]) scoreList.get(i));
-//        }
-//        for (String[] array : secondList) {
-//            if(array.length > 1) {
-//                String test = array[1];
-//                char[] s = test.toCharArray();
-//                List<String> listCsv = new ArrayList<String>(Arrays.asList(test.split(String.valueOf(s[12]))));
-//                Long tsLong = System.currentTimeMillis() / 1000;
-//                double acceleration = Math.sqrt(Math.pow(Double.parseDouble(listCsv.get(1)), 2) +
-//                        Math.pow(Double.parseDouble(listCsv.get(2)), 2) +
-//                        Math.pow(Double.parseDouble(listCsv.get(3)), 2));
-//                ShimmerData sData = new ShimmerData(Double.parseDouble(listCsv.get(6)),
-//                        Double.parseDouble(listCsv.get(4)),
-//                        0, acceleration,
-//                        tsLong);
-//                list.add(sData);
-//            }
-//        }
-//        Log.i("prova", "onCreate: " + list.size());
+         //        InputStream inputStream = getResources().openRawResource(R.raw.sampledata_gsr_ppg);
+         //        CSVFile csvFile = new CSVFile(inputStream);
+         //        List scoreList = csvFile.read();
+         //        ArrayList<String[]> secondList = new ArrayList();
+         //        for (int i = 3; i < scoreList.size(); i++) {
+         //            secondList.add((String[]) scoreList.get(i));
+         //        }
+         //        for (String[] array : secondList) {
+         //            if(array.length > 1) {
+         //                String test = array[1];
+         //                char[] s = test.toCharArray();
+         //                List<String> listCsv = new ArrayList<String>(Arrays.asList(test.split(String.valueOf(s[12]))));
+         //                Long tsLong = System.currentTimeMillis() / 1000;
+         //                double acceleration = Math.sqrt(Math.pow(Double.parseDouble(listCsv.get(1)), 2) +
+         //                        Math.pow(Double.parseDouble(listCsv.get(2)), 2) +
+         //                        Math.pow(Double.parseDouble(listCsv.get(3)), 2));
+         //                ShimmerData sData = new ShimmerData(Double.parseDouble(listCsv.get(6)),
+         //                        Double.parseDouble(listCsv.get(4)),
+         //                        0, acceleration,
+         //                        tsLong);
+         //                list.add(sData);
+         //            }
+         //        }
+         //        Log.i("prova", "onCreate: " + list.size());
          **/
 
     }
@@ -387,46 +385,39 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
     public void connectDevice(View view) {
-        for (int j = 0; j < 5000; j++) {
-            Long tsLong = System.currentTimeMillis();
-            ShimmerData s = new ShimmerData(j, j, j, j, tsLong);
-            list.add(s);
-        }
-
-        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-        Log.i("prova_json", "run: " + jsonElements);
-        list.clear();
-
-        try {
-
-
-            new SendDeviceDetails().execute("http://192.168.43.28:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-//        if (!connected) {
-//            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//            if (mBluetoothAdapter == null) {
-//                // Device does not support Bluetooth
-//                Log.e(LOG_TAG, "Error. This device does not support Bluetooth");
-//                Toast.makeText(this, "Error. This device does not support Bluetooth", Toast.LENGTH_LONG).show();
-//            } else {
-//                if (!mBluetoothAdapter.isEnabled()) {
-//                    // Bluetooth is not enabled
-//                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
-//                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
-//                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
-//                } else {
-//                    Intent intent = new Intent(getApplicationContext(), ShimmerBluetoothDialog.class);
-//                    startActivityForResult(intent, ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER);
-//                }
-//            }
-//        } else {
-//            if (shimmerDevice != null & !onpause) {
-//                shimmerDevice.startStreaming();
-//                onpause = true;
-//            }
+//        for (int j = 0; j < 5000; j++) {
+//            Long tsLong = System.currentTimeMillis();
+//            list.add(s);
 //        }
+//
+//        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+//        Log.i("prova_json", "run: " + jsonElements);
+//        list.clear();
+//
+
+        if (!connected) {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            if (mBluetoothAdapter == null) {
+                // Device does not support Bluetooth
+                Log.e(LOG_TAG, "Error. This device does not support Bluetooth");
+                Toast.makeText(this, "Error. This device does not support Bluetooth", Toast.LENGTH_LONG).show();
+            } else {
+                if (!mBluetoothAdapter.isEnabled()) {
+                    // Bluetooth is not enabled
+                    Log.e(LOG_TAG, "Error. Shimmer device not paired or Bluetooth is not enabled");
+                    Toast.makeText(this, "Error. Shimmer device not paired or Bluetooth is not enabled. " +
+                            "Please close the app and pair or enable Bluetooth", Toast.LENGTH_LONG).show();
+                } else {
+                    Intent intent = new Intent(getApplicationContext(), ShimmerBluetoothDialog.class);
+                    startActivityForResult(intent, ShimmerBluetoothDialog.REQUEST_CONNECT_SHIMMER);
+                }
+            }
+        } else {
+            if (shimmerDevice != null & !onpause) {
+                shimmerDevice.startStreaming();
+                onpause = true;
+            }
+        }
     }
 
     public void sampleWindow(View view) {
@@ -613,6 +604,8 @@ public class ShimmerSpec extends AppCompatActivity {
                         double accel_x = 6;
                         double accel_z = 6;
                         double accel_y = 6;
+                        double magnetometer_x = 0, magnetometer_y = 0, magnetometer_z = 0;
+                        double gyroscope_x = 0, gyroscope_y = 0, gyroscope_z = 0;
                         double timestamp = 0;
 
 
@@ -696,14 +689,57 @@ public class ShimmerSpec extends AppCompatActivity {
                             accel_y = formatCluster.mData;
                         }
 
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GYRO_X);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            gyroscope_x = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GYRO_Y);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            gyroscope_y = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.GYRO_Z);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            gyroscope_z = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.MAG_X);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            magnetometer_x = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.MAG_Y);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            magnetometer_y = formatCluster.mData;
+                        }
+
+                        allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.MAG_Z);
+                        formatCluster = (ObjectCluster.returnFormatCluster(allFormats, "CAL"));
+                        if (formatCluster != null) {
+                            magnetometer_z = formatCluster.mData;
+                        }
+
 
                         Log.d(LOG_TAG, "DATA_PACKET: " +
                                 "\n GSR CONDUCTANCE: " + gsrConductance +
-                                "\n GSR RESISTANCE: " + gsrResistance +
                                 "\n PPG: " + ppg +
                                 "\n ACCELERATION_X: " + accel_x +
                                 "\n ACCELERATION_Z: " + accel_z +
-                                "\n ACCELERATION_Y: " + accel_y);
+                                "\n ACCELERATION_Y: " + accel_y +
+                                "\n ACCELERATION_X: " + accel_x +
+                                "\n ACCELERATION_Z: " + accel_z +
+                                "\n gyroscope_x: " + gyroscope_x +
+                                "\n gyroscope_y: " + gyroscope_y +
+                                "\n gyroscope_z: " + gyroscope_z +
+                                "\n magnetometer_x: " + magnetometer_x +
+                                "\n magnetometer_y: " + magnetometer_y +
+                                "\n magnetometer_z: " + magnetometer_z);
 
 
                         mSeries2.appendData(new DataPoint(timestamp / 1000, dataPPG), true, 10000);
@@ -714,7 +750,9 @@ public class ShimmerSpec extends AppCompatActivity {
                         mSeriesGsr.appendData(new DataPoint(timestamp / 1000, gsrConductance), true, 10000);
                         mSeriesGsrResistance.appendData(new DataPoint(timestamp / 1000, gsrResistance), true, 10000);
                         Long tsLong = System.currentTimeMillis() / 1000;
-                        ShimmerData s = new ShimmerData(dataPPG, gsrResistance, gsrConductance, acceleration, tsLong);
+                        ShimmerData s = new ShimmerData(dataPPG, gsrConductance, accel_x,
+                                accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
+                                magnetometer_x, magnetometer_y, magnetometer_z, tsLong);
                         list.add(s);
                     }
                     break;
@@ -755,6 +793,11 @@ public class ShimmerSpec extends AppCompatActivity {
                                             Log.i("prova_json", "run: " + jsonElements);
                                             editor.putString("shimmerdata", String.valueOf(jsonElements));
                                             editor.apply();
+                                            try {
+                                                new SendDeviceDetails().execute("http://192.168.43.28:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
 
                                             handler.postDelayed(runnable, delay);
                                         }
