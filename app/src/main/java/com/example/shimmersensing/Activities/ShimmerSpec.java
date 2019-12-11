@@ -793,15 +793,15 @@ public class ShimmerSpec extends AppCompatActivity {
                                             Log.i("prova_json", "run: " + jsonElements);
                                             editor.putString("shimmerdata", String.valueOf(jsonElements));
                                             editor.apply();
-                                            try {
-                                                new SendDeviceDetails().execute("http://192.168.43.28:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
-
-                                                Log.i("im sending 2", "run: send " + list.size());
-                                                list.clear();
-                                                Log.i("im sending 3", "run: send " + list.size());
-                                            } catch (Exception e) {
-                                                e.printStackTrace();
-                                            }
+//                                            try {
+//                                                new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+//
+//                                                Log.i("im sending 2", "run: send " + list.size());
+//                                                list.clear();
+//                                                Log.i("im sending 3", "run: send " + list.size());
+//                                            } catch (Exception e) {
+//                                                e.printStackTrace();
+//                                            }
 
                                             handler.postDelayed(runnable, delay);
                                         }
@@ -876,5 +876,10 @@ public class ShimmerSpec extends AppCompatActivity {
         }
         handler.removeCallbacks(runnable); //stop handler when activity not visible
         super.onDestroy();
+    }
+
+    public void startActivityTest(View view) {
+        Intent intent = new Intent(this, ShimmerTrialActivity.class);
+        startActivity(intent);
     }
 }

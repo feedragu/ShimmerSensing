@@ -17,7 +17,6 @@
     <uses-permission
         android:name="android.permission.READ_EXTERNAL_STORAGE"
         android:required="true" />
-    <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -29,6 +28,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".Activities.ShimmerTrialActivity"></activity>
         <activity android:name=".Activities.ShimmerSpec">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -39,13 +39,10 @@
         </activity>
         <activity
             android:name=".Activities.MainActivity"
-            android:theme="@style/Theme.AppCompat.Translucent">
-
-        </activity>
+            android:theme="@style/Theme.AppCompat.Translucent"></activity>
         <activity
             android:name="com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog"
             android:theme="@android:style/Theme.Holo.Light.Dialog" />
     </application>
-
 
 </manifest>
