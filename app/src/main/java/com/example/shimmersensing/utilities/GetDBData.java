@@ -1,42 +1,40 @@
-package com.example.shimmersensing.Utilities;
+package com.example.shimmersensing.utilities;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.DataOutputStream;
+import java.io.BufferedInputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class SendDeviceDetails extends AsyncTask<String, Void, String> {
+public class GetDBData extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
-        String data = "";
+        StringBuilder data = new StringBuilder();
         Log.i("Prova", "cachi");
         HttpURLConnection httpURLConnection = null;
         try {
 
             httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-            httpURLConnection.setRequestMethod("POST");
+            httpURLConnection.setRequestMethod("GET");
             httpURLConnection.setDoOutput(true);
-
-            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
-            String s=params[1];
-            Log.i("mannag", "doInBackground: "+s);
-            wr.writeBytes("postdata="+ s);
-            wr.flush();
-            wr.close();
-
-            InputStream in = httpURLConnection.getInputStream();
-            InputStreamReader inputStreamReader = new InputStreamReader(in);
-
-            int inputStreamData = inputStreamReader.read();
-            while (inputStreamData != -1) {
-                char current = (char) inputStreamData;
-                inputStreamData = inputStreamReader.read();
-                data += current;
+            try {
+                InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
+                InputStreamReader inputStreamReader = new InputStreamReader(in);
+//
+                int inputStreamData = inputStreamReader.read();
+                while (inputStreamData != -1) {
+                    char current = (char) inputStreamData;
+                    inputStreamData = inputStreamReader.read();
+                    data.append(current);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
+
+            Log.i("mannag", "doInBackground: " + data.toString());
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -45,7 +43,7 @@ public class SendDeviceDetails extends AsyncTask<String, Void, String> {
             }
         }
 
-        return data;
+        return data.toString();
     }
 
     @Override

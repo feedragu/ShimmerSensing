@@ -1,41 +1,42 @@
-package com.example.shimmersensing.Utilities;
+package com.example.shimmersensing.utilities;
 
 import android.os.AsyncTask;
 import android.util.Log;
 
-import java.io.BufferedInputStream;
 import java.io.DataOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class GetDBData extends AsyncTask<String, Void, String> {
+public class SendDeviceDetails extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
-        StringBuilder data = new StringBuilder();
+        String data = "";
         Log.i("Prova", "cachi");
         HttpURLConnection httpURLConnection = null;
         try {
 
             httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-            httpURLConnection.setRequestMethod("GET");
+            httpURLConnection.setRequestMethod("POST");
             httpURLConnection.setDoOutput(true);
-            try {
-                InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
-                InputStreamReader inputStreamReader = new InputStreamReader(in);
-//
-                int inputStreamData = inputStreamReader.read();
-                while (inputStreamData != -1) {
-                    char current = (char) inputStreamData;
-                    inputStreamData = inputStreamReader.read();
-                    data.append(current);
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
 
-            Log.i("mannag", "doInBackground: " + data.toString());
+            DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+            String s=params[1];
+            Log.i("mannag", "doInBackground: "+s);
+            wr.writeBytes("postdata="+ s);
+            wr.flush();
+            wr.close();
+
+            InputStream in = httpURLConnection.getInputStream();
+            InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+            int inputStreamData = inputStreamReader.read();
+            while (inputStreamData != -1) {
+                char current = (char) inputStreamData;
+                inputStreamData = inputStreamReader.read();
+                data += current;
+            }
         } catch (Exception e) {
             e.printStackTrace();
         } finally {
@@ -44,7 +45,7 @@ public class GetDBData extends AsyncTask<String, Void, String> {
             }
         }
 
-        return data.toString();
+        return data;
     }
 
     @Override

@@ -1,37 +1,26 @@
-package com.example.shimmersensing.Activities;
+package com.example.shimmersensing.activities;
 
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
-import androidx.interpolator.view.animation.FastOutLinearInInterpolator;
-import androidx.interpolator.view.animation.FastOutSlowInInterpolator;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
-import android.transition.ChangeImageTransform;
 import android.transition.CircularPropagation;
-import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionSet;
 import android.view.Gravity;
 import android.view.View;
-import android.view.WindowManager;
-import android.view.animation.AccelerateInterpolator;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 
 import com.example.shimmersensing.R;
-import com.example.shimmersensing.Utilities.RecyclerAdapter;
-import com.example.shimmersensing.Utilities.row;
+import com.example.shimmersensing.utilities.RecyclerAdapter;
+import com.example.shimmersensing.utilities.row;
 
 import java.util.ArrayList;
 import java.util.List;

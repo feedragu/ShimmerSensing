@@ -1,4 +1,4 @@
-package com.example.shimmersensing.Graphic;
+package com.example.shimmersensing.graphic;
 
 import android.content.Context;
 import android.content.res.TypedArray;

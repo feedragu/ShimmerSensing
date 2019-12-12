@@ -1,4 +1,4 @@
-package com.example.shimmersensing.Utilities;
+package com.example.shimmersensing.utilities;
 
 public class row {
 

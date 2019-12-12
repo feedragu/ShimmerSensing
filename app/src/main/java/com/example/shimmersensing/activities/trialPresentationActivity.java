@@ -1,4 +1,4 @@
-package com.example.shimmersensing.Activities;
+package com.example.shimmersensing.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -6,11 +6,11 @@ import android.os.Bundle;
 
 import com.example.shimmersensing.R;
 
-public class ShimmerTrialActivity extends AppCompatActivity {
+public class trialPresentationActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.shimmer_trial);
+        setContentView(R.layout.activity_trial_presentation_1);
     }
 }
