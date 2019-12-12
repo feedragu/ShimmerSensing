@@ -42,8 +42,7 @@ public class SplashActivity extends AppCompatActivity {
 
     public void goAhead() {
 
-        Intent intent = new Intent(SplashActivity.this, ShimmerSpec.class);
-//        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
+        Intent intent = new Intent(SplashActivity.this, TrialPresentationActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
