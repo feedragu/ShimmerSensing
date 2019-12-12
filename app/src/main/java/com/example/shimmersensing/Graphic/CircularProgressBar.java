@@ -16,7 +16,7 @@ public class CircularProgressBar extends View {
     /**
      * ProgressBar's line thickness
      */
-    private float strokeWidth = 4;
+    private float strokeWidth = 6;
     private float progress = 0;
     private int min = 0;
     private int max = 100;

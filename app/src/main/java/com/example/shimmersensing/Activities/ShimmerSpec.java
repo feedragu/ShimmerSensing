@@ -14,6 +14,7 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.graphics.drawable.ColorDrawable;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -39,6 +40,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.interpolator.view.animation.LinearOutSlowInInterpolator;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.Utilities.GetDBData;
 import com.example.shimmersensing.Utilities.SendDeviceDetails;
 import com.example.shimmersensing.Utilities.ShimmerData;
 import com.google.gson.Gson;
@@ -64,6 +66,15 @@ import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 import com.shimmerresearch.exceptions.ShimmerException;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedInputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -128,6 +139,7 @@ public class ShimmerSpec extends AppCompatActivity {
     int delay = 300 * 1000; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int hztoms = 7; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int counterCsv = 0;
+    private String jsonDB;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -362,6 +374,9 @@ public class ShimmerSpec extends AppCompatActivity {
 //                handlerTest.postDelayed(runnable, hztoms);
 //            }
 //        }, hztoms);
+
+        new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/get");
+
 
         super.onStart();
     }
@@ -749,7 +764,7 @@ public class ShimmerSpec extends AppCompatActivity {
                         mSeriesX.appendData(new DataPoint(timestamp / 1000, acceleration), true, 10000);
                         mSeriesGsr.appendData(new DataPoint(timestamp / 1000, gsrConductance), true, 10000);
                         mSeriesGsrResistance.appendData(new DataPoint(timestamp / 1000, gsrResistance), true, 10000);
-                        Long tsLong = System.currentTimeMillis() / 1000;
+                        double tsLong = System.currentTimeMillis() / 1000;
                         ShimmerData s = new ShimmerData(dataPPG, gsrConductance, accel_x,
                                 accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
                                 magnetometer_x, magnetometer_y, magnetometer_z, tsLong);
@@ -879,7 +894,95 @@ public class ShimmerSpec extends AppCompatActivity {
     }
 
     public void startActivityTest(View view) {
-        Intent intent = new Intent(this, ShimmerTrialActivity.class);
-        startActivity(intent);
+//        Intent intent = new Intent(this, ShimmerTrialActivity.class);
+//        startActivity(intent);
+        try {
+            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
+
+            Log.i("im sending 2", "run: send " + list.size());
+            list.clear();
+            Log.i("im sending 3", "run: send " + list.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        }
+
+        @SuppressLint("StaticFieldLeak")
+        public class GetDBData extends AsyncTask<String, Void, String> {
+            @Override
+            protected String doInBackground(String... params) {
+                StringBuilder data = new StringBuilder();
+                HttpURLConnection httpURLConnection = null;
+                try {
+
+                    httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
+                    httpURLConnection.setRequestMethod("GET");
+                    httpURLConnection.setDoOutput(true);
+                    try {
+                        InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
+                        InputStreamReader inputStreamReader = new InputStreamReader(in);
+//
+                        int inputStreamData = inputStreamReader.read();
+                        while (inputStreamData != -1) {
+                            char current = (char) inputStreamData;
+                            inputStreamData = inputStreamReader.read();
+                            data.append(current);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    Log.i("mannag", "doInBackground: " + data.toString());
+                } catch (Exception e) {
+                    e.printStackTrace();
+                } finally {
+                    if (httpURLConnection != null) {
+                        httpURLConnection.disconnect();
+                    }
+                }
+
+                return data.toString();
+            }
+
+            @Override
+            protected void onPostExecute(String result) {
+                super.onPostExecute(result);
+                jsonDB = result;
+                double ppg = 0;
+                double gsrConductance = 0;
+                double accel_x = 6;
+                double accel_z = 6;
+                double accel_y = 6;
+                double magnetometer_x = 0, magnetometer_y = 0, magnetometer_z = 0;
+                double gyroscope_x = 0, gyroscope_y = 0, gyroscope_z = 0;
+                double timestamp = 0;
+                try {
+                    JSONArray jarray = new JSONArray(jsonDB);
+                    for (int i = 0; i < jarray.length(); i++) {
+                        JSONObject curr = jarray.getJSONObject(i);
+                        ppg = curr.getDouble("PPG");
+                        gsrConductance = curr.getDouble("gsrConductance");
+                        accel_x = curr.getDouble("accelerometer_x");
+                        accel_z = curr.getDouble("accelerometer_y");
+                        accel_y = curr.getDouble("accelerometer_z");
+                        magnetometer_x = curr.getDouble("gyroscope_x");
+                        magnetometer_y = curr.getDouble("gyroscope_y");
+                        magnetometer_z = curr.getDouble("gyroscope_z");
+                        gyroscope_x = curr.getDouble("magnetometer_x");
+                        gyroscope_y = curr.getDouble("magnetometer_y");
+                        gyroscope_z = curr.getDouble("magnetometer_z");
+                        timestamp = curr.getDouble("timestamp_shimmer");
+                        ShimmerData s = new ShimmerData(ppg, gsrConductance, accel_x,
+                                accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
+                                magnetometer_x, magnetometer_y, magnetometer_z, timestamp);
+                        list.add(s);
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+                Log.i("TAG", String.valueOf(list.size())); // this is expecting a response code to be sent from your server upon receiving the POST data
+            }
+        }
     }
-}

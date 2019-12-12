@@ -3,13 +3,13 @@ package com.example.shimmersensing.Utilities;
 public class ShimmerData {
     private double PPG, gsrConductance, accelerometer_x, accelerometer_y, accelerometer_z,
             gyroscope_x, gyroscope_y, gyroscope_z, magnetometer_x, magnetometer_y, magnetometer_z;
-    private long timestamp_shimmer;
+    private double timestamp_shimmer;
 
 
     public ShimmerData(double PPG, double gsrConductance, double accelerometer_x, double accelerometer_y,
                        double accelerometer_z, double gyroscope_x, double gyroscope_y,
                        double gyroscope_z, double magnetometer_x, double magnetometer_y,
-                       double magnetometer_z, long timestamp_shimmer) {
+                       double magnetometer_z, double timestamp_shimmer) {
         this.PPG = PPG;
         this.gsrConductance = gsrConductance;
         this.accelerometer_x = accelerometer_x;
@@ -86,7 +86,7 @@ public class ShimmerData {
         return magnetometer_z;
     }
 
-    public long getTimestamp_shimmer() {
+    public double getTimestamp_shimmer() {
         return timestamp_shimmer;
     }
 
