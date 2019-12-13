@@ -1,7 +1,7 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
@@ -31,6 +31,11 @@
         <item name="android:colorBackgroundCacheHint">@null</item>
 <!--        <item name="android:windowIsTranslucent">true</item>-->
 <!--        <item name="android:windowAnimationStyle">@android:style/Animation</item>-->
+    </style>
+
+
+    <style name="Test" parent="Widget.MaterialComponents.BottomAppBar">
+        <!-- Add attributes here -->
     </style>
 
     <style name="SplashTheme" parent="Theme.AppCompat.NoActionBar">
