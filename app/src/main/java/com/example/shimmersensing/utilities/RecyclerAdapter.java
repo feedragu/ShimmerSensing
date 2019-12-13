@@ -4,6 +4,8 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
@@ -34,7 +36,8 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ImageV
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-
+        holder.img.setImageResource(mdata.get(position).getImg());
+        holder.text.setText(mdata.get(position).getRow_name());
 
     }
 
@@ -45,13 +48,16 @@ public class RecyclerAdapter extends RecyclerView.Adapter<RecyclerAdapter.ImageV
 
     public class ImageViewHolder extends RecyclerView.ViewHolder implements View.OnClickListener {
 
-        CardView img;
+        ImageView img;
+        TextView text;
         OnShimmerListener onShimmerListener;
 
         public ImageViewHolder(@NonNull View itemView, OnShimmerListener onShimmerListener) {
             super(itemView);
             this.onShimmerListener=onShimmerListener;
             itemView.setOnClickListener(this);
+            img = (ImageView) itemView.findViewById(R.id.infoDrawable);
+            text= itemView.findViewById(R.id.infoBottom);
         }
 
         @Override

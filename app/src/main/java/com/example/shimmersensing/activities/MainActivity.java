@@ -45,9 +45,9 @@ public class MainActivity extends AppCompatActivity implements RecyclerAdapter.O
         shimmerList.setLayoutManager(manager);
 
         List<row> list= new ArrayList<>();
-        list.add(new row(R.drawable.shimmer_sensor));
-        list.add(new row(R.drawable.shimmer_sensor));
-        list.add(new row(R.drawable.shimmer_sensor));
+//        list.add(new row(R.drawable.shimmer_sensor));
+//        list.add(new row(R.drawable.shimmer_sensor));
+//        list.add(new row(R.drawable.shimmer_sensor));
 
         rAdapter = new RecyclerAdapter(this, list, this);
         shimmerList.setAdapter(rAdapter);

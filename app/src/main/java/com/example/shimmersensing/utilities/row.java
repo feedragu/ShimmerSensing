@@ -3,10 +3,16 @@ package com.example.shimmersensing.utilities;
 public class row {
 
     private int img;
+    private String row_name;
 
 
-    public row(int img) {
+    public String getRow_name() {
+        return row_name;
+    }
+
+    public row(int img, String row_name) {
         this.img = img;
+        this.row_name= row_name;
     }
 
 
