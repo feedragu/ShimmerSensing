@@ -30,7 +30,8 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.TrialPresentationActivity"></activity>
+        <activity android:name=".activities.TrialActivity"></activity>
+        <activity android:name=".activities.TrialPresentationActivity" />
         <activity
             android:name=".activities.SplashActivity"
             android:launchMode="singleInstance"
@@ -46,13 +47,17 @@
             <!-- android:theme="@style/Theme.AppCompat.Translucent" -->
 
         </activity>
-        <activity android:name=".activities.ShimmerSpec"></activity>
+        <activity android:name=".activities.ShimmerSpec" />
         <activity
             android:name=".activities.MainActivity"
             android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
             android:name="com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog"
             android:theme="@android:style/Theme.Holo.Light.Dialog" />
+
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts" />
     </application>
 
 </manifest>

@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.utilities.ShimmerData;
+import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
@@ -29,6 +30,8 @@ import java.util.ArrayList;
 
 public class SplashActivity extends AppCompatActivity {
 
+    private ArrayList<ShimmerTrial> shimmertrial;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +41,7 @@ public class SplashActivity extends AppCompatActivity {
         shimm_logo.setAnimation(AnimationUtils.loadAnimation(this, R.anim.zoom_in));
 
         new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/get");
+
     }
 
     public void goAhead() {
@@ -53,6 +57,7 @@ public class SplashActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... params) {
             StringBuilder data = new StringBuilder();
+            data.append("");
             HttpURLConnection httpURLConnection = null;
             try {
 
@@ -73,7 +78,7 @@ public class SplashActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Log.i("mannag", "doInBackground: " + data.toString());
+                Log.i("shimmer", "doInBackground: " + data.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {
@@ -90,56 +95,104 @@ public class SplashActivity extends AppCompatActivity {
             super.onPostExecute(result);
             ArrayList<ShimmerData> list = new ArrayList<>();
             String jsonDB = result;
+            Log.i(" ca", "onPostExecute: "+jsonDB);
+            if(jsonDB.equals("")) {
+                goAhead();
+            }
+            if (jsonDB.contains("trial")) {
 
-            SharedPreferences pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
+                shimmertrial=new ArrayList<>();
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
-            double ppg = 0;
-            double gsrConductance = 0;
-            double accel_x = 0;
-            double accel_z = 0;
-            double accel_y = 0;
-            double magnetometer_x = 0, magnetometer_y = 0, magnetometer_z = 0;
-            double gyroscope_x = 0, gyroscope_y = 0, gyroscope_z = 0;
-            double timestamp = 0;
-            try {
-                JSONArray jarray = new JSONArray(jsonDB);
-                for (int j = 0; j < jarray.length(); j++) {
-                    JSONObject curr = jarray.getJSONObject(j);
-                    ppg = curr.getDouble("PPG");
-                    gsrConductance = curr.getDouble("gsrConductance");
-                    accel_x = curr.getDouble("accelerometer_x");
-                    accel_z = curr.getDouble("accelerometer_y");
-                    accel_y = curr.getDouble("accelerometer_z");
-                    magnetometer_x = curr.getDouble("gyroscope_x");
-                    magnetometer_y = curr.getDouble("gyroscope_y");
-                    magnetometer_z = curr.getDouble("gyroscope_z");
-                    gyroscope_x = curr.getDouble("magnetometer_x");
-                    gyroscope_y = curr.getDouble("magnetometer_y");
-                    gyroscope_z = curr.getDouble("magnetometer_z");
-                    timestamp = curr.getDouble("timestamp_shimmer");
-                    ShimmerData s = new ShimmerData(ppg, gsrConductance, accel_x,
-                            accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
-                            magnetometer_x, magnetometer_y, magnetometer_z, timestamp);
-                    list.add(s);
+                String shimmer_name;
+                String shimmer_mode;
+                String mode;
+                String domande;
+                try {
+                    JSONArray jarray = new JSONArray(jsonDB);
+                    for (int j = 0; j < jarray.length(); j++) {
+                        JSONObject curr = jarray.getJSONObject(j);
+                        shimmer_name = curr.getString("trial_name");
+                        shimmer_mode = curr.getString("trial_duration");
+                        mode = curr.getString("mode");
+                        domande = curr.getString("n_domande");
+                        ShimmerTrial s = new ShimmerTrial(shimmer_name, shimmer_mode, mode, domande);
+                        shimmertrial.add(s);
 
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-            } catch (JSONException e) {
-                e.printStackTrace();
+
+                try {
+                    SharedPreferences.Editor editor = pref.edit();
+                    Gson gson = new Gson();
+                    JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(shimmertrial);
+                    Log.i("shimmertrial", "run: " + jsonElements);
+                    editor.putString("shimmertrial", String.valueOf(jsonElements));
+                    editor.apply();
+
+                    Log.i("TAG", String.valueOf(shimmertrial.size()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                goAhead();
+            } else {
+                SharedPreferences pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
+
+                double ppg = 0;
+                double gsrConductance = 0;
+                double accel_x = 0;
+                double accel_z = 0;
+                double accel_y = 0;
+                double magnetometer_x = 0, magnetometer_y = 0, magnetometer_z = 0;
+                double gyroscope_x = 0, gyroscope_y = 0, gyroscope_z = 0;
+                double timestamp = 0;
+                try {
+                    JSONArray jarray = new JSONArray(jsonDB);
+                    for (int j = 0; j < jarray.length(); j++) {
+                        JSONObject curr = jarray.getJSONObject(j);
+                        ppg = curr.getDouble("PPG");
+                        gsrConductance = curr.getDouble("gsrConductance");
+                        accel_x = curr.getDouble("accelerometer_x");
+                        accel_z = curr.getDouble("accelerometer_y");
+                        accel_y = curr.getDouble("accelerometer_z");
+                        magnetometer_x = curr.getDouble("gyroscope_x");
+                        magnetometer_y = curr.getDouble("gyroscope_y");
+                        magnetometer_z = curr.getDouble("gyroscope_z");
+                        gyroscope_x = curr.getDouble("magnetometer_x");
+                        gyroscope_y = curr.getDouble("magnetometer_y");
+                        gyroscope_z = curr.getDouble("magnetometer_z");
+                        timestamp = curr.getDouble("timestamp_shimmer");
+                        ShimmerData s = new ShimmerData(ppg, gsrConductance, accel_x,
+                                accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
+                                magnetometer_x, magnetometer_y, magnetometer_z, timestamp);
+                        list.add(s);
+
+                    }
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    SharedPreferences.Editor editor = pref.edit();
+                    Gson gson = new Gson();
+                    JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+                    Log.i("prova_json", "run: " + jsonElements);
+                    editor.putString("shimmerdata", String.valueOf(jsonElements));
+                    editor.apply();
+
+                    Log.i("TAG", String.valueOf(list.size()));
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+
+                //new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
+
             }
 
-            try {
-                SharedPreferences.Editor editor = pref.edit();
-                Gson gson = new Gson();
-                JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-                Log.i("prova_json", "run: " + jsonElements);
-                editor.putString("shimmerdata", String.valueOf(jsonElements));
-                editor.apply();
-
-                Log.i("TAG", String.valueOf(list.size()));
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            goAhead();
 
         }
     }

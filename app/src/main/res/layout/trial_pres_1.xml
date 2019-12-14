@@ -64,7 +64,7 @@
         style="@android:style/Widget.DeviceDefault.TextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:fontFamily="sans-serif"
+        android:fontFamily="@font/open_sans_semibold"
         android:gravity="center"
         android:text="Connetiti al sensore Shimmer per iniziare il test"
         android:textAllCaps="false"
