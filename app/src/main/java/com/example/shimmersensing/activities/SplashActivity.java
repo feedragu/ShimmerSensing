@@ -127,14 +127,18 @@ public class SplashActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
 
-            SharedPreferences.Editor editor = pref.edit();
-            Gson gson = new Gson();
-            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-            Log.i("prova_json", "run: " + jsonElements);
-            editor.putString("shimmerdata", String.valueOf(jsonElements));
-            editor.apply();
+            try {
+                SharedPreferences.Editor editor = pref.edit();
+                Gson gson = new Gson();
+                JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+                Log.i("prova_json", "run: " + jsonElements);
+                editor.putString("shimmerdata", String.valueOf(jsonElements));
+                editor.apply();
 
-            Log.i("TAG", String.valueOf(list.size()));
+                Log.i("TAG", String.valueOf(list.size()));
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
             goAhead();
 
         }

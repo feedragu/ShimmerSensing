@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/rootContainer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.example.shimmersensing.activities.TrialPresentationActivity">
+
+
+    <ImageView
+        android:id="@+id/shimmerlogoS"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:scaleType="fitCenter"
+        android:scaleX="1"
+        android:scaleY="1"
+        android:translationY="-250dp"
+        app:srcCompat="@drawable/s_logo_shimmer"
+        tools:layout_editor_absoluteX="93dp"
+        tools:layout_editor_absoluteY="-106dp" />
+
+    <androidx.viewpager2.widget.ViewPager2
+        android:id="@+id/pager"
+        android:layout_width="0dp"
+        android:layout_height="280dp"
+        android:layout_marginBottom="32dp"
+        android:foregroundGravity="center_vertical|clip_vertical"
+        app:layout_constraintBottom_toTopOf="@+id/connectDevice"
+        app:layout_constraintEnd_toStartOf="@+id/guideline7"
+        app:layout_constraintStart_toStartOf="@+id/guideline6"
+        app:layout_constraintTop_toBottomOf="@+id/sensorisalvatiText"
+        app:layout_constraintVertical_bias="0.16000003" />
+
+    <com.google.android.material.tabs.TabLayout
+        android:id="@+id/tabDots"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
+        app:layout_constraintBottom_toTopOf="@+id/oppureText"
+        app:layout_constraintEnd_toStartOf="@+id/guideline5"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="@+id/guideline4"
+        app:layout_constraintTop_toBottomOf="@+id/pager"
+        app:tabBackground="@drawable/selector_tab_indicator"
+        app:tabGravity="center"
+        app:tabIndicator="@null"
+        app:tabPaddingEnd="6dp"
+        app:tabPaddingStart="6dp" />
+
+    <TextView
+        android:id="@+id/welcomeText"
+        style="@android:style/Widget.DeviceDefault.TextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:fontFamily="sans-serif"
+        android:gravity="center"
+        android:text="Connetiti al sensore Shimmer per iniziare il test"
+        android:textAllCaps="false"
+        android:textColor="#A8000000"
+        android:textSize="28sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.051" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline4"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:translationY="-250dp"
+        app:layout_constraintGuide_percent="0.3" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline5"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:translationY="-250dp"
+        app:layout_constraintGuide_percent="0.7" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline6"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:translationY="-250dp"
+        app:layout_constraintGuide_percent="0.001" />
+
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline7"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:translationY="-250dp"
+        app:layout_constraintGuide_percent="0.99999" />
+
+    <TextView
+        android:id="@+id/sensorisalvatiText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Sensori salvati"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.10"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/welcomeText"
+        app:layout_constraintVertical_bias="0.050000012" />
+
+    <TextView
+        android:id="@+id/oppureText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Oppure"
+        android:textSize="24sp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline7"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/pager"
+        app:layout_constraintVertical_bias="0.23000002" />
+
+    <Button
+        android:id="@+id/connectDevice"
+        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:drawablePadding="5dp"
+        android:onClick="addDevice"
+        android:paddingLeft="35dp"
+        android:paddingTop="15dp"
+        android:paddingRight="35dp"
+        android:paddingBottom="15dp"
+        android:text="Aggiungi dispositivo"
+        android:textColor="@color/colorPrimary"
+        android:textSize="18sp"
+        android:textStyle="normal"
+        app:cornerRadius="6dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/sensorisalvatiText"
+        app:layout_constraintVertical_bias="0.72"
+        app:rippleColor="#33AAAAAA"
+        app:strokeColor="@color/colorPrimary"
+        app:strokeWidth="2dp" />
+
+<!--    <LinearLayout-->
+<!--        android:id="@+id/sliderDotPanel"-->
+<!--        android:layout_width="0dp"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_marginTop="1dp"-->
+<!--        android:gravity="center_vertical|center_horizontal"-->
+<!--        android:orientation="horizontal"-->
+<!--        app:layout_constraintBottom_toTopOf="@+id/textView11"-->
+<!--        app:layout_constraintEnd_toStartOf="@+id/guideline5"-->
+<!--        app:layout_constraintStart_toStartOf="@+id/guideline4"-->
+<!--        app:layout_constraintTop_toBottomOf="@+id/pager" />-->
+
+    <LinearLayout
+        android:id="@+id/recyclerViewLinear"
+        android:layout_width="360dp"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/guideline7"
+        app:layout_constraintStart_toStartOf="@+id/guideline6">
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1px"
+            android:background="#EBA0A0A0" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/bottomOptions"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clickable="true"
+            android:clipToPadding="true"
+            android:focusable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            android:layoutAnimation="@anim/layout_animation"
+            android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
+            android:scrollbarSize="0dp"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+    </LinearLayout>
+
+
+
+</androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,26 +6,18 @@
 
 
     <fade
-        android:duration="2000"
-        android:fadingMode="fade_out">
+        android:duration="250"
+        android:fadingMode="fade_in">
 
         <targets>
-            <target android:targetId="@id/welcomeText" />
+            <target android:targetId="@id/oppureText" />
+            <target android:targetId="@id/sensorisalvatiText" />
         </targets>
     </fade>
 
     <changeBounds
-        android:duration="8000"
-        android:interpolator="@android:anim/accelerate_interpolator"
-        android:startOffset="15">
-        <targets>
-            <target android:targetId="@id/imageView" />
-        </targets>
-    </changeBounds>
-
-    <changeBounds
-        android:duration="400"
-        android:interpolator="@android:anim/overshoot_interpolator"
+        android:duration="325"
+        android:interpolator="@anim/custom_overshoot_interpolator"
         android:startOffset="2">
     </changeBounds>
 
