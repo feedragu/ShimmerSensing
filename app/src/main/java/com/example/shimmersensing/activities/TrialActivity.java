@@ -145,7 +145,6 @@ public class TrialActivity extends AppCompatActivity {
 //            Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
 //        }
 //        btManager.connectShimmerThroughBTAddress(macAdd);
-        postponeEnterTransition();
 
     }
 
