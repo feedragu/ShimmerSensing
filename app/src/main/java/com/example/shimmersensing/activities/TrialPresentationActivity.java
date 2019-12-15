@@ -3,10 +3,14 @@ package com.example.shimmersensing.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.ActivityOptionsCompat;
+import androidx.core.util.Pair;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -16,6 +20,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.transition.Explode;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -25,6 +30,8 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
@@ -34,6 +41,7 @@ import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.row;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
+import com.google.gson.Gson;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
 
 import java.text.SimpleDateFormat;
@@ -58,10 +66,19 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
     private ArrayList<ShimmerSensorDevice> shimmerSensor;
     private int currentPage;
     private ShimmerBluetoothManagerAndroid btManager;
+    private Scene scene3;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+// set an enter transition
+        getWindow().setEnterTransition(new Explode());
+// set an exit transition
+        getWindow().setExitTransition(new Explode());
+
         setContentView(R.layout.activity_trial_presentation);
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
 
@@ -76,7 +93,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
         scene2 = Scene.getSceneForLayout(rootContainer,
                 R.layout.trial_pres_2, this);
-
         scene1.enter();
 
 
@@ -109,7 +125,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
         sceneOn = 2;
         storedScene(sceneOn);
         attachAdapter();
-
 
     }
 
@@ -145,11 +160,28 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
         }
 
         @Override
-        public void onBindViewHolder(MyHolder holder, int position) {
+        public void onBindViewHolder(final MyHolder holder, int position) {
             holder.sensorname.setText(shimmerSensor.get(position).getDeviceName());
             holder.macAddress.setText(shimmerSensor.get(position).getMacAddress());
-            holder.sampleRate.setText("Sample rate: " + shimmerSensor.get(position).getSampleRate() + " Hz");
+            holder.sampleRate.setText(shimmerSensor.get(position).getSampleRate() + " Hz");
             holder.lastUse.setText(shimmerSensor.get(position).getLastUse().toString());
+            holder.sensorCard.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.sensorCard.setTransitionName("cardView");
+                    holder.sensorImageCard.setTransitionName("sensorImageCard");
+                    Pair<View, String> pair1 = Pair.create((View) holder.sensorCard, holder.sensorCard.getTransitionName());
+                    Pair<View, String> pair2 = Pair.create((View) holder.sensorImageCard, holder.sensorImageCard.getTransitionName());
+                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, pair1);
+                    Intent intent = new Intent(context, TrialActivity.class);
+                    Gson gson = new Gson();
+                    String json = gson.toJson(shimmerSensor.get(currentPage));
+                    SharedPreferences.Editor editor = pref.edit();
+                    editor.putString("shimmersensor_selected", json);
+                    editor.commit();
+                    context.startActivity(intent, optionsCompat.toBundle());
+                }
+            });
 
         }
 
@@ -161,22 +193,49 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
     }
 
-    public void pageClicked(View view) {
-        Log.i("pageclicked", "pageClicked: " + shimmerSensor.get(currentPage).toString());
+    class MyHolder extends RecyclerView.ViewHolder {
 
-        Intent intent = new Intent(this, TrialActivity.class);
-        Bundle bundle = new Bundle();
-        bundle.putSerializable("shimmersensor_selected",shimmerSensor.get(currentPage));
-        intent.putExtras(bundle);
-        startActivity(intent);
+        private CardView sensorCard;
+        private ImageView sensorImageCard;
+        private TextView sensorname;
+        private TextView macAddress;
+        private TextView sampleRate;
+        private TextView lastUse;
+
+        public MyHolder(@NonNull View itemView) {
+            super(itemView);
+            sensorCard = itemView.findViewById(R.id.sensorCard);
+            sensorImageCard = itemView.findViewById(R.id.sensorImageCard);
+            sensorname = itemView.findViewById(R.id.sensorName);
+            macAddress = itemView.findViewById(R.id.macaddress);
+            sampleRate = itemView.findViewById(R.id.sampleRate);
+            lastUse = itemView.findViewById(R.id.dateUsage);
+        }
     }
 
+//    public void pageClicked(View view) {
+//        Log.i("pageclicked", "pageClicked: " + shimmerSensor.get(currentPage).toString());
+//
+//        Intent intent = new Intent(this, TrialActivity.class);
+////        Pair<View, String> p1 = Pair.create((View)sensorname, "sensorname");
+////        Pair<View, String> p2 = Pair.create((View)macAddress, "macAddress");
+////        Pair<View, String> p3 = Pair.create((View)sampleRate, "sampleRate");
+////        ActivityOptionsCompat options = ActivityOptionsCompat.
+////                makeSceneTransitionAnimation(this, p1, p2, p3);
+//
+//        Bundle bundle = new Bundle();
+//        bundle.putSerializable("shimmersensor_selected", shimmerSensor.get(currentPage));
+////        bundle.putAll(options.toBundle());
+//        intent.putExtras(bundle);
+//        startActivity(intent);
+//    }
 
-    private void setDialog(boolean show){
+
+    private void setDialog(boolean show) {
         AlertDialog.Builder builder = new AlertDialog.Builder(TrialPresentationActivity.this);
         builder.setView(R.layout.progress_dialog);
         Dialog dialog = builder.create();
-        if (show)dialog.show();
+        if (show) dialog.show();
         else dialog.dismiss();
     }
 
@@ -184,45 +243,43 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
     @Override
     protected void onResume() {
         super.onResume();
-        sceneOn = pref.getInt("scene_on", 1);
-        Log.i("onresume", "onResume: " + sceneOn);
-        switch (sceneOn) {
-            case 1:
-                scene1.enter();
-                attachAdapter();
-                break;
-            case 2:
-                scene2.enter();
-                attachAdapter();
-                break;
-            default:
-                break;
-
-        }
+//        sceneOn = pref.getInt("scene_on", 1);
+//        Log.i("onresume", "onResume: " + sceneOn);
+//        switch (sceneOn) {
+//            case 1:
+//                scene1.enter();
+//                attachAdapter();
+//                break;
+//            case 2:
+//                scene2.enter();
+//                attachAdapter();
+//                break;
+//            default:
+//                break;
+//
+//        }
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        sceneOn = pref.getInt("scene_on", 1);
-        Log.i("onRestart", "onRestart: " + sceneOn);
+//        sceneOn = pref.getInt("scene_on", 1);
+//        Log.i("onresume", "onResume: " + sceneOn);
+//        switch (sceneOn) {
+//            case 1:
+//                scene1.enter();
+//                attachAdapter();
+//                break;
+//            case 2:
+//                scene2.enter();
+//                attachAdapter();
+//                break;
+//            default:
+//                break;
+//
+//        }
     }
 
-    class MyHolder extends RecyclerView.ViewHolder {
-
-        public TextView sensorname;
-        public TextView macAddress;
-        public TextView sampleRate;
-        public TextView lastUse;
-
-        public MyHolder(@NonNull View itemView) {
-            super(itemView);
-            sensorname = itemView.findViewById(R.id.sensorName);
-            macAddress = itemView.findViewById(R.id.macaddress);
-            sampleRate = itemView.findViewById(R.id.sampleRate);
-            lastUse = itemView.findViewById(R.id.dateUsage);
-        }
-    }
 
     private void storedScene(int scene_on) {
         SharedPreferences.Editor editor = pref.edit();
@@ -252,6 +309,25 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
                 break;
             case 2:
                 scene2.enter();
+                mPager = findViewById(R.id.pager);
+                mPager.setAdapter(new MyViewPagerAdapter(this, shimmerSensor));
+                mPager.setPageTransformer(new ZoomOutPageTransformer());
+                mPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+
+                    @Override
+                    public void onPageSelected(int position) {
+                        super.onPageSelected(position);
+                        currentPage = position;
+                    }
+                });
+                TabLayout tabLayout = findViewById(R.id.tabDots);
+                new TabLayoutMediator(tabLayout, mPager,
+                        new TabLayoutMediator.TabConfigurationStrategy() {
+                            @Override
+                            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
+                            }
+                        }).attach();
+
                 shimmerList = findViewById(R.id.bottomOptions);
                 List<row> list2 = new ArrayList<>();
                 list2.add(new row(R.drawable.settings, "Impostazioni"));
@@ -261,40 +337,13 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
                 shimmerList.setAdapter(rAdapter);
 
-                Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
-                setSupportActionBar(mToolbar);
-                getSupportActionBar().setTitle("");
-                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-                getSupportActionBar().setDisplayShowHomeEnabled(true);
+//                Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
+////                setSupportActionBar(mToolbar);
+////                getSupportActionBar().setTitle("");
+////                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+////                getSupportActionBar().setDisplayShowHomeEnabled(true);
 
-                mPager = findViewById(R.id.pager);
-                mPager.setAdapter(new MyViewPagerAdapter(this, shimmerSensor));
-                mPager.setPageTransformer(new ZoomOutPageTransformer());
-                mPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-                    @Override
-                    public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                        super.onPageScrolled(position, positionOffset, positionOffsetPixels);
-                    }
 
-                    @Override
-                    public void onPageSelected(int position) {
-                        super.onPageSelected(position);
-                        currentPage = position;
-                        Log.i("TAG", "onPageSelected: " + position);
-                    }
-
-                    @Override
-                    public void onPageScrollStateChanged(int state) {
-                        super.onPageScrollStateChanged(state);
-                    }
-                });
-                TabLayout tabLayout = (TabLayout) findViewById(R.id.tabDots);
-                new TabLayoutMediator(tabLayout, mPager,
-                        new TabLayoutMediator.TabConfigurationStrategy() {
-                            @Override
-                            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-                            }
-                        }).attach();
 
                 break;
             default:

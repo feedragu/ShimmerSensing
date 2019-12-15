@@ -189,7 +189,7 @@ public class SplashActivity extends AppCompatActivity {
                 }
 
 
-                //new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
+                new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
 
             }
 

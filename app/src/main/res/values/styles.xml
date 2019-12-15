@@ -7,6 +7,7 @@
         <item name="colorPrimary">@color/colorPrimary</item>
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
+        <item name="colorSecondary">@color/black</item>
         <item name="android:windowActivityTransitions">true</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="windowActionBar">false</item>
@@ -15,6 +16,16 @@
         <item name="android:windowBackground">@android:color/white</item>
         <item name="android:colorBackgroundCacheHint">@null</item>
         <item name="android:listDivider">@drawable/horizontal_divider</item>
+        <item name="android:textColor">#DA000000</item>
+        <item name="android:textSize">14sp</item>
+        <!-- specify enter and exit transitions -->
+        <!-- options are: explode, slide, fade -->
+
+        <!-- specify shared element transitions -->
+        <item name="android:windowSharedElementEnterTransition">
+            @transition/trial_presentation_transition</item>
+        <item name="android:windowSharedElementExitTransition">
+            @transition/trial_presentation_transition</item>
 
     </style>
 

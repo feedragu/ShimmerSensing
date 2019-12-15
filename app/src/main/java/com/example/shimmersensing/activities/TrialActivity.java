@@ -1,6 +1,7 @@
 package com.example.shimmersensing.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -11,8 +12,12 @@ import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.transition.Explode;
+import android.transition.Fade;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,8 +25,10 @@ import android.widget.Toast;
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
+import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
+import com.google.gson.reflect.TypeToken;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
@@ -41,6 +48,7 @@ import com.shimmerresearch.driver.ShimmerDevice;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import static com.example.shimmersensing.activities.ShimmerSpec.LOG_TAG;
 
@@ -77,15 +85,56 @@ public class TrialActivity extends AppCompatActivity {
     private TextView sampling_text, overlap_text;
     private SharedPreferences pref;
     private int sampling_time_progress, overlap_time_progress;
-    private ArrayList<ShimmerData> list;
+    private ArrayList<ShimmerData> shimmerData;
+    private List<ShimmerTrial> shimmerTrial;
+    private CardView sensorCard;
+    private ImageView sensorImageCard;
+    private TextView sensorname;
+    private TextView macAddress;
+    private TextView sampleRateSensor;
+    private TextView lastUse;
+    private ShimmerSensorDevice shimmerSensor;
 
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+
         setContentView(R.layout.activity_trial_recap);
 
-        ShimmerSensorDevice shimmerSensor = (ShimmerSensorDevice) getIntent().getExtras().getSerializable("shimmersensor_selected");
+// set an enter transition
+        getWindow().setEnterTransition(new Explode());
+// set an exit transition
+        getWindow().setExitTransition(new Fade());
+
+
+        //ShimmerSensorDevice shimmerSensor = (ShimmerSensorDevice) getIntent().getExtras().getSerializable("shimmersensor_selected");
+        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
+
+        Gson gson = new Gson();
+        String response = pref.getString("shimmertrial", "");
+        shimmerTrial = gson.fromJson(response,
+                new TypeToken<List<ShimmerTrial>>() {
+                }.getType());
+
+        String json = pref.getString("shimmersensor_selected", "");
+        shimmerSensor = gson.fromJson(json, ShimmerSensorDevice.class);
+
+        Log.i("listsize", "onCreate: " + shimmerTrial.size());
+
+        sensorname = findViewById(R.id.sensorName);
+        macAddress = findViewById(R.id.macaddress);
+        sampleRateSensor = findViewById(R.id.sampleRate);
+        lastUse = findViewById(R.id.dateUsage);
+        sensorname.setText(shimmerSensor.getDeviceName());
+        macAddress.setText(shimmerSensor.getMacAddress());
+        sampleRateSensor.setText(shimmerSensor.getSampleRate()+" Hz");
+        lastUse.setText(shimmerSensor.getLastUse().toString());
+
+
+
 //
 //        String macAdd = shimmerSensor.getMacAddress();
 //
@@ -96,6 +145,8 @@ public class TrialActivity extends AppCompatActivity {
 //            Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
 //        }
 //        btManager.connectShimmerThroughBTAddress(macAdd);
+        postponeEnterTransition();
+
     }
 
 
@@ -274,7 +325,7 @@ public class TrialActivity extends AppCompatActivity {
                         ShimmerData s = new ShimmerData(dataPPG, gsrConductance, accel_x,
                                 accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
                                 magnetometer_x, magnetometer_y, magnetometer_z, tsLong);
-                        list.add(s);
+                        shimmerData.add(s);
 
                     }
                     break;
@@ -310,16 +361,16 @@ public class TrialActivity extends AppCompatActivity {
 //                                        public void run() {
 //                                            SharedPreferences.Editor editor = pref.edit();
 //                                            Gson gson = new Gson();
-//                                            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+//                                            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(shimmerData);
 //                                            Log.i("prova_json", "run: " + jsonElements);
 //                                            editor.putString("shimmerdata", String.valueOf(jsonElements));
 //                                            editor.apply();
 ////                                            try {
 ////                                                new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
 ////
-////                                                Log.i("im sending 2", "run: send " + list.size());
+////                                                Log.i("im sending 2", "run: send " + shimmerData.size());
 ////                                                list.clear();
-////                                                Log.i("im sending 3", "run: send " + list.size());
+////                                                Log.i("im sending 3", "run: send " + shimmerData.size());
 ////                                            } catch (Exception e) {
 ////                                                e.printStackTrace();
 ////                                            }

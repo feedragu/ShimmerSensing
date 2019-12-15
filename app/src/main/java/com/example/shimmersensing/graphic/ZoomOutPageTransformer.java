@@ -5,8 +5,8 @@ import android.view.View;
 import androidx.viewpager2.widget.ViewPager2;
 
 public class ZoomOutPageTransformer implements ViewPager2.PageTransformer {
-    private static final float MIN_SCALE = 0.85f;
-    private static final float MIN_ALPHA = 0.5f;
+    private static final float MIN_SCALE = 0.90f;
+    private static final float MIN_ALPHA = 0.6f;
 
     public void transformPage(View view, float position) {
         int pageWidth = view.getWidth();
