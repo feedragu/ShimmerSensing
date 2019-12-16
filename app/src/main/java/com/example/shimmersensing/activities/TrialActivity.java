@@ -1,7 +1,11 @@
 package com.example.shimmersensing.activities;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.app.AlertDialog;
 import android.app.Dialog;
@@ -14,7 +18,11 @@ import android.os.Handler;
 import android.os.Message;
 import android.transition.Explode;
 import android.transition.Fade;
+import android.transition.Transition;
+import android.transition.TransitionInflater;
+import android.transition.TransitionManager;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,11 +31,12 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.adapter.RecyclerAdapter;
+import com.example.shimmersensing.adapter.TrialRecyclerAdapter;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
@@ -36,7 +45,6 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.shimmerresearch.algorithms.Filter;
 import com.shimmerresearch.android.Shimmer;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
-import com.shimmerresearch.biophysicalprocessing.ECGtoHRAdaptive;
 import com.shimmerresearch.biophysicalprocessing.PPGtoHRAlgorithm;
 import com.shimmerresearch.biophysicalprocessing.PPGtoHRwithHRV;
 import com.shimmerresearch.bluetooth.ShimmerBluetooth;
@@ -50,9 +58,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-import static com.example.shimmersensing.activities.ShimmerSpec.LOG_TAG;
-
-public class TrialActivity extends AppCompatActivity {
+public class TrialActivity extends AppCompatActivity implements TrialRecyclerAdapter.OnShimmerListener {
 
     private ShimmerBluetoothManagerAndroid btManager;
     private Filter mLPFilter;
@@ -94,6 +100,8 @@ public class TrialActivity extends AppCompatActivity {
     private TextView sampleRateSensor;
     private TextView lastUse;
     private ShimmerSensorDevice shimmerSensor;
+    private TrialRecyclerAdapter rAdapter;
+    private RecyclerView shimmerTrialRecycler;
 
 
     @Override
@@ -104,10 +112,12 @@ public class TrialActivity extends AppCompatActivity {
 
         setContentView(R.layout.activity_trial_recap);
 
+        Transition enter = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial);
+        Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial_exit);
 // set an enter transition
-        getWindow().setEnterTransition(new Explode());
+        getWindow().setEnterTransition(enter);
 // set an exit transition
-        getWindow().setExitTransition(new Fade());
+        getWindow().setExitTransition(exit);
 
 
         //ShimmerSensorDevice shimmerSensor = (ShimmerSensorDevice) getIntent().getExtras().getSerializable("shimmersensor_selected");
@@ -124,16 +134,34 @@ public class TrialActivity extends AppCompatActivity {
 
         Log.i("listsize", "onCreate: " + shimmerTrial.size());
 
+        shimmerTrialRecycler = findViewById(R.id.recyclerTrial);
+
         sensorname = findViewById(R.id.sensorName);
         macAddress = findViewById(R.id.macaddress);
         sampleRateSensor = findViewById(R.id.sampleRate);
         lastUse = findViewById(R.id.dateUsage);
         sensorname.setText(shimmerSensor.getDeviceName());
         macAddress.setText(shimmerSensor.getMacAddress());
-        sampleRateSensor.setText(shimmerSensor.getSampleRate()+" Hz");
+        sampleRateSensor.setText(shimmerSensor.getSampleRate() + " Hz");
         lastUse.setText(shimmerSensor.getLastUse().toString());
 
+        RecyclerView.LayoutManager recyce = new
+                LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyce.setAutoMeasureEnabled(true);
+        shimmerTrialRecycler.setLayoutManager(recyce);
+        shimmerTrialRecycler.setNestedScrollingEnabled(false);
 
+        rAdapter = new TrialRecyclerAdapter(TrialActivity.this, shimmerTrial, this);
+        DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerTrialRecycler.getContext(), DividerItemDecoration.VERTICAL);
+        shimmerTrialRecycler.addItemDecoration(itemDecor);
+        shimmerTrialRecycler.setAdapter(rAdapter);
+
+
+        Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setTitle("");
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 //
 //        String macAdd = shimmerSensor.getMacAddress();
@@ -146,6 +174,18 @@ public class TrialActivity extends AppCompatActivity {
 //        }
 //        btManager.connectShimmerThroughBTAddress(macAdd);
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finishAfterTransition();
+                return true;
+
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 
@@ -427,4 +467,8 @@ public class TrialActivity extends AppCompatActivity {
         }
     });
 
+    @Override
+    public void onShimmerClick(int position) {
+
+    }
 }

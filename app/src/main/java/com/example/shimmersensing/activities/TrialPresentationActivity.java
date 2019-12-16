@@ -3,21 +3,14 @@ package com.example.shimmersensing.activities;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.core.app.ActivityOptionsCompat;
-import androidx.core.util.Pair;
 import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.transition.Explode;
@@ -26,32 +19,25 @@ import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.adapter.MyViewPagerAdapter;
 import com.example.shimmersensing.graphic.ZoomOutPageTransformer;
-import com.example.shimmersensing.utilities.RecyclerAdapter;
+import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.row;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
-import com.google.gson.Gson;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Set;
-
-import static com.example.shimmersensing.activities.ShimmerSpec.LOG_TAG;
-import static com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog.EXTRA_DEVICE_ADDRESS;
 
 public class TrialPresentationActivity extends AppCompatActivity implements RecyclerAdapter.OnShimmerListener {
 
@@ -74,10 +60,12 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
         super.onCreate(savedInstanceState);
 
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+        Transition enter = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial);
+        Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial_exit);
 // set an enter transition
-        getWindow().setEnterTransition(new Explode());
+        getWindow().setEnterTransition(enter);
 // set an exit transition
-        getWindow().setExitTransition(new Explode());
+        getWindow().setExitTransition(exit);
 
         setContentView(R.layout.activity_trial_presentation);
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
@@ -131,7 +119,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
     @Override
     public void onShimmerClick(int position) {
-
+        Log.i("dsds", "onShimmerClick: " + position);
     }
 
     public void addDevice(View view) {
@@ -142,76 +130,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
     }
 
-
-    public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
-
-        private Context context;
-        private ArrayList<ShimmerSensorDevice> shimmerSensor;
-
-        public MyViewPagerAdapter(Context context, ArrayList<ShimmerSensorDevice> shimmerSensor) {
-            this.context = context;
-            this.shimmerSensor = shimmerSensor;
-        }
-
-        @NonNull
-        @Override
-        public MyHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            return new MyHolder(LayoutInflater.from(context).inflate(R.layout.fragment_screen_slide_page, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(final MyHolder holder, int position) {
-            holder.sensorname.setText(shimmerSensor.get(position).getDeviceName());
-            holder.macAddress.setText(shimmerSensor.get(position).getMacAddress());
-            holder.sampleRate.setText(shimmerSensor.get(position).getSampleRate() + " Hz");
-            holder.lastUse.setText(shimmerSensor.get(position).getLastUse().toString());
-            holder.sensorCard.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    holder.sensorCard.setTransitionName("cardView");
-                    holder.sensorImageCard.setTransitionName("sensorImageCard");
-                    Pair<View, String> pair1 = Pair.create((View) holder.sensorCard, holder.sensorCard.getTransitionName());
-                    Pair<View, String> pair2 = Pair.create((View) holder.sensorImageCard, holder.sensorImageCard.getTransitionName());
-                    ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, pair1);
-                    Intent intent = new Intent(context, TrialActivity.class);
-                    Gson gson = new Gson();
-                    String json = gson.toJson(shimmerSensor.get(currentPage));
-                    SharedPreferences.Editor editor = pref.edit();
-                    editor.putString("shimmersensor_selected", json);
-                    editor.commit();
-                    context.startActivity(intent, optionsCompat.toBundle());
-                }
-            });
-
-        }
-
-        @Override
-        public int getItemCount() {
-            return shimmerSensor.size();
-        }
-
-
-    }
-
-    class MyHolder extends RecyclerView.ViewHolder {
-
-        private CardView sensorCard;
-        private ImageView sensorImageCard;
-        private TextView sensorname;
-        private TextView macAddress;
-        private TextView sampleRate;
-        private TextView lastUse;
-
-        public MyHolder(@NonNull View itemView) {
-            super(itemView);
-            sensorCard = itemView.findViewById(R.id.sensorCard);
-            sensorImageCard = itemView.findViewById(R.id.sensorImageCard);
-            sensorname = itemView.findViewById(R.id.sensorName);
-            macAddress = itemView.findViewById(R.id.macaddress);
-            sampleRate = itemView.findViewById(R.id.sampleRate);
-            lastUse = itemView.findViewById(R.id.dateUsage);
-        }
-    }
 
 //    public void pageClicked(View view) {
 //        Log.i("pageclicked", "pageClicked: " + shimmerSensor.get(currentPage).toString());
@@ -296,7 +214,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
                 List<row> list = new ArrayList<>();
                 list.add(new row(R.drawable.settings, "Impostazioni"));
-                list.add(new row(R.drawable.walking, "Trial description"));
+                list.add(new row(R.drawable.camminata, "Trial description"));
                 rAdapter = new RecyclerAdapter(this, list, this);
                 DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerList.getContext(), DividerItemDecoration.VERTICAL);
                 shimmerList.addItemDecoration(itemDecor);
@@ -337,12 +255,11 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
                 shimmerList.setAdapter(rAdapter);
 
-//                Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
-////                setSupportActionBar(mToolbar);
-////                getSupportActionBar().setTitle("");
-////                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
-////                getSupportActionBar().setDisplayShowHomeEnabled(true);
-
+                Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
+                setSupportActionBar(mToolbar);
+                getSupportActionBar().setTitle("");
+                getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+                getSupportActionBar().setDisplayShowHomeEnabled(true);
 
 
                 break;
@@ -388,6 +305,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
         }
     }
+
 
     @Override
     protected void onDestroy() {

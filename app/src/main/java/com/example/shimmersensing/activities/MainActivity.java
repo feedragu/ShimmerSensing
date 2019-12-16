@@ -19,7 +19,7 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import com.example.shimmersensing.R;
-import com.example.shimmersensing.utilities.RecyclerAdapter;
+import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.utilities.row;
 
 import java.util.ArrayList;

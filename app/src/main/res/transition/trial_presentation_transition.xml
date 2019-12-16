@@ -12,6 +12,7 @@
         <targets>
             <target android:targetId="@id/oppureText" />
             <target android:targetId="@id/sensorisalvatiText" />
+            <target android:excludeId="@id/toolbar_shimmer"/>
         </targets>
     </fade>
 
@@ -19,6 +20,10 @@
         android:duration="325"
         android:interpolator="@anim/custom_overshoot_interpolator"
         android:startOffset="2">
+        <targets>
+
+            <target android:excludeId="@id/toolbar_shimmer"/>
+        </targets>
     </changeBounds>
 
 
