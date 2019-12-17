@@ -159,7 +159,7 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
 
         Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
         setSupportActionBar(mToolbar);
-        getSupportActionBar().setTitle("");
+        getSupportActionBar().setTitle("Riepilogo Trial");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
 
@@ -180,6 +180,7 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                getSupportActionBar().setTitle("");
                 finishAfterTransition();
                 return true;
 
@@ -188,6 +189,12 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
         }
     }
 
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        getSupportActionBar().setTitle("");
+        finishAfterTransition();
+    }
 
     private void setDialog(boolean show) {
         AlertDialog.Builder builder = new AlertDialog.Builder(TrialActivity.this);

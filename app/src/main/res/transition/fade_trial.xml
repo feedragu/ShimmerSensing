@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<transitionSet xmlns:android="http://schemas.android.com/apk/res/android"
+    android:transitionOrdering="together">
+
+    <fade android:duration="250">
+        <targets>
+            <target android:excludeId="@id/toolbar_shimmer" />
+            <target android:excludeId="@id/trialrecapText" />
+            <target android:excludeId="@id/sensorrecapText" />
+        </targets>
+    </fade>
+</transitionSet>

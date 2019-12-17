@@ -39,8 +39,12 @@ public class SplashActivity extends AppCompatActivity {
 
         ImageView shimm_logo = findViewById(R.id.shimmerlogo);
         shimm_logo.setAnimation(AnimationUtils.loadAnimation(this, R.anim.zoom_in));
-
-        new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/get");
+        try {
+            new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/get");
+            Log.i("pippobaudo", "onCreate: ");
+        } catch (Exception e) {
+            Log.i("pippobaudoerror", "onCreate: ");
+        }
 
     }
 
@@ -62,29 +66,43 @@ public class SplashActivity extends AppCompatActivity {
             try {
 
                 httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
+
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoOutput(true);
+                httpURLConnection.setConnectTimeout(2000);
+
                 try {
-                    InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
-                    InputStreamReader inputStreamReader = new InputStreamReader(in);
-//
-                    int inputStreamData = inputStreamReader.read();
-                    while (inputStreamData != -1) {
-                        char current = (char) inputStreamData;
-                        inputStreamData = inputStreamReader.read();
-                        data.append(current);
+                    Log.e("trycatch", "onCreate: ");
+                    if(httpURLConnection.getInputStream() != null) {
+                        InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
+
+                        InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+                        int inputStreamData = inputStreamReader.read();
+                        while (inputStreamData != -1) {
+                            char current = (char) inputStreamData;
+                            inputStreamData = inputStreamReader.read();
+                            data.append(current);
+                        }
+                    }else {
+
                     }
                 } catch (Exception e) {
+
                     e.printStackTrace();
+
                 }
 
                 Log.i("shimmer", "doInBackground: " + data.toString());
             } catch (Exception e) {
                 e.printStackTrace();
+                Log.i("caccapupu", "onCreate: ");
+
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
                 }
+
             }
 
             return data.toString();
@@ -93,15 +111,16 @@ public class SplashActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
+            Log.i("pippobaudoerrorOnPost", "onCreate: ");
             ArrayList<ShimmerData> list = new ArrayList<>();
             String jsonDB = result;
-            Log.i(" ca", "onPostExecute: "+jsonDB);
-            if(jsonDB.equals("")) {
+            Log.i(" ca", "onPostExecute: " + jsonDB);
+            if (jsonDB.equals("")) {
                 goAhead();
             }
             if (jsonDB.contains("trial")) {
 
-                shimmertrial=new ArrayList<>();
+                shimmertrial = new ArrayList<>();
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
                 String shimmer_name;

@@ -61,7 +61,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
 
         getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         Transition enter = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial);
-        Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial_exit);
+        Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.fade_trial);
 // set an enter transition
         getWindow().setEnterTransition(enter);
 // set an exit transition
@@ -90,20 +90,21 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
         storedScene(sceneOn);
         attachAdapter();
 
-        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+//        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
 
         shimmerSensor = new ArrayList<ShimmerSensorDevice>();
 
 
         Calendar c = Calendar.getInstance();
-
-
-        for (BluetoothDevice bt : pairedDevices) {
-            if (bt.getName().contains("Shimmer")) {
-                shimmerSensor.add(new ShimmerSensorDevice(bt.getName(), bt.getAddress(), 128.5, c.getTime()));
-            }
-        }
+        shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
+        shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
+//
+//        for (BluetoothDevice bt : pairedDevices) {
+//            if (bt.getName().contains("Shimmer")) {
+//                shimmerSensor.add(new ShimmerSensorDevice(bt.getName(), bt.getAddress(), 128.5, c.getTime()));
+//            }
+//        }
 
 
     }
