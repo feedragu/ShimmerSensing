@@ -28,14 +28,12 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
         this.mContext = mContext;
         this.shimmerTrial = shimmerTrial;
         this.mOnShimmerListener=mOnShimmerListener;
-        Log.i("cacczo", "onBindViewHolder: ");
     }
 
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view= LayoutInflater.from(mContext).inflate(R.layout.trial_row_item, parent, false);
-        Log.i("cacczo", "onCreateViewHolder: ");
         return new ImageViewHolder(view, mOnShimmerListener);
     }
 
@@ -47,7 +45,7 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
                 .into(holder.trialImage);
         holder.trialName.setText(shimmerTrial.get(position).getTrialName());
         holder.trialDuration.setText(shimmerTrial.get(position).getTrialDuration());
-        holder.nDomande.setText(shimmerTrial.get(position).getN_domande());
+        holder.nDomande.setText(""+shimmerTrial.get(position).getN_domande().size());
 
     }
 

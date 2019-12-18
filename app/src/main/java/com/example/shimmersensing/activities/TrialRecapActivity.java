@@ -191,7 +191,7 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         }
     }
 
-    public void startTrial(View view ) {
+    public void startTrial(View view) {
         Intent intent = new Intent(this, ShimmerTrialActivity.class);
         startActivity(intent);
     }

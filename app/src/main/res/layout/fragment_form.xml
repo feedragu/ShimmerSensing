@@ -1,33 +1,16 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/introductionContainer"
+    android:id="@+id/formContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.shimmersensing.fragment.IntroductionFragment" >
+    tools:context="com.example.shimmersensing.fragment.FormFragment" >
 
-    <TextView
-        android:id="@+id/textView18"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Benvenuto in questo trial"
-        android:textAllCaps="true"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView19"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
-
-    <TextView
-        android:id="@+id/textView19"
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/formList"
         android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="32dp"
-        android:layout_marginEnd="32dp"
-        android:gravity="center"
-        android:text="Sarai sottoposto a dei task da eseguire in un determinato tempo, dopodichè ti verrà chiesto di compilare un questionario"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toBottomOf="parent"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toTopOf="@+id/guideline10"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -40,13 +23,12 @@
         android:backgroundTint="#FFFFFF"
         android:drawablePadding="5dp"
         android:elevation="2dp"
-        android:onClick="startTrial"
         android:paddingLeft="35dp"
         android:paddingTop="15dp"
         android:paddingRight="35dp"
         android:paddingBottom="15dp"
-        android:text="Inizia trial"
         android:stateListAnimator="@anim/pressed_button"
+        android:text="Invia form"
         android:textColor="@color/colorPrimary"
         android:textSize="17sp"
         android:textStyle="normal"
@@ -54,10 +36,16 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView19"
+        app:layout_constraintTop_toBottomOf="@+id/formList"
         app:rippleColor="#33AAAAAA"
         app:strokeColor="@color/colorPrimary"
         app:strokeWidth="2dp" />
 
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideline10"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        app:layout_constraintGuide_percent="0.8" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

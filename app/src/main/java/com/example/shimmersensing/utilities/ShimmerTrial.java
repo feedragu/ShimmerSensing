@@ -1,17 +1,19 @@
 package com.example.shimmersensing.utilities;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 
 public class ShimmerTrial implements Serializable {
 
     private String trialName, mode;
-    private String n_domande, trialDuration;
+    private String trialDuration;
+    private ArrayList<QuestionTrial> domande;
 
-    public ShimmerTrial(String trialName, String trialDuration, String mode, String n_domande) {
+    public ShimmerTrial(String trialName, String trialDuration, String mode, ArrayList<QuestionTrial> domande) {
         this.trialName = trialName;
         this.trialDuration = trialDuration;
         this.mode = mode;
-        this.n_domande = n_domande;
+        this.domande = domande;
     }
 
     public String getTrialName() {
@@ -26,7 +28,7 @@ public class ShimmerTrial implements Serializable {
         return mode;
     }
 
-    public String getN_domande() {
-        return n_domande;
+    public ArrayList<QuestionTrial> getN_domande() {
+        return domande;
     }
 }

@@ -232,7 +232,7 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/buttonPauseStart"
+                android:id="@+id/startTrial"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -246,7 +246,7 @@
                 android:paddingTop="15dp"
                 android:paddingRight="35dp"
                 android:paddingBottom="15dp"
-                android:text="Inizia test"
+                android:text="Carica Test"
                 android:textColor="@color/colorPrimary"
                 android:textSize="16sp"
                 android:textStyle="normal"

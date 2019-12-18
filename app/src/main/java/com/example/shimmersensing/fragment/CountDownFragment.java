@@ -16,7 +16,6 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
@@ -91,7 +90,7 @@ public class CountDownFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        return inflater.inflate(R.layout.fragment_questionary, container, false);
+        return inflater.inflate(R.layout.fragment_countdown, container, false);
     }
 
     @Override
@@ -99,7 +98,7 @@ public class CountDownFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-        fButton = getView().findViewById(R.id.buttonPauseStart);
+        fButton = getView().findViewById(R.id.buttonSendForm);
         final AnimationDrawable ad= (AnimationDrawable) fButton.getIcon();
         fButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -110,14 +109,14 @@ public class CountDownFragment extends Fragment {
                     isRunning = false;
                     Log.i(TAG, "stopPlay: ");
                     if (mListener != null) {
-                        mListener.onFragmentInteraction();
+                        mListener.onFragmentInteraction(2);
                     }
                     timerPause();
                 }else {
                     Log.i(TAG, "resumePlay: ");
                     timerResume();
                     if (mListener != null) {
-                        mListener.onFragmentInteraction();
+                        mListener.onFragmentInteraction(1);
                     }
                 }
             }
@@ -178,6 +177,18 @@ public class CountDownFragment extends Fragment {
 
             public void onFinish() {
                 textPercentage.setText("done!");
+                new CountDownTimer(2000, 1000) {
+
+                    public void onTick(long millisUntilFinished) {
+                    }
+
+                    public void onFinish() {
+                        if (mListener != null) {
+                            mListener.onFragmentInteraction(3);
+                        }
+                    }
+
+                }.start();
                 isRunning = false;
             }
 
@@ -214,6 +225,6 @@ public class CountDownFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteraction();
+        void onFragmentInteraction(int event);
     }
 }

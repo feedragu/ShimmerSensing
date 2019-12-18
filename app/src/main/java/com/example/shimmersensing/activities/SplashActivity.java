@@ -12,6 +12,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.utilities.QuestionTrial;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
@@ -126,16 +127,22 @@ public class SplashActivity extends AppCompatActivity {
                 String shimmer_name;
                 String shimmer_mode;
                 String mode;
-                String domande;
+                JSONArray domande;
+
                 try {
                     JSONArray jarray = new JSONArray(jsonDB);
                     for (int j = 0; j < jarray.length(); j++) {
+                        ArrayList<QuestionTrial> aQuest=new ArrayList<>();
                         JSONObject curr = jarray.getJSONObject(j);
                         shimmer_name = curr.getString("trial_name");
                         shimmer_mode = curr.getString("trial_duration");
                         mode = curr.getString("mode");
-                        domande = curr.getString("n_domande");
-                        ShimmerTrial s = new ShimmerTrial(shimmer_name, shimmer_mode, mode, domande);
+                        domande = curr.getJSONArray("n_domande");
+                        for (int k = 0; k < domande.length(); k++) {
+                            JSONObject question = domande.getJSONObject(k);
+                            aQuest.add(new QuestionTrial(question.getString("sheet_name"), question.getString("domanda"), question.getInt("range")));
+                        }
+                        ShimmerTrial s = new ShimmerTrial(shimmer_name, shimmer_mode, mode, aQuest);
                         shimmertrial.add(s);
 
                     }
