@@ -111,7 +111,7 @@ public class SplashActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(String result) {
             super.onPostExecute(result);
-            Log.i("pippobaudoerrorOnPost", "onCreate: ");
+
             ArrayList<ShimmerData> list = new ArrayList<>();
             String jsonDB = result;
             Log.i(" ca", "onPostExecute: " + jsonDB);
@@ -140,6 +140,7 @@ public class SplashActivity extends AppCompatActivity {
 
                     }
                 } catch (JSONException e) {
+                    Log.i("pippobaudoerrorOnPost", "onCreate: ");
                     e.printStackTrace();
                 }
 
@@ -190,25 +191,29 @@ public class SplashActivity extends AppCompatActivity {
                         list.add(s);
 
                     }
+
+                    try {
+                        SharedPreferences.Editor editor = pref.edit();
+                        Gson gson = new Gson();
+                        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
+                        Log.i("prova_json", "run: " + jsonElements);
+                        editor.putString("shimmerdata", String.valueOf(jsonElements));
+                        editor.apply();
+
+                        Log.i("TAG", String.valueOf(list.size()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+
+                    new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
+
                 } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-
-                try {
-                    SharedPreferences.Editor editor = pref.edit();
-                    Gson gson = new Gson();
-                    JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-                    Log.i("prova_json", "run: " + jsonElements);
-                    editor.putString("shimmerdata", String.valueOf(jsonElements));
-                    editor.apply();
-
-                    Log.i("TAG", String.valueOf(list.size()));
-                } catch (Exception e) {
+                    Log.i("pippobaudoerrorOnPost", "onCreate: ");
                     e.printStackTrace();
                 }
 
 
-                new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
 
             }
 

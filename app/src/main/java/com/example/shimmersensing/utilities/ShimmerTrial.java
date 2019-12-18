@@ -1,6 +1,8 @@
 package com.example.shimmersensing.utilities;
 
-public class ShimmerTrial {
+import java.io.Serializable;
+
+public class ShimmerTrial implements Serializable {
 
     private String trialName, mode;
     private String n_domande, trialDuration;

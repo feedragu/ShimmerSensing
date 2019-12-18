@@ -7,19 +7,17 @@ import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.cardview.widget.CardView;
 import androidx.core.app.ActivityOptionsCompat;
 import androidx.core.util.Pair;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shimmersensing.R;
-import com.example.shimmersensing.activities.TrialActivity;
+import com.example.shimmersensing.activities.TrialRecapActivity;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.google.gson.Gson;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -46,6 +44,11 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
         holder.macAddress.setText(shimmerSensor.get(position).getMacAddress());
         holder.sampleRate.setText(shimmerSensor.get(position).getSampleRate() + " Hz");
         holder.lastUse.setText(shimmerSensor.get(position).getLastUse().toString());
+
+        Picasso.get()
+                .load(R.drawable.shimmer_sensor)
+                .into(holder.sensorImageCard);
+
         holder.sensorCard.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -54,7 +57,7 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
                 Pair<View, String> pair1 = Pair.create((View) holder.sensorCard, holder.sensorCard.getTransitionName());
                 Pair<View, String> pair2 = Pair.create((View) holder.sensorImageCard, holder.sensorImageCard.getTransitionName());
                 ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, pair1);
-                Intent intent = new Intent(context, TrialActivity.class);
+                Intent intent = new Intent(context, TrialRecapActivity.class);
                 Gson gson = new Gson();
                 String json = gson.toJson(shimmerSensor.get(position));
                 pref = context.getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode

@@ -9,21 +9,6 @@
     android:layout_height="match_parent"
     tools:context="com.example.shimmersensing.activities.TrialPresentationActivity">
 
-    <androidx.appcompat.widget.Toolbar
-        android:id="@+id/toolbar_shimmer"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="#FFF"
-        android:minHeight="?attr/actionBarSize"
-        android:theme="@style/ToolBarTheme"
-        android:transitionName="toolbar_shimmer"
-        app:layout_constraintBottom_toTopOf="@+id/ivImage"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0" />
-
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -247,7 +232,7 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/connectDevice"
+                android:id="@+id/buttonPauseStart"
                 style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -256,6 +241,7 @@
                 android:layout_marginBottom="20dp"
                 android:drawablePadding="5dp"
                 android:foregroundGravity="center_vertical"
+                android:onClick="startTrial"
                 android:paddingLeft="35dp"
                 android:paddingTop="15dp"
                 android:paddingRight="35dp"
@@ -276,6 +262,21 @@
 
         </LinearLayout>
     </ScrollView>
+
+    <androidx.appcompat.widget.Toolbar
+        android:id="@+id/toolbar_shimmer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="#FFF"
+        android:minHeight="?attr/actionBarSize"
+        android:theme="@style/ToolBarTheme"
+        android:transitionName="toolbar_shimmer"
+        app:layout_constraintBottom_toTopOf="@+id/ivImage"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>
 

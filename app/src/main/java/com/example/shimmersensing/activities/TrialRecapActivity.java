@@ -11,6 +11,7 @@ import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.os.Bundle;
@@ -23,6 +24,7 @@ import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
 import android.util.Log;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -58,7 +60,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
-public class TrialActivity extends AppCompatActivity implements TrialRecyclerAdapter.OnShimmerListener {
+public class TrialRecapActivity extends AppCompatActivity implements TrialRecyclerAdapter.OnShimmerListener {
 
     private ShimmerBluetoothManagerAndroid btManager;
     private Filter mLPFilter;
@@ -147,11 +149,11 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
 
         RecyclerView.LayoutManager recyce = new
                 LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-        recyce.setAutoMeasureEnabled(true);
+
         shimmerTrialRecycler.setLayoutManager(recyce);
         shimmerTrialRecycler.setNestedScrollingEnabled(false);
 
-        rAdapter = new TrialRecyclerAdapter(TrialActivity.this, shimmerTrial, this);
+        rAdapter = new TrialRecyclerAdapter(TrialRecapActivity.this, shimmerTrial, this);
         DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerTrialRecycler.getContext(), DividerItemDecoration.VERTICAL);
         shimmerTrialRecycler.addItemDecoration(itemDecor);
         shimmerTrialRecycler.setAdapter(rAdapter);
@@ -189,6 +191,11 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
         }
     }
 
+    public void startTrial(View view ) {
+        Intent intent = new Intent(this, ShimmerTrialActivity.class);
+        startActivity(intent);
+    }
+
     @Override
     public void onBackPressed() {
         super.onBackPressed();
@@ -197,7 +204,7 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
     }
 
     private void setDialog(boolean show) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(TrialActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(TrialRecapActivity.this);
         builder.setView(R.layout.progress_dialog);
         Dialog dialog = builder.create();
         if (show) dialog.show();
@@ -453,7 +460,7 @@ public class TrialActivity extends AppCompatActivity implements TrialRecyclerAda
                         case DISCONNECTED:
                             if (nDialog.isShowing()) {
                                 nDialog.dismiss();
-                                new AlertDialog.Builder(TrialActivity.this)
+                                new AlertDialog.Builder(TrialRecapActivity.this)
                                         .setTitle("Error")
                                         .setMessage("Shimmer sensor is not connected")
                                         .setPositiveButton("Ok", new DialogInterface.OnClickListener() {

@@ -48,5 +48,6 @@ dependencies {
     implementation 'androidx.legacy:legacy-support-v4:1.0.0'
     implementation 'com.google.android.material:material:1.2.0-alpha02'
     implementation 'ShimmerAndroidInstrumentDriver:ShimmerAndroidInstrumentDriver:3.0.64Beta'
-
+    implementation 'com.github.bmarrdev:android-DecoView-charting:v0.9.3'
+    implementation 'com.squareup.picasso:picasso:2.71828'
 }

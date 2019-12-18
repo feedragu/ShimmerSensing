@@ -30,7 +30,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.TrialActivity"></activity>
+        <activity android:name=".activities.TrialRecapActivity" />
         <activity android:name=".activities.TrialPresentationActivity" />
         <activity
             android:name=".activities.SplashActivity"

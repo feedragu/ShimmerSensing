@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.example.shimmersensing.utilities.row;
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
@@ -41,7 +42,9 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         int resourceImage = mContext.getResources().getIdentifier(shimmerTrial.get(position).getTrialName(), "drawable", mContext.getPackageName());
-        holder.trialImage.setImageResource(resourceImage);
+        Picasso.get()
+                .load(resourceImage)
+                .into(holder.trialImage);
         holder.trialName.setText(shimmerTrial.get(position).getTrialName());
         holder.trialDuration.setText(shimmerTrial.get(position).getTrialDuration());
         holder.nDomande.setText(shimmerTrial.get(position).getN_domande());
@@ -61,10 +64,9 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
 
         public ImageViewHolder(@NonNull View itemView, OnShimmerListener onShimmerListener) {
             super(itemView);
-            Log.i("dsdsd", "onBindViewHolder: ");
             this.onShimmerListener=onShimmerListener;
             itemView.setOnClickListener(this);
-            trialImage = (ImageView) itemView.findViewById(R.id.trialImage);
+            trialImage = itemView.findViewById(R.id.trialImage);
             trialName= itemView.findViewById(R.id.trialName);
             trialDuration= itemView.findViewById(R.id.trialDuration);
             nDomande= itemView.findViewById(R.id.nDomande);

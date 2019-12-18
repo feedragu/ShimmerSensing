@@ -90,21 +90,22 @@ public class TrialPresentationActivity extends AppCompatActivity implements Recy
         storedScene(sceneOn);
         attachAdapter();
 
-//        BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//        Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
-
+        Calendar c = Calendar.getInstance();
         shimmerSensor = new ArrayList<ShimmerSensorDevice>();
 
-
-        Calendar c = Calendar.getInstance();
-        shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
-        shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
-//
-//        for (BluetoothDevice bt : pairedDevices) {
-//            if (bt.getName().contains("Shimmer")) {
-//                shimmerSensor.add(new ShimmerSensorDevice(bt.getName(), bt.getAddress(), 128.5, c.getTime()));
-//            }
-//        }
+        try {
+            BluetoothAdapter mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            Set<BluetoothDevice> pairedDevices = mBluetoothAdapter.getBondedDevices();
+            for (BluetoothDevice bt : pairedDevices) {
+                if (bt.getName().contains("Shimmer")) {
+                    shimmerSensor.add(new ShimmerSensorDevice(bt.getName(), bt.getAddress(), 128.5, c.getTime()));
+                }
+            }
+        } catch (Exception e) {
+            shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
+            shimmerSensor.add(new ShimmerSensorDevice("shimmersensor", "06:07:MC:09:55", 128.5, c.getTime()));
+            e.printStackTrace();
+        }
 
 
     }
