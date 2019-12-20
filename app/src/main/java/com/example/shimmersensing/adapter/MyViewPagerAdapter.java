@@ -47,6 +47,7 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
 
         Picasso.get()
                 .load(R.drawable.shimmer_sensor)
+                .placeholder(R.drawable.shimmer_sensor)
                 .into(holder.sensorImageCard);
 
         holder.sensorCard.setOnClickListener(new View.OnClickListener() {

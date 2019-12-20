@@ -116,10 +116,10 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
 
         Transition enter = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial);
         Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial_exit);
-// set an enter transition
+
         getWindow().setEnterTransition(enter);
-// set an exit transition
-        getWindow().setExitTransition(exit);
+
+        getWindow().setExitTransition(new Fade());
 
 
         //ShimmerSensorDevice shimmerSensor = (ShimmerSensorDevice) getIntent().getExtras().getSerializable("shimmersensor_selected");

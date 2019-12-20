@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.adapter.FormRecyclerAdapter;
@@ -43,6 +44,7 @@ public class FormFragment extends Fragment {
     private RecyclerView formList;
     private ArrayList<QuestionTrial> formTrial;
     private FormRecyclerAdapter rAdapter;
+    private Button sendForm;
 
     public FormFragment() {
         // Required empty public constructor
@@ -85,7 +87,16 @@ public class FormFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         formList = getView().findViewById(R.id.formList);
 
+        sendForm = getView().findViewById(R.id.buttonSendForm);
 
+        sendForm.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (mListener != null) {
+                    mListener.onFragmentInteractionForm();
+                }
+            }
+        });
         RecyclerView.LayoutManager recyce = new
                 LinearLayoutManager(getView().getContext(), LinearLayoutManager.VERTICAL, false);
 

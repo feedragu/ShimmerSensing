@@ -16,13 +16,19 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.utilities.QuestionTrial;
 import com.google.android.material.button.MaterialButton;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
+import com.squareup.picasso.Picasso;
+
+import java.io.Serializable;
+import java.util.ArrayList;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
@@ -58,6 +64,9 @@ public class CountDownFragment extends Fragment {
     private int series1Index;
     private long lastSeconds;
     private boolean isRunning;
+    private String trialName;
+    private TextView trialNameView;
+    private ImageView trialImage;
 
     public CountDownFragment() {
         // Required empty public constructor
@@ -70,8 +79,11 @@ public class CountDownFragment extends Fragment {
      * @return A new instance of fragment questionaryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CountDownFragment newInstance() {
+    public static CountDownFragment newInstance(String trialName) {
         CountDownFragment fragment = new CountDownFragment();
+        Bundle args = new Bundle();
+        args.putString(ARG_PARAM1, trialName);
+        fragment.setArguments(args);
         return fragment;
     }
 
@@ -79,8 +91,7 @@ public class CountDownFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
+            trialName = getArguments().getString(ARG_PARAM1);
         }
 
 
@@ -99,7 +110,14 @@ public class CountDownFragment extends Fragment {
 
 
         fButton = getView().findViewById(R.id.buttonSendForm);
-        final AnimationDrawable ad= (AnimationDrawable) fButton.getIcon();
+        trialNameView = getView().findViewById(R.id.trialName);
+        trialImage = getView().findViewById(R.id.trialImage);
+        trialNameView.setText(trialName);
+        int resourceImage = getView().getContext().getResources().getIdentifier(trialName, "drawable", getView().getContext().getPackageName());
+        Picasso.get()
+                .load(resourceImage)
+                .into(trialImage);
+        final AnimationDrawable ad = (AnimationDrawable) fButton.getIcon();
         fButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -112,7 +130,7 @@ public class CountDownFragment extends Fragment {
                         mListener.onFragmentInteraction(2);
                     }
                     timerPause();
-                }else {
+                } else {
                     Log.i(TAG, "resumePlay: ");
                     timerResume();
                     if (mListener != null) {

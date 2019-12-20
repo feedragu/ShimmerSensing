@@ -6,6 +6,9 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.animation.ObjectAnimator;
+import android.transition.Slide;
+import android.transition.Transition;
 import android.transition.TransitionInflater;
 
 import android.content.SharedPreferences;
@@ -13,7 +16,12 @@ import android.os.Bundle;
 import android.transition.Fade;
 import android.transition.TransitionSet;
 import android.util.Log;
+import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.Window;
+import android.view.animation.DecelerateInterpolator;
+import android.view.animation.OvershootInterpolator;
+import android.widget.ProgressBar;
 
 import com.example.shimmersensing.fragment.CountDownFragment;
 import com.example.shimmersensing.R;
@@ -23,6 +31,7 @@ import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ShimmerTrialActivity extends AppCompatActivity implements CountDownFragment.OnFragmentInteractionListener,
@@ -33,18 +42,31 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     private IntroductionFragment initialFragment;
     private SharedPreferences pref;
     private List<ShimmerTrial> shimmerTrial;
-    private static final long MOVE_DEFAULT_TIME = 0;
-    private static final long FADE_DEFAULT_TIME = 0;
+    private List<ShimmerTrial> shimmerTrialProgress;
+    private ProgressBar trialProgress;
+    private static final long MOVE_DEFAULT_TIME = 200;
+    private static final long FADE_DEFAULT_TIME = 250;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
         setContentView(R.layout.shimmer_trial);
+
+        Transition enter = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial);
+        Transition exit = TransitionInflater.from(this).inflateTransition(R.transition.explode_trial_exit);
+
+        getWindow().setEnterTransition(new Slide());
+
+        getWindow().setExitTransition(new Slide());
 
         Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
+
+        trialProgress = findViewById(R.id.trialProgress);
+
 
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
@@ -56,6 +78,15 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                     }.getType());
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        if (shimmerTrialProgress == null) {
+            try {
+                shimmerTrialProgress = cloneList(shimmerTrial);
+            } catch (CloneNotSupportedException e) {
+                e.printStackTrace();
+            }
+            trialProgress.setMax(shimmerTrial.size());
+            Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
         }
 
 
@@ -91,7 +122,43 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             return;
         }
         Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
-        CountDownFragment nextFragment = CountDownFragment.newInstance();
+        CountDownFragment nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName());
+
+        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+        // 1. Exit for Previous Fragment
+        Slide exitFade = new Slide(Gravity.LEFT);
+        exitFade.setDuration(FADE_DEFAULT_TIME);
+        previousFragment.setExitTransition(exitFade);
+
+        // 2. Shared Elements Transition
+//        TransitionSet enterTransitionSet = new TransitionSet();
+//        enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
+//        enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
+//        enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
+//        nextFragment.setSharedElementEnterTransition(enterTransitionSet);
+
+        // 3. Enter Transition for New Fragment
+        Slide enterFade = new Slide(Gravity.RIGHT);
+        enterFade.setStartDelay(MOVE_DEFAULT_TIME);
+        enterFade.setDuration(FADE_DEFAULT_TIME);
+        nextFragment.setEnterTransition(enterFade);
+
+        //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
+        fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
+        fragmentTransaction.commit();
+    }
+
+    private void updateProgressTrial() {
+
+        shimmerTrialProgress.remove(0);
+
+        trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
+
+        Log.i("shimmerprogress_afterform_original", "onCreate: " + shimmerTrial.size());
+        Log.i("shimmerprogress_afterform", "onCreate: " + shimmerTrialProgress.size());
+        Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
+        IntroductionFragment nextFragment = IntroductionFragment.newInstance();
 
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
@@ -131,6 +198,12 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         }
     }
 
+    public static List<ShimmerTrial> cloneList(List<ShimmerTrial> list) throws CloneNotSupportedException {
+        List<ShimmerTrial> clone = new ArrayList<ShimmerTrial>(list.size());
+        for (ShimmerTrial item : list) clone.add((ShimmerTrial) item.clone());
+        return clone;
+    }
+
     @Override
     public void onSaveInstanceState(Bundle savedInstanceState) {
         super.onSaveInstanceState(savedInstanceState);
@@ -168,7 +241,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             }
             case 3: {
                 Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
-                Log.i("cachi", "onFragmentInteraction: "+shimmerTrial.get(0).getN_domande().size());
+                Log.i("cachi", "onFragmentInteraction: " + shimmerTrial.get(0).getN_domande().size());
                 FormFragment nextFragment = FormFragment.newInstance(shimmerTrial.get(0).getN_domande());
 
                 FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -208,6 +281,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
     @Override
     public void onFragmentInteractionForm() {
-
+        updateProgressTrial();
     }
+
+
 }

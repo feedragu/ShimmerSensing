@@ -1,9 +1,11 @@
 package com.example.shimmersensing.utilities;
 
+import androidx.annotation.NonNull;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class ShimmerTrial implements Serializable {
+public class ShimmerTrial implements Serializable, Cloneable {
 
     private String trialName, mode;
     private String trialDuration;
@@ -30,5 +32,11 @@ public class ShimmerTrial implements Serializable {
 
     public ArrayList<QuestionTrial> getN_domande() {
         return domande;
+    }
+
+    @NonNull
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return super.clone();
     }
 }
