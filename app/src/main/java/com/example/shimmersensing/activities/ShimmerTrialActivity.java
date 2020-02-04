@@ -7,6 +7,7 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.animation.ObjectAnimator;
+import android.net.Uri;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -23,6 +24,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
 import android.widget.ProgressBar;
 
+import com.example.shimmersensing.fragment.AudioFragment;
 import com.example.shimmersensing.fragment.CountDownFragment;
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.fragment.FormFragment;
@@ -35,7 +37,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ShimmerTrialActivity extends AppCompatActivity implements CountDownFragment.OnFragmentInteractionListener,
-        IntroductionFragment.OnFragmentInteractionListener, FormFragment.OnFragmentInteractionListener {
+        IntroductionFragment.OnFragmentInteractionListener, FormFragment.OnFragmentInteractionListener, AudioFragment.OnFragmentInteractionListener {
 
 
     private FragmentManager mFragmentManager;
@@ -155,8 +157,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
         trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
 
-        Log.i("shimmerprogress_afterform_original", "onCreate: " + shimmerTrial.size());
-        Log.i("shimmerprogress_afterform", "onCreate: " + shimmerTrialProgress.size());
+        Log.i("shimmerprogress_orig", "onCreate: " + shimmerTrial.size());
+        Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
         Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
         IntroductionFragment nextFragment = IntroductionFragment.newInstance();
 
@@ -285,4 +287,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
 
+    @Override
+    public void onFragmentInteractionAudio(Uri uri) {
+
+    }
 }

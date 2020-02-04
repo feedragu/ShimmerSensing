@@ -11,7 +11,7 @@
         android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/trialImage"
+            android:id="@+id/deviceImage"
             android:layout_width="47dp"
             android:layout_height="45dp"
             android:layout_marginStart="24dp"
@@ -20,12 +20,12 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.07"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="@+id/trialName"
+            app:layout_constraintTop_toTopOf="@+id/deviceName"
             app:layout_constraintVertical_bias="0.0"
             app:srcCompat="@drawable/jump" />
 
         <TextView
-            android:id="@+id/trialName"
+            android:id="@+id/deviceName"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
@@ -34,7 +34,7 @@
             android:textSize="18sp"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.2"
-            app:layout_constraintStart_toEndOf="@+id/trialImage"
+            app:layout_constraintStart_toEndOf="@+id/deviceImage"
             app:layout_constraintTop_toTopOf="parent" />
 
         <LinearLayout
@@ -43,8 +43,8 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="6dp"
             android:orientation="horizontal"
-            app:layout_constraintStart_toStartOf="@+id/trialName"
-            app:layout_constraintTop_toBottomOf="@+id/trialName">
+            app:layout_constraintStart_toStartOf="@+id/deviceName"
+            app:layout_constraintTop_toBottomOf="@+id/deviceName">
 
             <TextView
                 android:id="@+id/textView16"

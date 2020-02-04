@@ -1,7 +1,6 @@
 package com.example.shimmersensing.adapter;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.utilities.ShimmerTrial;
-import com.example.shimmersensing.utilities.row;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
@@ -64,8 +62,8 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
             super(itemView);
             this.onShimmerListener=onShimmerListener;
             itemView.setOnClickListener(this);
-            trialImage = itemView.findViewById(R.id.trialImage);
-            trialName= itemView.findViewById(R.id.trialName);
+            trialImage = itemView.findViewById(R.id.deviceImage);
+            trialName= itemView.findViewById(R.id.deviceName);
             trialDuration= itemView.findViewById(R.id.trialDuration);
             nDomande= itemView.findViewById(R.id.nDomande);
         }

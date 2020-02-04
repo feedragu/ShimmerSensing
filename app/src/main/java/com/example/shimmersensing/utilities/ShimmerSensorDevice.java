@@ -2,6 +2,7 @@ package com.example.shimmersensing.utilities;
 
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Objects;
 
 public class ShimmerSensorDevice implements Serializable {
 
@@ -38,6 +39,22 @@ public class ShimmerSensorDevice implements Serializable {
 
     public double getSampleRate() {
         return sampleRate;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ShimmerSensorDevice that = (ShimmerSensorDevice) o;
+        return Double.compare(that.sampleRate, sampleRate) == 0 &&
+                deviceName.equals(that.deviceName) &&
+                macAddress.equals(that.macAddress) &&
+                Objects.equals(lastUse, that.lastUse);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(deviceName, macAddress, sampleRate, lastUse);
     }
 
     public Date getLastUse() {

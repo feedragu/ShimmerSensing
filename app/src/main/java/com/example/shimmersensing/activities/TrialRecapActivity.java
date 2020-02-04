@@ -14,14 +14,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.preference.PreferenceManager;
 import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
 import android.transition.TransitionManager;
+import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -56,6 +59,10 @@ import com.shimmerresearch.driver.FormatCluster;
 import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -104,6 +111,7 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
     private ShimmerSensorDevice shimmerSensor;
     private TrialRecyclerAdapter rAdapter;
     private RecyclerView shimmerTrialRecycler;
+    private MediaPlayer mediaPlayer;
 
 
     @Override
@@ -133,6 +141,15 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
 
         String json = pref.getString("shimmersensor_selected", "");
         shimmerSensor = gson.fromJson(json, ShimmerSensorDevice.class);
+
+//        String audioArray= pref.getString("shimmeraudio", "");
+//        Log.i("onCreate", "onCreate: " + audioArray);
+//        byte[] array = Base64.decode(audioArray, Base64.DEFAULT);
+//
+        mediaPlayer = new MediaPlayer();
+//
+//        playMp3(array);
+
 
         Log.i("listsize", "onCreate: " + shimmerTrial.size());
 
@@ -184,6 +201,14 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
             case android.R.id.home:
                 getSupportActionBar().setTitle("");
                 finishAfterTransition();
+                if(mediaPlayer.isPlaying()) {
+                    Log.i("tarantella", "onBackPressed: isplaying");
+                    mediaPlayer.stop();
+                    mediaPlayer.release();
+                    mediaPlayer = null;
+                }else {
+                    Log.i("ciumbia", "onBackPressed: isnotplaying");
+                }
                 return true;
 
             default:
@@ -201,6 +226,23 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         super.onBackPressed();
         getSupportActionBar().setTitle("");
         finishAfterTransition();
+        if(mediaPlayer.isPlaying()) {
+            Log.i("tarantella", "onBackPressed: isplaying");
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }else {
+            Log.i("ciumbia", "onBackPressed: isnotplaying");
+        }
+
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        String prefTag = "shimmeraudio";
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+//        prefs.edit().remove(prefTag).commit();
     }
 
     private void setDialog(boolean show) {
@@ -209,6 +251,35 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         Dialog dialog = builder.create();
         if (show) dialog.show();
         else dialog.dismiss();
+    }
+
+    private void playMp3(byte[] mp3SoundByteArray) {
+        try {
+            // create temp file that will hold byte array
+            File tempMp3 = File.createTempFile("kurchina", "mp3", getCacheDir());
+            tempMp3.deleteOnExit();
+            FileOutputStream fos = new FileOutputStream(tempMp3);
+            fos.write(mp3SoundByteArray);
+            fos.close();
+
+            // resetting mediaplayer instance to evade problems
+            mediaPlayer.reset();
+
+            // In case you run into issues with threading consider new instance like:
+            // MediaPlayer mediaPlayer = new MediaPlayer();
+
+            // Tried passing path directly, but kept getting
+            // "Prepare failed.: status=0x1"
+            // so using file descriptor instead
+            FileInputStream fis = new FileInputStream(tempMp3);
+            mediaPlayer.setDataSource(fis.getFD());
+
+            mediaPlayer.prepare();
+            mediaPlayer.start();
+        } catch (IOException ex) {
+            String s = ex.toString();
+            ex.printStackTrace();
+        }
     }
 
     Handler mHandler = new Handler(new Handler.Callback() {

@@ -20,15 +20,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
-import com.example.shimmersensing.utilities.QuestionTrial;
 import com.google.android.material.button.MaterialButton;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
 import com.squareup.picasso.Picasso;
-
-import java.io.Serializable;
-import java.util.ArrayList;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
@@ -110,8 +106,8 @@ public class CountDownFragment extends Fragment {
 
 
         fButton = getView().findViewById(R.id.buttonSendForm);
-        trialNameView = getView().findViewById(R.id.trialName);
-        trialImage = getView().findViewById(R.id.trialImage);
+        trialNameView = getView().findViewById(R.id.deviceName);
+        trialImage = getView().findViewById(R.id.deviceImage);
         trialNameView.setText(trialName);
         int resourceImage = getView().getContext().getResources().getIdentifier(trialName, "drawable", getView().getContext().getPackageName());
         Picasso.get()
@@ -162,14 +158,14 @@ public class CountDownFragment extends Fragment {
 
     }
 
-    public static int getThemeAccentColor(final Context context) {
+    private static int getThemeAccentColor(final Context context) {
         final TypedValue value = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.colorAccent, value, true);
         return value.data;
     }
 
 
-    public void timerPause() {
+    private void timerPause() {
         countDown.cancel();
     }
 
@@ -179,7 +175,7 @@ public class CountDownFragment extends Fragment {
     }
 
 
-    public void timerStart(long timeLengthMilli) {
+    private void timerStart(long timeLengthMilli) {
         textPercentage.setText("" + timeLengthMilli / 1000);
         countDown = new CountDownTimer(timeLengthMilli, 1000) {
 
