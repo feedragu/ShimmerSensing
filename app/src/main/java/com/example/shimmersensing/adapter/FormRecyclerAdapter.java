@@ -56,7 +56,6 @@ public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapte
             radioButton.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Toast.makeText(mContext, "click " + radioButton.getId(), Toast.LENGTH_SHORT).show();
                     onFormValueClickListener.OnFormValueClickListener(position, radioButton.getId());
                 }
             });

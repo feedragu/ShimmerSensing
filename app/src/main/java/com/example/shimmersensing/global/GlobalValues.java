@@ -12,11 +12,20 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class GlobalValues extends Application {
     private String name, surname, date;
+    private String _id;
+
+    public void set_id(String _id) {
+        this._id = _id;
+    }
+
+    public String get_id() {
+        return _id;
+    }
+
     private ArrayList<ShimmerTrial> shimmerTrialArrayList;
     private ShimmerSensorDevice ssd;
 
     public void setSsd(ShimmerSensorDevice ssd) {
-        Log.i(TAG, "setSsd: "+ssd.getDeviceName());
         this.ssd = ssd;
     }
 

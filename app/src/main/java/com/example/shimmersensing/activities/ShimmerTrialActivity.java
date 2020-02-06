@@ -7,7 +7,9 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.animation.ObjectAnimator;
+import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.transition.Slide;
 import android.transition.Transition;
@@ -32,7 +34,6 @@ import com.example.shimmersensing.R;
 import com.example.shimmersensing.fragment.FormFragment;
 import com.example.shimmersensing.fragment.IntroductionFragment;
 import com.example.shimmersensing.global.GlobalValues;
-import com.example.shimmersensing.utilities.SendDeviceDetails;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
@@ -43,6 +44,11 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.DataOutputStream;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -65,6 +71,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     private CountDownTimer cTimer;
     private GlobalValues gv;
     private int[] values;
+    private long countdowninterval = 3;
+    private int shimmerProgress = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -171,8 +179,13 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
     private void updateProgressTrial() {
-
         shimmerTrialProgress.remove(0);
+
+        if((shimmerTrial.size() - shimmerTrialProgress.size()) == shimmerTrial.size()) {
+            finishAffinity();
+            startActivity(new Intent(this, EndTrialActivity.class));
+        }
+
 
         trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
 
@@ -204,6 +217,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
         fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
         fragmentTransaction.commitAllowingStateLoss();
+        msuntilfinish=10000;
     }
 
     @Override
@@ -254,7 +268,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         switch (event) {
             case 1: {
                 Log.i("play", "onFragmentInteraction: ");
-                cTimer = new CountDownTimer(msuntilfinish, 3) {
+                cTimer = new CountDownTimer(msuntilfinish, countdowninterval) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                         msuntilfinish = millisUntilFinished;
@@ -312,7 +326,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case 69: {
-                cTimer = new CountDownTimer(msuntilfinish, 3) {
+                cTimer = new CountDownTimer(msuntilfinish, countdowninterval) {
                     @Override
                     public void onTick(long millisUntilFinished) {
                         msuntilfinish = millisUntilFinished;
@@ -337,7 +351,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         }
     }
 
-    public void sendShimmerData() {
+    public void sendShimmerDataInitial() {
         try {
             Gson gson = new Gson();
             String listString = gson.toJson(
@@ -352,7 +366,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
                 JSONObject jobjInner = new JSONObject();
                 jobjInner.put("shimmerdata", jsonArray);
-                for(int i=0; i<values.length; i++) {
+                for (int i = 0; i < values.length; i++) {
                     jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
                 }
                 JSONObject jobjInnerDate = new JSONObject();
@@ -376,6 +390,48 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         shimmerDataProgress.clear();
     }
 
+    public void sendShimmerDataUpdate() {
+        try {
+            Gson gson = new Gson();
+            String listString = gson.toJson(
+                    shimmerDataProgress,
+                    new TypeToken<ArrayList<ShimmerData>>() {
+                    }.getType());
+            JSONArray jsonArray = new JSONArray(listString);
+            JSONObject obj = new JSONObject();
+            JSONObject jobjInnerDate = new JSONObject();
+            try {
+                obj.put("Nome", gv.getName());
+                obj.put("Cognome", gv.getSurname());
+
+                JSONObject jobjInner = new JSONObject();
+                jobjInner.put("shimmerdata", jsonArray);
+                for (int i = 0; i < values.length; i++) {
+                    jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
+                }
+
+                jobjInnerDate.put("_id", gv.get_id());
+                jobjInnerDate.put("date_trial", gv.getDate());
+                jobjInnerDate.put("trialnumber", "Trial"+shimmerProgress);
+                jobjInnerDate.put("Trial"+shimmerProgress, jobjInner);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JsonArray jArray = new JsonArray();
+            jArray.add(String.valueOf(obj));
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/update", String.valueOf(jobjInnerDate));
+
+            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
+            shimmerDataProgress.clear();
+            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        shimmerDataProgress.clear();
+    }
+
     @Override
     public void onFragmentInteractionIntroduction() {
         performTransition();
@@ -383,11 +439,15 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
     @Override
     public void onFragmentInteractionForm(int[] voti) {
-        values=voti;
+        values = voti;
         for (int i : voti) {
             Log.i("caac", "onFragmentInteractionForm: " + i);
         }
-        sendShimmerData();
+        if(shimmerProgress == 1) {
+            sendShimmerDataInitial();
+        }else {
+            sendShimmerDataUpdate();
+        }
         updateProgressTrial();
 
     }
@@ -396,5 +456,56 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     @Override
     public void onFragmentInteractionAudio(Uri uri) {
 
+    }
+
+    public class SendDeviceDetails extends AsyncTask<String, Void, String> {
+        @Override
+        protected String doInBackground(String... params) {
+            String data = "";
+            Log.i("Prova", "cachi");
+            HttpURLConnection httpURLConnection = null;
+            try {
+
+                httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
+                httpURLConnection.setRequestMethod("POST");
+                httpURLConnection.setDoOutput(true);
+
+                DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
+                String s=params[1];
+                Log.i("mannag", "doInBackground: "+s);
+                wr.writeBytes("postdata="+ s);
+                wr.flush();
+                wr.close();
+
+                InputStream in = httpURLConnection.getInputStream();
+                InputStreamReader inputStreamReader = new InputStreamReader(in);
+
+                int inputStreamData = inputStreamReader.read();
+                while (inputStreamData != -1) {
+                    char current = (char) inputStreamData;
+                    inputStreamData = inputStreamReader.read();
+                    data += current;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (httpURLConnection != null) {
+                    httpURLConnection.disconnect();
+                }
+            }
+
+            return data;
+        }
+
+        @Override
+        protected void onPostExecute(String result) {
+            super.onPostExecute(result);
+            if(shimmerProgress == 1) {
+                GlobalValues gv = (GlobalValues) getApplicationContext();
+                gv.set_id(result);
+            }
+            shimmerProgress++;
+            Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
+        }
     }
 }

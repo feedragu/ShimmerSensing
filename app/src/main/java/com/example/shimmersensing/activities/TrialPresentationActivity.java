@@ -192,13 +192,19 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                 myBlueToothAdapter.startDiscovery();
             }
 
+            try {
 
-            registerReceiver(FoundReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-            IntentFilter filter = new IntentFilter();
-            filter.addAction(BluetoothDevice.ACTION_FOUND);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-            filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
-            this.registerReceiver(FoundReceiver, filter);
+                IntentFilter filter = new IntentFilter();
+                filter.addAction(BluetoothDevice.ACTION_FOUND);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+                filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+                this.registerReceiver(FoundReceiver, filter);
+
+            } catch(IllegalArgumentException e) {
+
+                e.printStackTrace();
+            }
+
         }
     }
 
@@ -400,11 +406,18 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                     }
                     Toast.makeText(TrialPresentationActivity.this, "Scanning Devices", Toast.LENGTH_LONG).show();
 
+                    try {
 
-                    registerReceiver(FoundReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-                    IntentFilter filter = new IntentFilter(
-                            BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-                    this.registerReceiver(FoundReceiver, filter);
+                        IntentFilter filter = new IntentFilter();
+                        filter.addAction(BluetoothDevice.ACTION_FOUND);
+                        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
+                        filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
+                        this.registerReceiver(FoundReceiver, filter);
+
+                    } catch(IllegalArgumentException e) {
+
+                        e.printStackTrace();
+                    }
                 }
 //                mPager = findViewById(R.id.pager);
 //                mPager.setAdapter(new MyViewPagerAdapter(this, shimmerSensor));
@@ -542,7 +555,15 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         editor.putInt("scene_on", sceneOn);
         editor.apply();
         Log.i("onDestroy", "onDestroy: " + sceneOn);
-        unregisterReceiver(FoundReceiver);
+        try {
+
+            unregisterReceiver(FoundReceiver);
+
+        } catch(IllegalArgumentException e) {
+
+            e.printStackTrace();
+        }
+
     }
 
     @Override
