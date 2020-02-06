@@ -109,7 +109,7 @@ public class CountDownFragment extends Fragment {
         trialNameView = getView().findViewById(R.id.deviceName);
         trialImage = getView().findViewById(R.id.deviceImage);
         trialNameView.setText(trialName);
-        int resourceImage = getView().getContext().getResources().getIdentifier(trialName, "drawable", getView().getContext().getPackageName());
+        int resourceImage = getView().getContext().getResources().getIdentifier(trialName.toLowerCase(), "drawable", getView().getContext().getPackageName());
         Picasso.get()
                 .load(resourceImage)
                 .into(trialImage);
@@ -154,6 +154,9 @@ public class CountDownFragment extends Fragment {
         final SeriesItem finalSeriesItem = seriesItem1;
 
         timerStart(10000);
+        if (mListener != null) {
+            mListener.onFragmentInteraction(69);
+        }
 
 
     }

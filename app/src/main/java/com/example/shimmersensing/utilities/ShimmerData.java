@@ -91,4 +91,7 @@ public class ShimmerData {
     }
 
 
+    public void setTimestamp_shimmer(double timestamp_shimmer) {
+        this.timestamp_shimmer = timestamp_shimmer;
+    }
 }

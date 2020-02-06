@@ -36,6 +36,7 @@ import com.example.shimmersensing.R;
 import com.example.shimmersensing.adapter.BtShimmerRecyclerAdapter;
 import com.example.shimmersensing.adapter.MyViewPagerAdapter;
 import com.example.shimmersensing.adapter.TrialRecyclerAdapter;
+import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.graphic.ZoomOutPageTransformer;
 import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
@@ -74,6 +75,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
     private ArrayList<ShimmerSensorDevice> shimmerTrialSaved;
     private Gson gson = new Gson();
     private boolean noShimmerSelected = true;
+    private GlobalValues gv;
 
 
     @Override
@@ -104,6 +106,8 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         scene3 = Scene.getSceneForLayout(rootContainer,
                 R.layout.trial_pres_3, this);
         scene1.enter();
+
+        gv = (GlobalValues) getApplicationContext();
 
 
         sceneOn = pref.getInt("scene_on", 1);
@@ -565,10 +569,10 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
 
 
         String json = gson.toJson(s);
-        pref = getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
-        SharedPreferences.Editor editor = pref.edit();
-        editor.putString("shimmersensor_selected", json);
-        editor.apply();
+
+        gv.setSsd(s);
+        Log.i("boh", "OnBtClickListener: diobono");
+        Log.i("boh", "OnBtClickListener: " + gv.getSsd().toString());
         startActivity(intent);
     }
 

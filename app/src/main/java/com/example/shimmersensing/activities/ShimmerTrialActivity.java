@@ -8,6 +8,7 @@ import androidx.fragment.app.FragmentTransaction;
 
 import android.animation.ObjectAnimator;
 import android.net.Uri;
+import android.os.CountDownTimer;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -19,6 +20,7 @@ import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
+import android.view.View;
 import android.view.Window;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.OvershootInterpolator;
@@ -29,9 +31,17 @@ import com.example.shimmersensing.fragment.CountDownFragment;
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.fragment.FormFragment;
 import com.example.shimmersensing.fragment.IntroductionFragment;
+import com.example.shimmersensing.global.GlobalValues;
+import com.example.shimmersensing.utilities.SendDeviceDetails;
+import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
+import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -45,9 +55,16 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     private SharedPreferences pref;
     private List<ShimmerTrial> shimmerTrial;
     private List<ShimmerTrial> shimmerTrialProgress;
+    private List<ShimmerData> shimmerData;
+    private List<ShimmerData> shimmerDataProgress = new ArrayList<>();
     private ProgressBar trialProgress;
+    private int counterShimmerDEBUG = 0;
     private static final long MOVE_DEFAULT_TIME = 200;
     private static final long FADE_DEFAULT_TIME = 250;
+    private long msuntilfinish = 10000;
+    private CountDownTimer cTimer;
+    private GlobalValues gv;
+    private int[] values;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,14 +86,16 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
         trialProgress = findViewById(R.id.trialProgress);
 
-
+        gv = (GlobalValues) getApplicationContext();
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
+
+        shimmerTrial = gv.getShimmerTrialArrayList();
         try {
             Gson gson = new Gson();
-            String response = pref.getString("shimmertrial", "");
-            shimmerTrial = gson.fromJson(response,
-                    new TypeToken<List<ShimmerTrial>>() {
+            String response = pref.getString("shimmerdata", "");
+            shimmerData = gson.fromJson(response,
+                    new TypeToken<List<ShimmerData>>() {
                     }.getType());
         } catch (Exception e) {
             e.printStackTrace();
@@ -235,10 +254,30 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         switch (event) {
             case 1: {
                 Log.i("play", "onFragmentInteraction: ");
+                cTimer = new CountDownTimer(msuntilfinish, 3) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        msuntilfinish = millisUntilFinished;
+                        double tsLong = System.currentTimeMillis() / 1000;
+                        shimmerData.get(counterShimmerDEBUG).setTimestamp_shimmer(tsLong);
+                        shimmerDataProgress.add(shimmerData.get(counterShimmerDEBUG));
+                        Log.i("shimmerdatadebug", shimmerDataProgress.get(counterShimmerDEBUG).toString());
+                        counterShimmerDEBUG++;
+                        if (counterShimmerDEBUG == shimmerData.size() - 1)
+                            counterShimmerDEBUG = 0;
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        counterShimmerDEBUG = 0;
+                    }
+                }.start();
                 break;
             }
             case 2: {
                 Log.i("stop", "onFragmentInteraction: ");
+                cTimer.cancel();
                 break;
             }
             case 3: {
@@ -269,11 +308,72 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
                 fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
                 fragmentTransaction.commitAllowingStateLoss();
+
                 break;
+            }
+            case 69: {
+                cTimer = new CountDownTimer(msuntilfinish, 3) {
+                    @Override
+                    public void onTick(long millisUntilFinished) {
+                        msuntilfinish = millisUntilFinished;
+                        double tsLong = System.currentTimeMillis() / 1000;
+                        shimmerData.get(counterShimmerDEBUG).setTimestamp_shimmer(tsLong);
+                        shimmerDataProgress.add(shimmerData.get(counterShimmerDEBUG));
+                        Log.i("shimmerdatadebug", shimmerDataProgress.get(counterShimmerDEBUG).toString());
+                        counterShimmerDEBUG++;
+                        if (counterShimmerDEBUG == shimmerData.size() - 1)
+                            counterShimmerDEBUG = 0;
+
+                    }
+
+                    @Override
+                    public void onFinish() {
+                        counterShimmerDEBUG = 0;
+                    }
+                }.start();
             }
             default:
                 break;
         }
+    }
+
+    public void sendShimmerData() {
+        try {
+            Gson gson = new Gson();
+            String listString = gson.toJson(
+                    shimmerDataProgress,
+                    new TypeToken<ArrayList<ShimmerData>>() {
+                    }.getType());
+            JSONArray jsonArray = new JSONArray(listString);
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("Nome", gv.getName());
+                obj.put("Cognome", gv.getSurname());
+
+                JSONObject jobjInner = new JSONObject();
+                jobjInner.put("shimmerdata", jsonArray);
+                for(int i=0; i<values.length; i++) {
+                    jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
+                }
+                JSONObject jobjInnerDate = new JSONObject();
+                jobjInnerDate.put("Trial1", jobjInner);
+                obj.put(gv.getDate(), jobjInnerDate);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            JsonArray jArray = new JsonArray();
+            jArray.add(String.valueOf(obj));
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(obj));
+
+            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
+            shimmerDataProgress.clear();
+            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        shimmerDataProgress.clear();
     }
 
     @Override
@@ -282,8 +382,14 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
     @Override
-    public void onFragmentInteractionForm() {
+    public void onFragmentInteractionForm(int[] voti) {
+        values=voti;
+        for (int i : voti) {
+            Log.i("caac", "onFragmentInteractionForm: " + i);
+        }
+        sendShimmerData();
         updateProgressTrial();
+
     }
 
 

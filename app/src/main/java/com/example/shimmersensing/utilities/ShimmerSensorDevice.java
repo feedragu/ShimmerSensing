@@ -46,10 +46,8 @@ public class ShimmerSensorDevice implements Serializable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         ShimmerSensorDevice that = (ShimmerSensorDevice) o;
-        return Double.compare(that.sampleRate, sampleRate) == 0 &&
-                deviceName.equals(that.deviceName) &&
-                macAddress.equals(that.macAddress) &&
-                Objects.equals(lastUse, that.lastUse);
+        return deviceName.equals(that.deviceName) &&
+                macAddress.equals(that.macAddress);
     }
 
     @Override

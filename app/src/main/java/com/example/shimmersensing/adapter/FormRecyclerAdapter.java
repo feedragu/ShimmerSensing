@@ -1,6 +1,7 @@
 package com.example.shimmersensing.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,29 +21,34 @@ import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
+import static androidx.constraintlayout.widget.Constraints.TAG;
+
 public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapter.ImageViewHolder> {
 
     private Context mContext;
     private List<QuestionTrial> formTrial;
     private RadioButton radioButton;
+    private OnFormValueClickListener onFormValueClickListener;
 
-    public FormRecyclerAdapter(Context mContext, List<QuestionTrial> formTrial) {
+    public FormRecyclerAdapter(Context mContext, List<QuestionTrial> formTrial, OnFormValueClickListener onFormValueClickListener) {
         this.mContext = mContext;
         this.formTrial = formTrial;
+        this.onFormValueClickListener=onFormValueClickListener;
     }
 
     @NonNull
     @Override
     public ImageViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(mContext).inflate(R.layout.form_row_item, parent, false);
-        return new ImageViewHolder(view);
+        return new ImageViewHolder(view, onFormValueClickListener);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull ImageViewHolder holder, final int position) {
         for (int i = 0; i < formTrial.get(position).getRange(); i++) {
-            radioButton = new RadioButton(mContext);
+            final RadioButton radioButton = new RadioButton(mContext);
             radioButton.setText("");
+            Log.i(TAG, "onBindViewHolder: "+i);
             radioButton.setId(i);
             holder.radioGroup.addView(radioButton);
 
@@ -51,7 +57,7 @@ public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapte
                 @Override
                 public void onClick(View v) {
                     Toast.makeText(mContext, "click " + radioButton.getId(), Toast.LENGTH_SHORT).show();
-
+                    onFormValueClickListener.OnFormValueClickListener(position, radioButton.getId());
                 }
             });
         }
@@ -71,10 +77,12 @@ public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapte
 
         RadioGroup radioGroup;
         TextView nomeDomanda, numeroDomanda, rangeMin, rangeMax;
+        OnFormValueClickListener onFormValueClickListener;
 
-        public ImageViewHolder(@NonNull View itemView) {
+        public ImageViewHolder(@NonNull View itemView, OnFormValueClickListener onFormValueClickListener) {
             super(itemView);
             itemView.setOnClickListener(this);
+            this.onFormValueClickListener=onFormValueClickListener;
             radioGroup = itemView.findViewById(R.id.formRadio);
             nomeDomanda = itemView.findViewById(R.id.nomeDomanda);
             numeroDomanda = itemView.findViewById(R.id.numeroDomanda);
@@ -86,6 +94,10 @@ public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapte
         @Override
         public void onClick(View v) {
         }
+    }
+
+    public interface OnFormValueClickListener {
+        void OnFormValueClickListener(int position, int value);
     }
 
 

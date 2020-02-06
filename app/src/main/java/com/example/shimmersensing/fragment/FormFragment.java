@@ -33,11 +33,12 @@ import java.util.List;
  * Use the {@link FormFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class FormFragment extends Fragment {
+public class FormFragment extends Fragment implements FormRecyclerAdapter.OnFormValueClickListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private int[] voti;
 
 
     private OnFragmentInteractionListener mListener;
@@ -71,6 +72,9 @@ public class FormFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             formTrial = (ArrayList<QuestionTrial>) getArguments().getSerializable(ARG_PARAM1);
+            if (formTrial != null) {
+                voti = new int[formTrial.size()];
+            }
         }
 
     }
@@ -93,7 +97,7 @@ public class FormFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (mListener != null) {
-                    mListener.onFragmentInteractionForm();
+                    mListener.onFragmentInteractionForm(voti);
                 }
             }
         });
@@ -103,17 +107,17 @@ public class FormFragment extends Fragment {
         formList.setLayoutManager(recyce);
         formList.setNestedScrollingEnabled(false);
 
-        rAdapter = new FormRecyclerAdapter(getView().getContext(), formTrial);
+        rAdapter = new FormRecyclerAdapter(getView().getContext(), formTrial, this);
         DividerItemDecoration itemDecor = new DividerItemDecoration(formList.getContext(), DividerItemDecoration.VERTICAL);
         formList.addItemDecoration(itemDecor);
         formList.setAdapter(rAdapter);
     }
 
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteractionForm();
-        }
-    }
+//    public void onButtonPressed(Uri uri) {
+//        if (mListener != null) {
+//            mListener.onFragmentInteractionForm();
+//        }
+//    }
 
     @Override
     public void onAttach(Context context) {
@@ -132,6 +136,11 @@ public class FormFragment extends Fragment {
         mListener = null;
     }
 
+    @Override
+    public void OnFormValueClickListener(int position, int value) {
+        voti[position]=value+1;
+    }
+
     /**
      * This interface must be implemented by activities that contain this
      * fragment to allow an interaction in this fragment to be communicated
@@ -144,6 +153,6 @@ public class FormFragment extends Fragment {
      */
     public interface OnFragmentInteractionListener {
         // TODO: Update argument type and name
-        void onFragmentInteractionForm();
+        void onFragmentInteractionForm(int[] voti);
     }
 }

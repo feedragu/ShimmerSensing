@@ -37,7 +37,7 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
 
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
-        int resourceImage = mContext.getResources().getIdentifier(shimmerTrial.get(position).getTrialName(), "drawable", mContext.getPackageName());
+        int resourceImage = mContext.getResources().getIdentifier(shimmerTrial.get(position).getTrialName().toLowerCase(), "drawable", mContext.getPackageName());
         Picasso.get()
                 .load(resourceImage)
                 .into(holder.trialImage);

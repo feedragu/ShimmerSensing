@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +16,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.activities.TrialRecapActivity;
+import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
@@ -26,6 +28,7 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
     private Context context;
     private ArrayList<ShimmerSensorDevice> shimmerSensor;
     private SharedPreferences pref;
+    private GlobalValues gv;
 
     public MyViewPagerAdapter(Context context, ArrayList<ShimmerSensorDevice> shimmerSensor) {
         this.context = context;
@@ -59,12 +62,10 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
                 Pair<View, String> pair2 = Pair.create((View) holder.sensorImageCard, holder.sensorImageCard.getTransitionName());
                 ActivityOptionsCompat optionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation((Activity) context, pair1);
                 Intent intent = new Intent(context, TrialRecapActivity.class);
-                Gson gson = new Gson();
-                String json = gson.toJson(shimmerSensor.get(position));
-                pref = context.getSharedPreferences("ShimmerSensingSamplingConfig", 0); // 0 - for private mode
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("shimmersensor_selected", json);
-                editor.commit();
+                gv=(GlobalValues) context.getApplicationContext();
+                gv.setSsd(shimmerSensor.get(position));
+                Log.i("boh", "OnBtClickListener: diobono");
+                Log.i("boh", "OnBtClickListener: "+gv.getSsd().toString());
                 context.startActivity(intent, optionsCompat.toBundle());
             }
         });

@@ -38,6 +38,7 @@ import android.widget.Toast;
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.adapter.TrialRecyclerAdapter;
+import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.ShimmerTrial;
@@ -131,16 +132,20 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
 
 
         //ShimmerSensorDevice shimmerSensor = (ShimmerSensorDevice) getIntent().getExtras().getSerializable("shimmersensor_selected");
-        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
+//        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
         Gson gson = new Gson();
-        String response = pref.getString("shimmertrial", "");
-        shimmerTrial = gson.fromJson(response,
-                new TypeToken<List<ShimmerTrial>>() {
-                }.getType());
+//        String response = pref.getString("shimmertrial", "");
+//        shimmerTrial = gson.fromJson(response,
+//                new TypeToken<List<ShimmerTrial>>() {
+//                }.getType());
 
-        String json = pref.getString("shimmersensor_selected", "");
-        shimmerSensor = gson.fromJson(json, ShimmerSensorDevice.class);
+        GlobalValues gv = (GlobalValues) getApplicationContext();
+
+        shimmerTrial = gv.getShimmerTrialArrayList();
+//
+//        String json = pref.getString("shimmersensor_selected", "");
+        shimmerSensor = gv.getSsd();
 
 //        String audioArray= pref.getString("shimmeraudio", "");
 //        Log.i("onCreate", "onCreate: " + audioArray);
@@ -201,12 +206,12 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
             case android.R.id.home:
                 getSupportActionBar().setTitle("");
                 finishAfterTransition();
-                if(mediaPlayer.isPlaying()) {
+                if (mediaPlayer.isPlaying()) {
                     Log.i("tarantella", "onBackPressed: isplaying");
                     mediaPlayer.stop();
                     mediaPlayer.release();
                     mediaPlayer = null;
-                }else {
+                } else {
                     Log.i("ciumbia", "onBackPressed: isnotplaying");
                 }
                 return true;
@@ -226,12 +231,12 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         super.onBackPressed();
         getSupportActionBar().setTitle("");
         finishAfterTransition();
-        if(mediaPlayer.isPlaying()) {
+        if (mediaPlayer.isPlaying()) {
             Log.i("tarantella", "onBackPressed: isplaying");
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
-        }else {
+        } else {
             Log.i("ciumbia", "onBackPressed: isnotplaying");
         }
 

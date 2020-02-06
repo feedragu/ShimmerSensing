@@ -3,6 +3,7 @@ package com.example.shimmersensing.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -14,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.utilities.QuestionTrial;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
@@ -37,12 +39,13 @@ public class SplashActivity extends AppCompatActivity {
 
     private ArrayList<ShimmerTrial> shimmertrial;
     private SharedPreferences pref;
+    private GlobalValues globalValues;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-
+        globalValues = (GlobalValues) getApplicationContext();
         ImageView shimm_logo = findViewById(R.id.shimmerlogo);
         shimm_logo.setAnimation(AnimationUtils.loadAnimation(this, R.anim.zoom_in));
 
@@ -84,7 +87,7 @@ public class SplashActivity extends AppCompatActivity {
 
                 try {
                     Log.e("trycatch", "onCreate: ");
-                    if(httpURLConnection.getInputStream() != null) {
+                    if (httpURLConnection.getInputStream() != null) {
                         InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
 
                         InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -95,7 +98,7 @@ public class SplashActivity extends AppCompatActivity {
                             inputStreamData = inputStreamReader.read();
                             data.append(current);
                         }
-                    }else {
+                    } else {
 
                     }
                 } catch (Exception e) {
@@ -125,27 +128,28 @@ public class SplashActivity extends AppCompatActivity {
 
             ArrayList<ShimmerData> list = new ArrayList<>();
             String jsonDB = result;
-            Log.i(" ca", "onPostExecute: " + jsonDB);
             if (jsonDB.equals("")) {
                 goAhead();
             }
             if (jsonDB.contains("trial")) {
 
                 shimmertrial = new ArrayList<>();
-
-
                 String shimmer_name;
                 String shimmer_mode;
                 String mode;
                 JSONArray domande;
-
                 try {
-                    JSONArray jarray = new JSONArray(jsonDB);
+                    JSONObject jObj = new JSONObject(jsonDB);
+                    globalValues.setName(jObj.getString("name"));
+                    globalValues.setSurname(jObj.getString("surname"));
+                    globalValues.setDate(jObj.getString("date"));
+                    jObj.get("shimmerdata");
+                    JSONArray jarray = jObj.getJSONArray("shimmerdata");
                     for (int j = 0; j < jarray.length(); j++) {
-                        ArrayList<QuestionTrial> aQuest=new ArrayList<>();
+                        ArrayList<QuestionTrial> aQuest = new ArrayList<>();
                         JSONObject curr = jarray.getJSONObject(j);
                         shimmer_name = curr.getString("trial_name");
-                        if(shimmer_name.equals("musica")) {
+                        if (shimmer_name.equals("musica")) {
                             String shimmer_audio = curr.getString("track");
 //                            SharedPreferences.Editor editor = pref.edit();
 //                            editor.putString("shimmeraudio", shimmer_audio);
@@ -159,7 +163,7 @@ public class SplashActivity extends AppCompatActivity {
                             }
                             ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, shimmer_mode, mode, aQuest, shimmer_audio);
                             shimmertrial.add(s);
-                        }else {
+                        } else {
                             shimmer_mode = curr.getString("trial_duration");
                             mode = curr.getString("mode");
                             domande = curr.getJSONArray("n_domande");
@@ -170,7 +174,6 @@ public class SplashActivity extends AppCompatActivity {
                             ShimmerTrial s = new ShimmerTrial(shimmer_name, shimmer_mode, mode, aQuest);
                             shimmertrial.add(s);
                         }
-
 
 
                     }
@@ -186,6 +189,7 @@ public class SplashActivity extends AppCompatActivity {
                     Log.i("shimmertrial", "run: " + jsonElements);
                     editor.putString("shimmertrial", String.valueOf(jsonElements));
                     editor.apply();
+                    globalValues.setShimmerTrialArrayList(shimmertrial);
 
                     Log.i("TAG", String.valueOf(shimmertrial.size()));
                 } catch (Exception e) {
@@ -249,7 +253,6 @@ public class SplashActivity extends AppCompatActivity {
                 }
 
 
-
             }
 
 
@@ -298,7 +301,7 @@ public class SplashActivity extends AppCompatActivity {
 //                Log.v("log_tag", "byte array " + data_byte.length);
                 try {
                     Log.e("trycatch", "onCreate: ");
-                    if(httpURLConnection.getInputStream() != null) {
+                    if (httpURLConnection.getInputStream() != null) {
                         InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
 
                         InputStreamReader inputStreamReader = new InputStreamReader(in);
@@ -309,7 +312,7 @@ public class SplashActivity extends AppCompatActivity {
                             inputStreamData = inputStreamReader.read();
                             data.append(current);
                         }
-                    }else {
+                    } else {
 
                     }
                 } catch (Exception e) {
