@@ -156,7 +156,7 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
 //        playMp3(array);
 
 
-        Log.i("listsize", "onCreate: " + shimmerTrial.size());
+
 
         shimmerTrialRecycler = findViewById(R.id.recyclerTrial);
 

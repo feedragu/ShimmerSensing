@@ -20,11 +20,14 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.interfaccia.Shimmer_interface;
 import com.google.android.material.button.MaterialButton;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
 import com.squareup.picasso.Picasso;
+
+import java.util.Objects;
 
 import static androidx.constraintlayout.widget.Constraints.TAG;
 
@@ -37,11 +40,12 @@ import static androidx.constraintlayout.widget.Constraints.TAG;
  * Use the {@link CountDownFragment#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class CountDownFragment extends Fragment {
+public class CountDownFragment extends Fragment implements Shimmer_interface {
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    private static final String ARG_PARAM3 = "param3";
 
     private MaterialButton fButton;
     private AnimationDrawable pausePlayAnim;
@@ -63,6 +67,8 @@ public class CountDownFragment extends Fragment {
     private String trialName;
     private TextView trialNameView;
     private ImageView trialImage;
+    private String url_icon;
+    private long trialDuration;
 
     public CountDownFragment() {
         // Required empty public constructor
@@ -75,10 +81,12 @@ public class CountDownFragment extends Fragment {
      * @return A new instance of fragment questionaryFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static CountDownFragment newInstance(String trialName) {
+    public static CountDownFragment newInstance(String trialName, String url_icon, long trialDuration) {
         CountDownFragment fragment = new CountDownFragment();
         Bundle args = new Bundle();
         args.putString(ARG_PARAM1, trialName);
+        args.putString(ARG_PARAM2, url_icon);
+        args.putLong(ARG_PARAM3, trialDuration);
         fragment.setArguments(args);
         return fragment;
     }
@@ -88,6 +96,8 @@ public class CountDownFragment extends Fragment {
         super.onCreate(savedInstanceState);
         if (getArguments() != null) {
             trialName = getArguments().getString(ARG_PARAM1);
+            url_icon = getArguments().getString(ARG_PARAM2);
+            trialDuration = getArguments().getLong(ARG_PARAM3);
         }
 
 
@@ -109,9 +119,8 @@ public class CountDownFragment extends Fragment {
         trialNameView = getView().findViewById(R.id.deviceName);
         trialImage = getView().findViewById(R.id.deviceImage);
         trialNameView.setText(trialName);
-        int resourceImage = getView().getContext().getResources().getIdentifier(trialName.toLowerCase(), "drawable", getView().getContext().getPackageName());
         Picasso.get()
-                .load(resourceImage)
+                .load(URL_FILE.concat(url_icon))
                 .into(trialImage);
         final AnimationDrawable ad = (AnimationDrawable) fButton.getIcon();
         fButton.setOnClickListener(new View.OnClickListener() {
@@ -139,13 +148,13 @@ public class CountDownFragment extends Fragment {
         arcView = (DecoView) getView().findViewById(R.id.progressBar);
 
         arcView.addSeries(new SeriesItem.Builder(Color.LTGRAY)
-                .setRange(0, 10, 10)
+                .setRange(0, trialDuration/1000, trialDuration/1000)
                 .setInitialVisibility(true)
                 .setLineWidth(20f)
                 .build());
 
         SeriesItem seriesItem1 = new SeriesItem.Builder(getThemeAccentColor(getView().getContext()))
-                .setRange(0, 10, 10)
+                .setRange(0, trialDuration/1000, trialDuration/1000)
                 .setLineWidth(20f)
                 .build();
         series1Index = arcView.addSeries(seriesItem1);
@@ -153,7 +162,7 @@ public class CountDownFragment extends Fragment {
         textPercentage = getView().findViewById(R.id.timerCountdown);
         final SeriesItem finalSeriesItem = seriesItem1;
 
-        timerStart(10000);
+        timerStart(trialDuration);
         if (mListener != null) {
             mListener.onFragmentInteraction(69);
         }
@@ -193,8 +202,8 @@ public class CountDownFragment extends Fragment {
             }
 
             public void onFinish() {
-                textPercentage.setText("done!");
-                new CountDownTimer(2000, 1000) {
+                textPercentage.setText("Finito");
+                new CountDownTimer(1000, 1000) {
 
                     public void onTick(long millisUntilFinished) {
                     }

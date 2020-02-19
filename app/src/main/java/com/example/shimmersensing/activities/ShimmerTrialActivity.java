@@ -6,9 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
-import android.animation.ObjectAnimator;
 import android.content.Intent;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
 import android.transition.Slide;
@@ -22,10 +20,7 @@ import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.Window;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.OvershootInterpolator;
 import android.widget.ProgressBar;
 
 import com.example.shimmersensing.fragment.AudioFragment;
@@ -36,6 +31,7 @@ import com.example.shimmersensing.fragment.IntroductionFragment;
 import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
+import com.example.shimmersensing.utilities.ShimmerTrialMusic;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -150,14 +146,41 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         if (isDestroyed()) {
             return;
         }
+
+        Fragment nextFragment = null;
+        Log.i("test_mode", "performTransition: "+shimmerTrialProgress.get(0).getMode());
         Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
-        CountDownFragment nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName());
+        switch (shimmerTrialProgress.get(0).getMode()) {
+            case "Musica" : {
+                nextFragment = AudioFragment.newInstance((ShimmerTrialMusic) shimmerTrialProgress.get(0));
+
+                Log.i("Musica", "performTransition: ");
+                break;
+            }
+            case "Lettura" : {
+                nextFragment = AudioFragment.newInstance((ShimmerTrialMusic) shimmerTrialProgress.get(0));
+                Log.i("Lettura", "performTransition: ");
+                break;
+            }
+            case "Countdown" : {
+                long countdown_timer = Integer.parseInt(shimmerTrialProgress.get(0).getTrialDuration()) * 1000;
+                msuntilfinish = countdown_timer;
+                nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon(), countdown_timer);
+                Log.i("CountDown", "performTransition: ");
+                break;
+            }
+            case "Prompt" : {
+                Log.i("Prompt", "performTransition: ");
+                break;
+            }
+        }
 
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
         // 1. Exit for Previous Fragment
         Slide exitFade = new Slide(Gravity.LEFT);
         exitFade.setDuration(FADE_DEFAULT_TIME);
+        assert previousFragment != null;
         previousFragment.setExitTransition(exitFade);
 
         // 2. Shared Elements Transition
@@ -264,7 +287,127 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
     @Override
-    public void onFragmentInteraction(int event) {
+    public void onFragmentInteraction(int code) {
+        fragment_handler(code);
+
+    }
+
+
+
+    public void sendShimmerDataInitial() {
+        try {
+            Gson gson = new Gson();
+            String listString = gson.toJson(
+                    shimmerDataProgress,
+                    new TypeToken<ArrayList<ShimmerData>>() {
+                    }.getType());
+            JSONArray jsonArray = new JSONArray(listString);
+            JSONObject obj = new JSONObject();
+            try {
+                obj.put("Nome", gv.getName());
+                obj.put("Cognome", gv.getSurname());
+
+                JSONObject jobjInner = new JSONObject();
+                jobjInner.put("trial_name", shimmerTrialProgress.get(0).getTrialName());
+                jobjInner.put("trial_duration", shimmerTrialProgress.get(0).getTrialDuration());
+                jobjInner.put("trial_mode", shimmerTrialProgress.get(0).getMode());
+                jobjInner.put("shimmerdata", jsonArray);
+                for (int i = 0; i < values.length; i++) {
+                    jobjInner.put(shimmerTrialProgress.get(0).getN_domande().get(i).getNome_domanda(), values[i]);
+                }
+                JSONObject jobjInnerDate = new JSONObject();
+                jobjInnerDate.put("Trial1", jobjInner);
+                obj.put(gv.getDate(), jobjInnerDate);
+            } catch (JSONException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            JsonArray jArray = new JsonArray();
+            jArray.add(String.valueOf(obj));
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(obj));
+
+            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
+            shimmerDataProgress.clear();
+            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        shimmerDataProgress.clear();
+    }
+
+    public void sendShimmerDataUpdate() {
+        try {
+            Gson gson = new Gson();
+            String listString = gson.toJson(
+                    shimmerDataProgress,
+                    new TypeToken<ArrayList<ShimmerData>>() {
+                    }.getType());
+            JSONArray jsonArray = new JSONArray(listString);
+            JSONObject obj = new JSONObject();
+            JSONObject jobjInnerDate = new JSONObject();
+            try {
+                obj.put("Nome", gv.getName());
+                obj.put("Cognome", gv.getSurname());
+
+                JSONObject jobjInner = new JSONObject();
+                jobjInner.put("trial_name", shimmerTrialProgress.get(0).getTrialName());
+                jobjInner.put("trial_duration", shimmerTrialProgress.get(0).getTrialDuration());
+                jobjInner.put("trial_mode", shimmerTrialProgress.get(0).getMode());
+                jobjInner.put("shimmerdata", jsonArray);
+                for (int i = 0; i < values.length; i++) {
+                    jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
+                }
+
+                jobjInnerDate.put("_id", gv.get_id());
+                jobjInnerDate.put("date_trial", gv.getDate());
+                jobjInnerDate.put("trialnumber", "Trial"+shimmerProgress);
+                jobjInnerDate.put("Trial"+shimmerProgress, jobjInner);
+
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+            JsonArray jArray = new JsonArray();
+            jArray.add(String.valueOf(obj));
+            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/update", String.valueOf(jobjInnerDate));
+
+            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
+            shimmerDataProgress.clear();
+            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        shimmerDataProgress.clear();
+    }
+
+    @Override
+    public void onFragmentInteractionIntroduction() {
+        performTransition();
+    }
+
+    @Override
+    public void onFragmentInteractionForm(int[] voti) {
+        values = voti;
+        for (int i : voti) {
+            Log.i("caac", "onFragmentInteractionForm: " + i);
+        }
+        if(shimmerProgress == 1) {
+            sendShimmerDataInitial();
+        }else {
+            sendShimmerDataUpdate();
+        }
+        updateProgressTrial();
+
+    }
+
+
+    @Override
+    public void onFragmentInteractionAudio(int code) {
+        fragment_handler(code);
+    }
+
+    private void fragment_handler(int event) {
         switch (event) {
             case 1: {
                 Log.i("play", "onFragmentInteraction: ");
@@ -351,113 +494,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         }
     }
 
-    public void sendShimmerDataInitial() {
-        try {
-            Gson gson = new Gson();
-            String listString = gson.toJson(
-                    shimmerDataProgress,
-                    new TypeToken<ArrayList<ShimmerData>>() {
-                    }.getType());
-            JSONArray jsonArray = new JSONArray(listString);
-            JSONObject obj = new JSONObject();
-            try {
-                obj.put("Nome", gv.getName());
-                obj.put("Cognome", gv.getSurname());
-
-                JSONObject jobjInner = new JSONObject();
-                jobjInner.put("shimmerdata", jsonArray);
-                for (int i = 0; i < values.length; i++) {
-                    jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
-                }
-                JSONObject jobjInnerDate = new JSONObject();
-                jobjInnerDate.put("Trial1", jobjInner);
-                obj.put(gv.getDate(), jobjInnerDate);
-            } catch (JSONException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            JsonArray jArray = new JsonArray();
-            jArray.add(String.valueOf(obj));
-            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(obj));
-
-            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
-            shimmerDataProgress.clear();
-            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        shimmerDataProgress.clear();
-    }
-
-    public void sendShimmerDataUpdate() {
-        try {
-            Gson gson = new Gson();
-            String listString = gson.toJson(
-                    shimmerDataProgress,
-                    new TypeToken<ArrayList<ShimmerData>>() {
-                    }.getType());
-            JSONArray jsonArray = new JSONArray(listString);
-            JSONObject obj = new JSONObject();
-            JSONObject jobjInnerDate = new JSONObject();
-            try {
-                obj.put("Nome", gv.getName());
-                obj.put("Cognome", gv.getSurname());
-
-                JSONObject jobjInner = new JSONObject();
-                jobjInner.put("shimmerdata", jsonArray);
-                for (int i = 0; i < values.length; i++) {
-                    jobjInner.put(shimmerTrial.get(shimmerTrial.size() - shimmerTrialProgress.size()).getN_domande().get(i).getNome_domanda(), values[i]);
-                }
-
-                jobjInnerDate.put("_id", gv.get_id());
-                jobjInnerDate.put("date_trial", gv.getDate());
-                jobjInnerDate.put("trialnumber", "Trial"+shimmerProgress);
-                jobjInnerDate.put("Trial"+shimmerProgress, jobjInner);
-
-            } catch (JSONException e) {
-                e.printStackTrace();
-            }
-            JsonArray jArray = new JsonArray();
-            jArray.add(String.valueOf(obj));
-            new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/update", String.valueOf(jobjInnerDate));
-
-            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
-            shimmerDataProgress.clear();
-            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        shimmerDataProgress.clear();
-    }
-
-    @Override
-    public void onFragmentInteractionIntroduction() {
-        performTransition();
-    }
-
-    @Override
-    public void onFragmentInteractionForm(int[] voti) {
-        values = voti;
-        for (int i : voti) {
-            Log.i("caac", "onFragmentInteractionForm: " + i);
-        }
-        if(shimmerProgress == 1) {
-            sendShimmerDataInitial();
-        }else {
-            sendShimmerDataUpdate();
-        }
-        updateProgressTrial();
-
-    }
-
-
-    @Override
-    public void onFragmentInteractionAudio(Uri uri) {
-
-    }
-
     public class SendDeviceDetails extends AsyncTask<String, Void, String> {
         @Override
         protected String doInBackground(String... params) {
@@ -508,4 +544,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
         }
     }
+
+
 }

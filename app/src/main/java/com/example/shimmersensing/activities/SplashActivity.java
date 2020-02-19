@@ -3,19 +3,17 @@ package com.example.shimmersensing.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Application;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.CountDownTimer;
-import android.util.Base64;
 import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.global.GlobalValues;
+import com.example.shimmersensing.interfaccia.Shimmer_interface;
 import com.example.shimmersensing.utilities.QuestionTrial;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerTrial;
@@ -28,14 +26,13 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends AppCompatActivity implements Shimmer_interface {
 
     private ArrayList<ShimmerTrial> shimmertrial;
     private SharedPreferences pref;
@@ -52,7 +49,7 @@ public class SplashActivity extends AppCompatActivity {
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
         try {
-            new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/get");
+            new GetDBData().execute(URL_SERVER+"get");
             Log.i("pippobaudo", "onCreate: ");
         } catch (Exception e) {
             Log.i("pippobaudoerror", "onCreate: ");
@@ -72,6 +69,8 @@ public class SplashActivity extends AppCompatActivity {
 
     @SuppressLint("StaticFieldLeak")
     public class GetDBData extends AsyncTask<String, Void, String> {
+
+
         @Override
         protected String doInBackground(String... params) {
             StringBuilder data = new StringBuilder();
@@ -137,41 +136,40 @@ public class SplashActivity extends AppCompatActivity {
                 String shimmer_name;
                 String shimmer_mode;
                 String mode;
+                String url_icon;
+                String duration_trial;
                 JSONArray domande;
                 try {
                     JSONObject jObj = new JSONObject(jsonDB);
                     globalValues.setName(jObj.getString("name"));
                     globalValues.setSurname(jObj.getString("surname"));
                     globalValues.setDate(jObj.getString("date"));
-                    jObj.get("shimmerdata");
-                    JSONArray jarray = jObj.getJSONArray("shimmerdata");
+                    jObj.get("trial");
+                    JSONArray jarray = jObj.getJSONArray("trial");
                     for (int j = 0; j < jarray.length(); j++) {
                         ArrayList<QuestionTrial> aQuest = new ArrayList<>();
                         JSONObject curr = jarray.getJSONObject(j);
                         shimmer_name = curr.getString("trial_name");
-                        if (shimmer_name.equals("musica")) {
-                            String shimmer_audio = curr.getString("track");
-//                            SharedPreferences.Editor editor = pref.edit();
-//                            editor.putString("shimmeraudio", shimmer_audio);
-//                            editor.apply();
-                            shimmer_mode = curr.getString("trial_duration");
-                            mode = curr.getString("mode");
-                            domande = curr.getJSONArray("n_domande");
+                        shimmer_mode = curr.getString("mode");
+                        url_icon = curr.getString("url_img_cat");
+                        if (shimmer_mode.equals("Musica")) {
+                            String shimmer_audio = curr.getString("mod_file_url");
+                            duration_trial = curr.getString("trial_duration");
+                            domande = curr.getJSONArray("questionario_trial");
                             for (int k = 0; k < domande.length(); k++) {
                                 JSONObject question = domande.getJSONObject(k);
-                                aQuest.add(new QuestionTrial(question.getString("sheet_name"), question.getString("domanda"), question.getInt("range")));
+                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
                             }
-                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, shimmer_mode, mode, aQuest, shimmer_audio);
+                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, shimmer_audio);
                             shimmertrial.add(s);
                         } else {
-                            shimmer_mode = curr.getString("trial_duration");
-                            mode = curr.getString("mode");
-                            domande = curr.getJSONArray("n_domande");
+                            duration_trial = curr.getString("trial_duration");
+                            domande = curr.getJSONArray("questionario_trial");
                             for (int k = 0; k < domande.length(); k++) {
                                 JSONObject question = domande.getJSONObject(k);
-                                aQuest.add(new QuestionTrial(question.getString("sheet_name"), question.getString("domanda"), question.getInt("range")));
+                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
                             }
-                            ShimmerTrial s = new ShimmerTrial(shimmer_name, shimmer_mode, mode, aQuest);
+                            ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest);
                             shimmertrial.add(s);
                         }
 
@@ -245,7 +243,7 @@ public class SplashActivity extends AppCompatActivity {
                     }
 
 
-                    new GetDBData().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/trialdetails");
+                    new GetDBData().execute(URL_SERVER+"trialdetails");
 
                 } catch (JSONException e) {
                     Log.i("pippobaudoerrorOnPost", "onCreate: ");
@@ -270,35 +268,6 @@ public class SplashActivity extends AppCompatActivity {
                 httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoOutput(true);
-//                httpURLConnection.connect();
-//                // getting file length
-//                int lenghtOfFile = httpURLConnection.getContentLength();
-//                // input stream to read file - with 8k buffer
-//                InputStream input = new BufferedInputStream(httpURLConnection.getInputStream(),
-//                        8192);
-////            File download = new File(Environment.getExternalStorageDirectory()
-////                    + "/download/");
-////            if (!download.exists()) {
-////                download.mkdir();
-////            }
-////            String strDownloaDuRL = download + "/" + "test";
-////            Log.v("log_tag", " down url   " + strDownloaDuRL + " lenght: " + lenghtOfFile);
-////            FileOutputStream output = new FileOutputStream(strDownloaDuRL);
-////
-////            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-//
-//                ByteArrayOutputStream bos = new ByteArrayOutputStream();
-//                int next = input.read();
-//                while (next > -1) {
-//                    bos.write(next);
-//                    next = input.read();
-//                }
-//
-//                bos.flush();
-//                byte data_byte[] = bos.toByteArray();
-//                bos.close();
-//
-//                Log.v("log_tag", "byte array " + data_byte.length);
                 try {
                     Log.e("trycatch", "onCreate: ");
                     if (httpURLConnection.getInputStream() != null) {
@@ -331,28 +300,6 @@ public class SplashActivity extends AppCompatActivity {
 
                 long total = 0;
 
-
-//            // flushing output
-//            output.flush();
-//
-//            // closing streams
-//            output.close();
-//                input.close();
-
-
-//            try {
-//                InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
-//                InputStreamReader inputStreamReader = new InputStreamReader(in);
-////
-//                int inputStreamData = inputStreamReader.read();
-//                while (inputStreamData != -1) {
-//                    char current = (char) inputStreamData;
-//                    inputStreamData = inputStreamReader.read();
-//                    data.append(current);
-//                }
-//            } catch (Exception e) {
-//                e.printStackTrace();
-//            }
 
             } catch (Exception e) {
                 e.printStackTrace();

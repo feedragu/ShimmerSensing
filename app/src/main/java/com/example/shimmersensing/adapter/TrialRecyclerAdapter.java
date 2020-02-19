@@ -1,6 +1,7 @@
 package com.example.shimmersensing.adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +12,15 @@ import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.shimmersensing.R;
+import com.example.shimmersensing.interfaccia.Shimmer_interface;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.squareup.picasso.Picasso;
 
 import java.util.List;
 
-public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdapter.ImageViewHolder> {
+import static androidx.constraintlayout.widget.Constraints.TAG;
+
+public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdapter.ImageViewHolder> implements Shimmer_interface {
 
     private Context mContext;
     private List<ShimmerTrial> shimmerTrial;
@@ -38,8 +42,9 @@ public class TrialRecyclerAdapter extends RecyclerView.Adapter<TrialRecyclerAdap
     @Override
     public void onBindViewHolder(@NonNull ImageViewHolder holder, int position) {
         int resourceImage = mContext.getResources().getIdentifier(shimmerTrial.get(position).getTrialName().toLowerCase(), "drawable", mContext.getPackageName());
+        Log.i(TAG, "onBindViewHolder: "+URL_FILE.concat(shimmerTrial.get(position).getUrl_icon()));
         Picasso.get()
-                .load(resourceImage)
+                .load(URL_FILE.concat(shimmerTrial.get(position).getUrl_icon()))
                 .into(holder.trialImage);
         holder.trialName.setText(shimmerTrial.get(position).getTrialName());
         holder.trialDuration.setText(shimmerTrial.get(position).getTrialDuration());
