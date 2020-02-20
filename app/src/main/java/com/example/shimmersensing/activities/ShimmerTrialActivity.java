@@ -6,6 +6,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.CountDownTimer;
@@ -22,6 +23,7 @@ import android.view.Gravity;
 import android.view.MenuItem;
 import android.view.Window;
 import android.widget.ProgressBar;
+import android.widget.Toast;
 
 import com.example.shimmersensing.fragment.AudioFragment;
 import com.example.shimmersensing.fragment.CountDownFragment;
@@ -142,6 +144,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         Log.i("provaRestart", "onRestart: ");
     }
 
+    @SuppressLint("ShowToast")
     private void performTransition() {
         if (isDestroyed()) {
             return;
@@ -170,8 +173,14 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case "Prompt" : {
+                long countdown_timer = Integer.parseInt(shimmerTrialProgress.get(0).getTrialDuration()) * 1000;
+                msuntilfinish = countdown_timer;
+                nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon(), countdown_timer);
                 Log.i("Prompt", "performTransition: ");
                 break;
+            }
+            default : {
+                Toast.makeText(this, "Errore", Toast.LENGTH_LONG);
             }
         }
 
