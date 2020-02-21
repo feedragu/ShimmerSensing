@@ -16,12 +16,12 @@ import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.interfaccia.Shimmer_interface;
-import com.google.android.material.button.MaterialButton;
 import com.hookedonplay.decoviewlib.DecoView;
 import com.hookedonplay.decoviewlib.charts.SeriesItem;
 import com.hookedonplay.decoviewlib.events.DecoEvent;
@@ -47,7 +47,7 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
     private static final String ARG_PARAM2 = "param2";
     private static final String ARG_PARAM3 = "param3";
 
-    private MaterialButton fButton;
+    private Button fButton;
     private AnimationDrawable pausePlayAnim;
     private Handler timeHandler = new Handler();
 
@@ -122,13 +122,11 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
         Picasso.get()
                 .load(URL_FILE.concat(url_icon))
                 .into(trialImage);
-        final AnimationDrawable ad = (AnimationDrawable) fButton.getIcon();
         fButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
                 if (isRunning) {
-                    ad.start();
                     isRunning = false;
                     Log.i(TAG, "stopPlay: ");
                     if (mListener != null) {
