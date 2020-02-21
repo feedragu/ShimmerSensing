@@ -115,7 +115,7 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
         super.onViewCreated(view, savedInstanceState);
 
 
-        fButton = getView().findViewById(R.id.buttonSendForm);
+        fButton = Objects.requireNonNull(getView()).findViewById(R.id.buttonSendForm);
         trialNameView = getView().findViewById(R.id.deviceName);
         trialImage = getView().findViewById(R.id.deviceImage);
         trialNameView.setText(trialName);

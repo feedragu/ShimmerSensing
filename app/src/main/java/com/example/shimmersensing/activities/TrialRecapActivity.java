@@ -1,12 +1,5 @@
 package com.example.shimmersensing.activities;
 
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.cardview.widget.CardView;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
@@ -18,13 +11,9 @@ import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
-import android.preference.PreferenceManager;
-import android.transition.Explode;
 import android.transition.Fade;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
-import android.transition.TransitionManager;
-import android.util.Base64;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
@@ -35,15 +24,20 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
 import com.example.shimmersensing.R;
-import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.adapter.TrialRecyclerAdapter;
 import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.utilities.ShimmerData;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.ShimmerTrial;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.series.DataPoint;
 import com.jjoe64.graphview.series.DataPointInterface;
@@ -156,31 +150,30 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
 //        playMp3(array);
 
 
+        if (shimmerSensor != null) {
+            shimmerTrialRecycler = findViewById(R.id.recyclerTrial);
 
+            sensorname = findViewById(R.id.sensorName);
+            macAddress = findViewById(R.id.macaddress);
+            sampleRateSensor = findViewById(R.id.sampleRate);
+            lastUse = findViewById(R.id.dateUsage);
+            sensorname.setText(shimmerSensor.getDeviceName());
+            macAddress.setText(shimmerSensor.getMacAddress());
+            sampleRateSensor.setText(shimmerSensor.getSampleRate() + " Hz");
+            lastUse.setText(shimmerSensor.getLastUse().toString());
 
-        shimmerTrialRecycler = findViewById(R.id.recyclerTrial);
+            RecyclerView.LayoutManager recyce = new
+                    LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
 
-        sensorname = findViewById(R.id.sensorName);
-        macAddress = findViewById(R.id.macaddress);
-        sampleRateSensor = findViewById(R.id.sampleRate);
-        lastUse = findViewById(R.id.dateUsage);
-        sensorname.setText(shimmerSensor.getDeviceName());
-        macAddress.setText(shimmerSensor.getMacAddress());
-        sampleRateSensor.setText(shimmerSensor.getSampleRate() + " Hz");
-        lastUse.setText(shimmerSensor.getLastUse().toString());
+            shimmerTrialRecycler.setLayoutManager(recyce);
+            shimmerTrialRecycler.setNestedScrollingEnabled(false);
 
-        RecyclerView.LayoutManager recyce = new
-                LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+            rAdapter = new TrialRecyclerAdapter(TrialRecapActivity.this, shimmerTrial, this);
+            DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerTrialRecycler.getContext(), DividerItemDecoration.VERTICAL);
+            shimmerTrialRecycler.addItemDecoration(itemDecor);
+            shimmerTrialRecycler.setAdapter(rAdapter);
 
-        shimmerTrialRecycler.setLayoutManager(recyce);
-        shimmerTrialRecycler.setNestedScrollingEnabled(false);
-
-        rAdapter = new TrialRecyclerAdapter(TrialRecapActivity.this, shimmerTrial, this);
-        DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerTrialRecycler.getContext(), DividerItemDecoration.VERTICAL);
-        shimmerTrialRecycler.addItemDecoration(itemDecor);
-        shimmerTrialRecycler.setAdapter(rAdapter);
-
-
+        }
         Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
         setSupportActionBar(mToolbar);
         getSupportActionBar().setTitle("Riepilogo Trial");
