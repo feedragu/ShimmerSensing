@@ -62,6 +62,7 @@ import com.shimmerresearch.driver.Configuration;
 import com.shimmerresearch.driver.FormatCluster;
 import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
+import com.shimmerresearch.exceptions.ConnectionExceptionListener;
 import com.shimmerresearch.exceptions.ShimmerException;
 
 import org.json.JSONArray;
@@ -209,6 +210,26 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 btManager = new ShimmerBluetoothManagerAndroid(ShimmerTrialActivity.this, mHandler);
                 shimmerBtAdd = gv.getSsd().getMacAddress();
                 btManager.connectShimmerThroughBTAddress(gv.getSsd().getMacAddress());
+                btManager.setConnectionExceptionListener(new ConnectionExceptionListener() {
+                    @Override
+                    public void onConnectionStart(String connectionHandle) {
+                        Log.i("test_listner1", "onConnectionException: ");
+
+                    }
+
+                    @Override
+                    public void onConnectionException(Exception exception) {
+                        exception.printStackTrace();
+                        Log.i("test_listner2", "onConnectionException: ");
+                    }
+
+                    @Override
+                    public void onConnectStartException(String connectionHandle) {
+                        Log.i("test_listner3", "onConnectionException: ");
+                        btManager.getHandler().sendEmptyMessage(666666);
+
+                    }
+                });
                 alertD = new AlertDialog.Builder(ShimmerTrialActivity.this);
                 alertD.setView(R.layout.progress_dialog);
 
@@ -565,7 +586,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 if (DEBUG_SHIMMER) {
                     cTimer.cancel();
                 } else {
-                    shimmerDevice.stopStreaming();
+                    if(shimmerDevice.isConnected())
+                        shimmerDevice.stopStreaming();
+                    else
+                        finish();
                 }
                 Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
                 Log.i("cachi", "onFragmentInteraction: " + shimmerTrial.get(0).getN_domande().size());
@@ -680,6 +704,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
     private void showDialogShimmer() {
+        Log.i("ao", "onConnectionException: ");
         alertdialog.dismiss();
         alertdialog = new AlertDialog.Builder(this)
                 .setTitle("Non connesso")
@@ -765,6 +790,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
+                case 666666 :
+                    Log.i("voglioandare a casa", "handleMessage: ");
+                    showDialogShimmer();
+                    break;
                 case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
                     if ((msg.obj instanceof ObjectCluster)) {
 
@@ -957,6 +986,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                                     try {
                                         mLPFilter = new Filter(Filter.LOW_PASS, sampleRate, mLPFc);
                                     } catch (Exception e) {
+                                        Log.i("test_error", "handleMessage: ");
                                         e.printStackTrace();
                                     }
 
@@ -981,20 +1011,21 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             if (not_config_yet) {
                                 showDialogShimmer();
 
-                            }else {
+                            } else {
                                 showDialogShimmerDisconnetted();
                             }
-                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
+                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
                             break;
                     }
+                    break;
+                default:
+                    Log.i(LOG_TAG, "Shimmer [" + msg.what + "] has been DISCONNECTED");
                     break;
             }
 
             super.handleMessage(msg);
         }
     };
-
-
 
 
 }
