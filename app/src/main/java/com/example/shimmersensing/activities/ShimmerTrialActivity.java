@@ -62,6 +62,7 @@ import com.shimmerresearch.driver.Configuration;
 import com.shimmerresearch.driver.FormatCluster;
 import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
+import com.shimmerresearch.exceptions.ShimmerException;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -155,6 +156,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     int hztoms = 7; //Delay for 15 seconds.  One second = 1000 milliseconds.
     int counterCsv = 0;
     private String jsonDB;
+    private AlertDialog.Builder alertD;
+    private AlertDialog alertdialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,20 +202,25 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             trialProgress.setMax(shimmerTrial.size());
             Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
         }
+
+
         if (!DEBUG_SHIMMER) {
             try {
-                btManager = new ShimmerBluetoothManagerAndroid(this, mHandler);
+                btManager = new ShimmerBluetoothManagerAndroid(ShimmerTrialActivity.this, mHandler);
                 shimmerBtAdd = gv.getSsd().getMacAddress();
-                btManager.connectShimmerThroughBTAddress(gv.getSsd().getMacAddress());   //Connect to the selected device
+                btManager.connectShimmerThroughBTAddress(gv.getSsd().getMacAddress());
+                alertD = new AlertDialog.Builder(ShimmerTrialActivity.this);
+                alertD.setView(R.layout.progress_dialog);
+
+                alertdialog = alertD.show();
+                alertdialog.setCanceledOnTouchOutside(false);
                 Log.i("testconnection", "onCreate: " + gv.getSsd().getMacAddress());
             } catch (Exception e) {
-                Log.e(LOG_TAG, "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
+                Log.e("test_conn", "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
             }
         }
 
         mFragmentManager = getSupportFragmentManager();
-
-        loadInitialFragment();
 
 
     }
@@ -538,7 +546,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             counterShimmerDEBUG = 0;
                         }
                     }.start();
-                }else {
+                } else {
                     shimmerDevice.startStreaming();
                 }
                 break;
@@ -547,7 +555,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 Log.i("stop", "onFragmentInteraction: ");
                 if (DEBUG_SHIMMER) {
                     cTimer.cancel();
-                }else {
+                } else {
                     shimmerDevice.stopStreaming();
                 }
 
@@ -556,7 +564,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             case 3: {
                 if (DEBUG_SHIMMER) {
                     cTimer.cancel();
-                }else {
+                } else {
                     shimmerDevice.stopStreaming();
                 }
                 Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
@@ -610,7 +618,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             counterShimmerDEBUG = 0;
                         }
                     }.start();
-                }else {
+                } else {
                     shimmerDevice.startStreaming();
                 }
 
@@ -669,6 +677,85 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             shimmerProgress++;
             Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
         }
+    }
+
+    private void showDialogShimmer() {
+        alertdialog.dismiss();
+        alertdialog = new AlertDialog.Builder(this)
+                .setTitle("Non connesso")
+                .setMessage("Non è stato possibile connettersi al dispositivo shimmer")
+                .setIcon(R.drawable.s_logo_shimmer)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ShimmerTrialActivity.this.finish();
+                    }
+                })
+                .show();
+    }
+
+    private void showDialogShimmerDisconnetted() {
+        alertdialog.dismiss();
+        alertdialog = new AlertDialog.Builder(this)
+                .setTitle("Shimmer disconnesso")
+                .setMessage("Il dispositivo è stasto disconnesso, prego riprovare")
+                .setIcon(R.drawable.s_logo_shimmer)
+                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        ShimmerTrialActivity.this.finish();
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        Log.i("stop", "onFragmentInteraction: ");
+        if (DEBUG_SHIMMER) {
+            cTimer.cancel();
+        } else {
+            if (shimmerDevice.isStreaming())
+                shimmerDevice.stopStreaming();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (shimmerDevice != null) {
+            if (shimmerDevice.isStreaming() | shimmerDevice.isSDLogging()) {
+                shimmerDevice.stopStreaming();
+                try {
+                    shimmerDevice.disconnect();
+                } catch (ShimmerException e) {
+                    e.printStackTrace();
+                }
+
+            }
+
+
+        }
+        handler.removeCallbacks(runnable); //stop handler when activity not visible
+        super.onDestroy();
+    }
+
+    @Override
+    protected void onStop() {
+        //Disconnect the Shimmer device when app is stopped
+        if (shimmerDevice != null) {
+            if (shimmerDevice.isSDLogging()) {
+                shimmerDevice.stopSDLogging();
+                Log.d(LOG_TAG, "Stopped Shimmer Logging");
+            } else if (shimmerDevice.isStreaming()) {
+                shimmerDevice.stopStreaming();
+                Log.d(LOG_TAG, "Stopped Shimmer Streaming");
+            } else {
+                shimmerDevice.stopStreamingAndLogging();
+                Log.d(LOG_TAG, "Stopped Shimmer Streaming and Logging");
+            }
+        }
+        btManager.disconnectAllDevices();
+        Log.i(LOG_TAG, "Shimmer DISCONNECTED");
+        super.onStop();
     }
 
     @SuppressLint("HandlerLeak")
@@ -826,14 +913,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                                 "\n magnetometer_y: " + magnetometer_y +
                                 "\n magnetometer_z: " + magnetometer_z);
 
-//
-//                        mSeries2.appendData(new DataPoint(timestamp / 1000, dataPPG), true, 10000);
-
-
-//                        double acceleration = Math.sqrt(Math.pow(accel_x, 2) + Math.pow(accel_z, 2) + Math.pow(accel_y, 2));
-//                        mSeriesX.appendData(new DataPoint(timestamp / 1000, acceleration), true, 10000);
-//                        mSeriesGsr.appendData(new DataPoint(timestamp / 1000, gsrConductance), true, 10000);
-//                        mSeriesGsrResistance.appendData(new DataPoint(timestamp / 1000, gsrResistance), true, 10000);
                         double tsLong = System.currentTimeMillis() / 1000;
                         ShimmerData s = new ShimmerData(dataPPG, gsrConductance, accel_x,
                                 accel_y, accel_z, gyroscope_x, gyroscope_y, gyroscope_z,
@@ -842,9 +921,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
                     }
                     break;
-                case Shimmer.MESSAGE_TOAST:
-                    Toast.makeText(getApplicationContext(), msg.getData().getString(Shimmer.TOAST), Toast.LENGTH_SHORT).show();
-                    break;
+
                 case ShimmerBluetooth.MSG_IDENTIFIER_STATE_CHANGE:
                     ShimmerBluetooth.BT_STATE state = null;
                     String macAddress = "";
@@ -864,34 +941,17 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now CONNECTED");
                             shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
                             if (shimmerDevice != null) {
+
                                 Log.i(LOG_TAG, "Got the ShimmerDevice!");
                                 if (not_config_yet) {
+                                    alertdialog.dismiss();
+                                    loadInitialFragment();
                                     sampleRate = shimmerDevice.getSamplingRateShimmer();
                                     connected = true;
                                     mNewPPGSignalProcessing = true;
                                     mCountPPGInitial = 0;
                                     mHeartRateCalculation = new PPGtoHRAlgorithm(sampleRate, mNumberOfBeatsToAverage, 10); //10 second training period
-//                                    handler.postDelayed(runnable = new Runnable() {
-//                                        public void run() {
-//                                            SharedPreferences.Editor editor = pref.edit();
-//                                            Gson gson = new Gson();
-//                                            JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-//                                            Log.i("prova_json", "run: " + jsonElements);
-//                                            editor.putString("shimmerdata", String.valueOf(jsonElements));
-//                                            editor.apply();
-////                                            try {
-////                                                new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
-////
-////                                                Log.i("im sending 2", "run: send " + list.size());
-////                                                list.clear();
-////                                                Log.i("im sending 3", "run: send " + list.size());
-////                                            } catch (Exception e) {
-////                                                e.printStackTrace();
-////                                            }
-//
-//                                            handler.postDelayed(runnable, delay);
-//                                        }
-//                                    }, delay);
+
                                     not_config_yet = false;
 
                                     try {
@@ -901,9 +961,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                                     }
 
                                 }
-//                                nDialog.dismiss();
-//                                macAddr.setText(shimmerBtAdd);
-//                                connect_start.setText("Start streaming");
                             } else {
                                 Log.i(LOG_TAG, "ShimmerDevice returned is NULL!");
                             }
@@ -921,20 +978,13 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now SDLOGGING");
                             break;
                         case DISCONNECTED:
-//                            if (nDialog.isShowing()) {
-//                                nDialog.dismiss();
-//                                new AlertDialog.Builder(ShimmerTrialActivity.this)
-//                                        .setTitle("Error")
-//                                        .setMessage("Shimmer sensor is not connected")
-//                                        .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
-//                                            @Override
-//                                            public void onClick(DialogInterface dialog, int which) {
-//                                                Log.d("MainActivity", "Done");
-//                                            }
-//                                        })
-//                                        .show();
-//                            }
-                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
+                            if (not_config_yet) {
+                                showDialogShimmer();
+
+                            }else {
+                                showDialogShimmerDisconnetted();
+                            }
+                                Log.i(LOG_TAG, "Shimmer [" + macAddress + "] has been DISCONNECTED");
                             break;
                     }
                     break;
@@ -943,6 +993,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             super.handleMessage(msg);
         }
     };
+
+
 
 
 }

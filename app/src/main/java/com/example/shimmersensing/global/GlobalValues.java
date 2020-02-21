@@ -1,18 +1,55 @@
 package com.example.shimmersensing.global;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
 import com.example.shimmersensing.utilities.ShimmerTrial;
+import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
+import com.shimmerresearch.driver.ShimmerDevice;
 
 import java.util.ArrayList;
-
-import static androidx.constraintlayout.widget.Constraints.TAG;
 
 public class GlobalValues extends Application {
     private String name, surname, date;
     private String _id;
+    private ShimmerDevice shimmerDevice = null;
+    private ArrayList<ShimmerTrial> shimmerTrialArrayList;
+    private ShimmerSensorDevice ssd;
+    private ShimmerBluetoothManagerAndroid btManager;
+
+    public GlobalValues() {
+    }
+
+
+    public void setBtManager(ShimmerBluetoothManagerAndroid btManager) {
+        this.btManager = btManager;
+    }
+
+    public ShimmerBluetoothManagerAndroid getBtManager() {
+        return btManager;
+    }
+
+
+    public boolean isShimmerDeviceConnected() {
+        return shimmerDevice != null;
+    }
+
+    public void setShimmerDevice(ShimmerDevice shimmerDevice) {
+        this.shimmerDevice = shimmerDevice;
+    }
+
+    public ShimmerDevice getShimmerDevice() {
+        return shimmerDevice;
+    }
+
+
+    public ShimmerSensorDevice getSsd() {
+        return ssd;
+    }
+
+    public void setSsd(ShimmerSensorDevice ssd) {
+        this.ssd = ssd;
+    }
 
     public void set_id(String _id) {
         this._id = _id;
@@ -22,19 +59,6 @@ public class GlobalValues extends Application {
         return _id;
     }
 
-    private ArrayList<ShimmerTrial> shimmerTrialArrayList;
-    private ShimmerSensorDevice ssd;
-
-    public void setSsd(ShimmerSensorDevice ssd) {
-        this.ssd = ssd;
-    }
-
-    public ShimmerSensorDevice getSsd() {
-        return ssd;
-    }
-
-    public GlobalValues() {
-    }
 
     public void setName(String name) {
         this.name = name;

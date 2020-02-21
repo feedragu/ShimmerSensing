@@ -1,14 +1,7 @@
 package com.example.shimmersensing.activities;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.Toolbar;
-import androidx.recyclerview.widget.DividerItemDecoration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.viewpager2.widget.ViewPager2;
-
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.bluetooth.BluetoothAdapter;
@@ -20,7 +13,8 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
-import android.transition.Explode;
+import android.os.Handler;
+import android.os.Message;
 import android.transition.Scene;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
@@ -32,28 +26,38 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
+import androidx.recyclerview.widget.DividerItemDecoration;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+import androidx.viewpager2.widget.ViewPager2;
+
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.adapter.BtShimmerRecyclerAdapter;
 import com.example.shimmersensing.adapter.MyViewPagerAdapter;
-import com.example.shimmersensing.adapter.TrialRecyclerAdapter;
+import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.global.GlobalValues;
 import com.example.shimmersensing.graphic.ZoomOutPageTransformer;
-import com.example.shimmersensing.adapter.RecyclerAdapter;
 import com.example.shimmersensing.utilities.ShimmerSensorDevice;
-import com.example.shimmersensing.utilities.ShimmerTrial;
-import com.example.shimmersensing.utilities.row;
 import com.google.android.material.tabs.TabLayout;
 import com.google.android.material.tabs.TabLayoutMediator;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
+import com.shimmerresearch.android.Shimmer;
 import com.shimmerresearch.android.manager.ShimmerBluetoothManagerAndroid;
+import com.shimmerresearch.bluetooth.ShimmerBluetooth;
+import com.shimmerresearch.driver.CallbackObject;
+import com.shimmerresearch.driver.ObjectCluster;
 import com.shimmerresearch.driver.ShimmerDevice;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.Set;
+
+import static com.example.shimmersensing.interfaccia.Shimmer_interface.DEBUG_SHIMMER;
 
 public class TrialPresentationActivity extends AppCompatActivity implements BtShimmerRecyclerAdapter.OnBtClickListener {
 
@@ -76,6 +80,9 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
     private Gson gson = new Gson();
     private boolean noShimmerSelected = true;
     private GlobalValues gv;
+    private ShimmerDevice shimmerDevice = null;
+    private String shimmerBtAdd = "00:00:00:00:00:00";
+    private String LOG_TAG = "pageadpater_connection";
 
 
     @Override
@@ -200,7 +207,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                 filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
                 this.registerReceiver(FoundReceiver, filter);
 
-            } catch(IllegalArgumentException e) {
+            } catch (IllegalArgumentException e) {
 
                 e.printStackTrace();
             }
@@ -232,41 +239,12 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
     @Override
     protected void onResume() {
         super.onResume();
-//        sceneOn = pref.getInt("scene_on", 1);
-//        Log.i("onresume", "onResume: " + sceneOn);
-//        switch (sceneOn) {
-//            case 1:
-//                scene1.enter();
-//                attachAdapter();
-//                break;
-//            case 2:
-//                scene2.enter();
-//                attachAdapter();
-//                break;
-//            default:
-//                break;
-//
-//        }
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-//        sceneOn = pref.getInt("scene_on", 1);
-//        Log.i("onresume", "onResume: " + sceneOn);
-//        switch (sceneOn) {
-//            case 1:
-//                scene1.enter();
-//                attachAdapter();
-//                break;
-//            case 2:
-//                scene2.enter();
-//                attachAdapter();
-//                break;
-//            default:
-//                break;
-//
-//        }
+
     }
 
 
@@ -280,56 +258,10 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         switch (sceneOn) {
             case 1:
                 scene1.enter();
-//                shimmerList = findViewById(R.id.bottomOptions);
-//
 
-//                List<row> list = new ArrayList<>();
-//                list.add(new row(R.drawable.settings, "Impostazioni"));
-//                list.add(new row(R.drawable.camminata, "Trial description"));
-//                rAdapter = new RecyclerAdapter(this, list, this);
-//                DividerItemDecoration itemDecor = new DividerItemDecoration(shimmerList.getContext(), DividerItemDecoration.VERTICAL);
-//                shimmerList.addItemDecoration(itemDecor);
-//
-//                try {
-//                    shimmerList.setAdapter(rAdapter);
-//                } catch (Exception e) {
-//                    e.printStackTrace();
-//                }
                 break;
             case 2:
                 scene2.enter();
-                //Turn on Bluetooth
-//                if (myBlueToothAdapter == null)
-//                    Toast.makeText(TrialPresentationActivity.this, "Your device doesnot support Bluetooth", Toast.LENGTH_LONG).show();
-//                else if (!myBlueToothAdapter.isEnabled()) {
-//                    Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-//                    startActivityForResult(BtIntent, 0);
-//                    Toast.makeText(TrialPresentationActivity.this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
-//                }
-
-
-//                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP) {
-//                    int permissionCheck = this.checkSelfPermission("Manifest.permission.ACCESS_FINE_LOCATION");
-//                    permissionCheck += this.checkSelfPermission("Manifest.permission.ACCESS_COARSE_LOCATION");
-//                    if (permissionCheck != 0) {
-//
-//                        this.requestPermissions(new String[]{Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION}, 1001); //Any number
-//                    }
-//                } else {
-//                    Log.d("cazzi", "checkBTPermissions: No need to check permissions. SDK version < LOLLIPOP.");
-//
-//
-//                    if (myBlueToothAdapter != null) {
-//                        myBlueToothAdapter.startDiscovery();
-//                    }
-//                    Toast.makeText(TrialPresentationActivity.this, "Scanning Devices", Toast.LENGTH_LONG).show();
-//
-//
-//                    registerReceiver(FoundReceiver, new IntentFilter(BluetoothDevice.ACTION_FOUND));
-//                    IntentFilter filter = new IntentFilter(
-//                            BluetoothAdapter.ACTION_DISCOVERY_FINISHED);
-//                    this.registerReceiver(FoundReceiver, filter);
-//                }
                 mPager = findViewById(R.id.pager);
                 mPager.setAdapter(new MyViewPagerAdapter(this, shimmerSensor));
                 mPager.setPageTransformer(new ZoomOutPageTransformer());
@@ -349,27 +281,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                             }
                         }).attach();
 
-//                shimmerList = findViewById(R.id.bottomOptions);
-//                List<row> list2 = new ArrayList<>();
-//                list2.add(new row(R.drawable.settings, "Impostazioni"));
-//                rAdapter = new RecyclerAdapter(this, list2, this);
-//                DividerItemDecoration itemDecor2 = new DividerItemDecoration(shimmerList.getContext(), DividerItemDecoration.VERTICAL);
-//                shimmerList.addItemDecoration(itemDecor2);
-//
-//                shimmerList.setAdapter(rAdapter);
-//
-//                btList = findViewById(R.id.btShimmerList);
-//
-//                RecyclerView.LayoutManager recyce = new
-//                        LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
-//
-//                btList.setLayoutManager(recyce);
-//                btList.setNestedScrollingEnabled(false);
-//
-//                btAdapter = new BtShimmerRecyclerAdapter(TrialPresentationActivity.this, btListDev, TrialPresentationActivity.this);
-//                DividerItemDecoration itemDecor = new DividerItemDecoration(btList.getContext(), DividerItemDecoration.VERTICAL);
-//                btList.addItemDecoration(itemDecor);
-//                btList.setAdapter(btAdapter);
                 Toolbar mToolbar = findViewById(R.id.toolbar_shimmer);
                 setSupportActionBar(mToolbar);
                 getSupportActionBar().setTitle("");
@@ -414,38 +325,12 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                         filter.addAction(BluetoothAdapter.ACTION_DISCOVERY_STARTED);
                         this.registerReceiver(FoundReceiver, filter);
 
-                    } catch(IllegalArgumentException e) {
+                    } catch (IllegalArgumentException e) {
 
                         e.printStackTrace();
                     }
                 }
-//                mPager = findViewById(R.id.pager);
-//                mPager.setAdapter(new MyViewPagerAdapter(this, shimmerSensor));
-//                mPager.setPageTransformer(new ZoomOutPageTransformer());
-//                mPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
-//
-//                    @Override
-//                    public void onPageSelected(int position) {
-//                        super.onPageSelected(position);
-//                        currentPage = position;
-//                    }
-//                });
-//                TabLayout tabLayout = findViewById(R.id.tabDots);
-//                new TabLayoutMediator(tabLayout, mPager,
-//                        new TabLayoutMediator.TabConfigurationStrategy() {
-//                            @Override
-//                            public void onConfigureTab(@NonNull TabLayout.Tab tab, int position) {
-//                            }
-//                        }).attach();
 
-//                shimmerList = findViewById(R.id.bottomOptions);
-//                List<row> list2 = new ArrayList<>();
-//                list2.add(new row(R.drawable.settings, "Impostazioni"));
-//                rAdapter = new RecyclerAdapter(this, list2, this);
-//                DividerItemDecoration itemDecor2 = new DividerItemDecoration(shimmerList.getContext(), DividerItemDecoration.VERTICAL);
-//                shimmerList.addItemDecoration(itemDecor2);
-//
-//                shimmerList.setAdapter(rAdapter);
 
                 btList = findViewById(R.id.btShimmerList);
 
@@ -559,7 +444,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
 
             unregisterReceiver(FoundReceiver);
 
-        } catch(IllegalArgumentException e) {
+        } catch (IllegalArgumentException e) {
 
             e.printStackTrace();
         }
@@ -594,6 +479,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         gv.setSsd(s);
         Log.i("boh", "OnBtClickListener: diobono");
         Log.i("boh", "OnBtClickListener: " + gv.getSsd().toString());
+
         startActivity(intent);
     }
 
@@ -609,4 +495,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         editor.putString("shimmertrialsensorsaved", String.valueOf(jsonElements));
         editor.apply();
     }
+
+
+
 }
