@@ -7,6 +7,7 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.Fragment;
 
 import android.os.CountDownTimer;
@@ -69,6 +70,7 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
     private ImageView trialImage;
     private String url_icon;
     private long trialDuration;
+    private MotionLayout motion_layout;
 
     public CountDownFragment() {
         // Required empty public constructor
@@ -118,6 +120,7 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
         fButton = Objects.requireNonNull(getView()).findViewById(R.id.buttonSendForm);
         trialNameView = getView().findViewById(R.id.deviceName);
         trialImage = getView().findViewById(R.id.deviceImage);
+        motion_layout = ((MotionLayout)getView().findViewById(R.id.motionlayout_fragment));
         trialNameView.setText(trialName);
         Picasso.get()
                 .load(URL_FILE.concat(url_icon))
@@ -160,7 +163,20 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
         textPercentage = getView().findViewById(R.id.timerCountdown);
         final SeriesItem finalSeriesItem = seriesItem1;
 
-        timerStart(trialDuration);
+        new CountDownTimer(4000, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                if(millisUntilFinished <= 3001) {
+                    motion_layout.transitionToEnd();
+                }
+            }
+
+            public void onFinish() {
+                timerStart(trialDuration);
+            }
+
+        }.start();
+
         if (mListener != null) {
             mListener.onFragmentInteraction(69);
         }

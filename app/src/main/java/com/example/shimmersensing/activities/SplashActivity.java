@@ -3,6 +3,8 @@ package com.example.shimmersensing.activities;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
@@ -10,6 +12,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import com.example.shimmersensing.R;
 import com.example.shimmersensing.global.GlobalValues;
@@ -26,17 +29,23 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedInputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.ConnectException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.concurrent.TimeoutException;
 
 public class SplashActivity extends AppCompatActivity implements Shimmer_interface {
 
     private ArrayList<ShimmerTrial> shimmertrial;
     private SharedPreferences pref;
     private GlobalValues globalValues;
+    private AlertDialog.Builder alertDialogBuilder;
+    private AlertDialog alertDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,14 +58,36 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
         pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
         try {
-            new GetDBData().execute(URL_SERVER+"get");
-            Log.i("pippobaudo", "onCreate: ");
+            if (!DEBUG_SHIMMER)
+                new GetDBData().execute(URL_SERVER + "trialdetails");
+            else
+                new GetDBData().execute(URL_SERVER + "get");
         } catch (Exception e) {
             Log.i("pippobaudoerror", "onCreate: ");
         }
-//
-//        new GetAudioTrial().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata/audiotrial");
 
+        alertDialogBuilder = new AlertDialog.Builder(SplashActivity.this);
+
+        // set title
+        alertDialogBuilder.setTitle("Server timeout");
+
+        // set dialog message
+        alertDialogBuilder
+                .setMessage("Impossibile connettersi al server")
+                .setCancelable(false)
+                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+
+                    }
+                });
+
+        // create alert dialog
+        alertDialog = alertDialogBuilder.create();
+
+    }
+
+    public void server_timeout() {
+        alertDialog.show();
     }
 
     public void goAhead() {
@@ -100,17 +131,15 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                     } else {
 
                     }
-                } catch (Exception e) {
+                } catch (IOException e) {
 
-                    e.printStackTrace();
 
                 }
 
                 Log.i("shimmer", "doInBackground: " + data.toString());
-            } catch (Exception e) {
-                e.printStackTrace();
-                Log.i("caccapupu", "onCreate: ");
+            } catch (IOException e) {
 
+                Log.i("caccapupu", "onCreate: ");
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
@@ -138,6 +167,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                 String mode;
                 String url_icon;
                 String duration_trial;
+                String description;
                 JSONArray domande;
                 try {
                     JSONObject jObj = new JSONObject(jsonDB);
@@ -152,6 +182,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         shimmer_name = curr.getString("trial_name");
                         shimmer_mode = curr.getString("mode");
                         url_icon = curr.getString("url_img_cat");
+                        description = curr.getString("categoria_descr");
                         if (shimmer_mode.equals("Musica")) {
                             String shimmer_audio = curr.getString("mod_file_url");
                             duration_trial = curr.getString("trial_duration");
@@ -160,7 +191,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                                 JSONObject question = domande.getJSONObject(k);
                                 aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
                             }
-                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, shimmer_audio);
+                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_audio);
                             shimmertrial.add(s);
                         } else {
                             duration_trial = curr.getString("trial_duration");
@@ -169,7 +200,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                                 JSONObject question = domande.getJSONObject(k);
                                 aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
                             }
-                            ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest);
+                            ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description);
                             shimmertrial.add(s);
                         }
 
@@ -177,24 +208,26 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                     }
                 } catch (JSONException e) {
                     Log.i("pippobaudoerrorOnPost", "onCreate: ");
-                    e.printStackTrace();
+                    server_timeout();
+                } finally {
+                    try {
+                        SharedPreferences.Editor editor = pref.edit();
+                        Gson gson = new Gson();
+                        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(shimmertrial);
+                        Log.i("shimmertrial", "run: " + jsonElements);
+                        editor.putString("shimmertrial", String.valueOf(jsonElements));
+                        editor.apply();
+                        globalValues.setShimmerTrialArrayList(shimmertrial);
+
+                        Log.i("TAG", String.valueOf(shimmertrial.size()));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+
+                    goAhead();
                 }
 
-                try {
-                    SharedPreferences.Editor editor = pref.edit();
-                    Gson gson = new Gson();
-                    JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(shimmertrial);
-                    Log.i("shimmertrial", "run: " + jsonElements);
-                    editor.putString("shimmertrial", String.valueOf(jsonElements));
-                    editor.apply();
-                    globalValues.setShimmerTrialArrayList(shimmertrial);
 
-                    Log.i("TAG", String.valueOf(shimmertrial.size()));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-
-                goAhead();
             } else {
                 SharedPreferences pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
@@ -243,11 +276,12 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                     }
 
 
-                    new GetDBData().execute(URL_SERVER+"trialdetails");
-
                 } catch (JSONException e) {
                     Log.i("pippobaudoerrorOnPost", "onCreate: ");
-                    e.printStackTrace();
+                    server_timeout();
+                } finally {
+
+                    new GetDBData().execute(URL_SERVER + "trialdetails");
                 }
 
 
@@ -257,65 +291,4 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
         }
     }
 
-    public class GetAudioTrial extends AsyncTask<String, Void, String> {
-        @Override
-        protected String doInBackground(String... params) {
-            StringBuilder data = new StringBuilder();
-            Log.i("Prova", "cachi");
-            HttpURLConnection httpURLConnection = null;
-            try {
-
-                httpURLConnection = (HttpURLConnection) new URL(params[0]).openConnection();
-                httpURLConnection.setRequestMethod("GET");
-                httpURLConnection.setDoOutput(true);
-                try {
-                    Log.e("trycatch", "onCreate: ");
-                    if (httpURLConnection.getInputStream() != null) {
-                        InputStream in = new BufferedInputStream(httpURLConnection.getInputStream());
-
-                        InputStreamReader inputStreamReader = new InputStreamReader(in);
-
-                        int inputStreamData = inputStreamReader.read();
-                        while (inputStreamData != -1) {
-                            char current = (char) inputStreamData;
-                            inputStreamData = inputStreamReader.read();
-                            data.append(current);
-                        }
-                    } else {
-
-                    }
-                } catch (Exception e) {
-
-                    e.printStackTrace();
-
-                }
-
-//
-//                String saveThis = Base64.encodeToString(data_byte, Base64.DEFAULT);
-
-                SharedPreferences.Editor editor = pref.edit();
-                editor.putString("shimmeraudio", data.toString());
-                editor.apply();
-
-
-                long total = 0;
-
-
-            } catch (Exception e) {
-                e.printStackTrace();
-            } finally {
-                if (httpURLConnection != null) {
-                    httpURLConnection.disconnect();
-                }
-            }
-
-            return data.toString();
-        }
-
-        @Override
-        protected void onPostExecute(String result) {
-            super.onPostExecute(result);
-            Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
-        }
-    }
 }

@@ -1,12 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/ConstraintLayout"
+    android:id="@+id/motionlayout_fragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:clipToPadding="false"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    app:layoutDescription="@xml/fragment_countdown_scene2">
 
     <!--    <com.example.shimmersensing.graphic.CircularProgressBar-->
     <!--        android:id="@+id/custom_progressBar"-->
@@ -113,6 +114,21 @@
         app:strokeWidth="2dp" />
 
 
+    <!--    <ProgressBar-->
+    <!--        android:id="@+id/progressBar"-->
+    <!--        style="?android:attr/progressBarStyleHorizontal"-->
+    <!--        android:layout_width="200dp"-->
+    <!--        android:layout_height="200dp"-->
+    <!--        android:layout_centerHorizontal="true"-->
+    <!--        android:indeterminate="false"-->
+    <!--        android:max="100"-->
+    <!--        android:progress="10"-->
+    <!--        android:progressDrawable="@drawable/circular_progress_bar"-->
+    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintStart_toStartOf="parent"-->
+    <!--        app:layout_constraintTop_toTopOf="parent" />-->
+
     <TextView
         android:id="@+id/textView7"
         android:layout_width="wrap_content"
@@ -131,25 +147,11 @@
         android:text="10"
         android:textColor="@color/colorPrimary"
         android:textSize="36sp"
+        android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/progressBar"
         app:layout_constraintEnd_toEndOf="@+id/progressBar"
         app:layout_constraintStart_toStartOf="@+id/progressBar"
         app:layout_constraintTop_toTopOf="@+id/progressBar" />
-
-    <!--    <ProgressBar-->
-    <!--        android:id="@+id/progressBar"-->
-    <!--        style="?android:attr/progressBarStyleHorizontal"-->
-    <!--        android:layout_width="200dp"-->
-    <!--        android:layout_height="200dp"-->
-    <!--        android:layout_centerHorizontal="true"-->
-    <!--        android:indeterminate="false"-->
-    <!--        android:max="100"-->
-    <!--        android:progress="10"-->
-    <!--        android:progressDrawable="@drawable/circular_progress_bar"-->
-    <!--        app:layout_constraintBottom_toBottomOf="parent"-->
-    <!--        app:layout_constraintEnd_toEndOf="parent"-->
-    <!--        app:layout_constraintStart_toStartOf="parent"-->
-    <!--        app:layout_constraintTop_toTopOf="parent" />-->
 
     <com.hookedonplay.decoviewlib.DecoView
         android:id="@+id/progressBar"
@@ -162,4 +164,4 @@
         app:layout_constraintTop_toTopOf="parent" />
 
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>

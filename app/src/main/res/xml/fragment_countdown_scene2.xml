@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetEnd="@+id/end"
+        motion:constraintSetStart="@id/start"
+        motion:duration="500"
+        motion:motionInterpolator="easeOut">
+       <KeyFrameSet>
+       </KeyFrameSet>
+    </Transition>
+
+    <ConstraintSet android:id="@+id/start">
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            motion:layout_constraintBottom_toTopOf="@+id/progressBar"
+            motion:layout_constraintVertical_bias="1.0"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/textView7" />
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/textView7"
+            motion:layout_constraintVertical_bias="0.98"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/linearLayout2" />
+        <Constraint
+            android:elevation="2dp"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintTop_toBottomOf="@+id/progressBar"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/buttonSendForm"
+            motion:layout_constraintVertical_bias="0.0" />
+        <Constraint
+            android:id="@+id/progressBar"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="1dp"
+            android:layout_height="1dp"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/timerCountdown"
+            motion:layout_constraintEnd_toEndOf="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="@+id/progressBar"
+            android:visibility="invisible"
+            motion:layout_constraintTop_toTopOf="@+id/progressBar"
+            motion:layout_constraintStart_toStartOf="@+id/progressBar" />
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/end">
+        <Constraint
+            android:id="@+id/timerCountdown"
+            motion:layout_constraintEnd_toEndOf="@+id/progressBar"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="@+id/progressBar"
+            android:visibility="visible"
+            motion:layout_constraintTop_toTopOf="@+id/progressBar"
+            motion:layout_constraintStart_toStartOf="@+id/progressBar" />
+    </ConstraintSet>
+    <Transition
+        android:id="@+id/test_transition"
+        motion:constraintSetStart="@+id/start"
+        motion:constraintSetEnd="@+id/end" />
+</MotionScene>

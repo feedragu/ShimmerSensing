@@ -51,4 +51,6 @@ dependencies {
     implementation 'com.github.bmarrdev:android-DecoView-charting:v0.9.3'
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'androidx.viewpager2:viewpager2:1.0.0'
+    implementation 'androidx.constraintlayout:constraintlayout:2.0.0-beta4'
+
 }

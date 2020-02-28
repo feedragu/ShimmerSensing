@@ -242,7 +242,9 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         }
 
         mFragmentManager = getSupportFragmentManager();
-
+        if (DEBUG_SHIMMER) {
+            loadInitialFragment();
+        }
 
     }
 
@@ -586,7 +588,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 if (DEBUG_SHIMMER) {
                     cTimer.cancel();
                 } else {
-                    if(shimmerDevice.isConnected())
+                    if (shimmerDevice.isConnected())
                         shimmerDevice.stopStreaming();
                     else
                         finish();
@@ -765,21 +767,23 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
     @Override
     protected void onStop() {
-        //Disconnect the Shimmer device when app is stopped
-        if (shimmerDevice != null) {
-            if (shimmerDevice.isSDLogging()) {
-                shimmerDevice.stopSDLogging();
-                Log.d(LOG_TAG, "Stopped Shimmer Logging");
-            } else if (shimmerDevice.isStreaming()) {
-                shimmerDevice.stopStreaming();
-                Log.d(LOG_TAG, "Stopped Shimmer Streaming");
-            } else {
-                shimmerDevice.stopStreamingAndLogging();
-                Log.d(LOG_TAG, "Stopped Shimmer Streaming and Logging");
+        if (!DEBUG_SHIMMER) {
+            //Disconnect the Shimmer device when app is stopped
+            if (shimmerDevice != null) {
+                if (shimmerDevice.isSDLogging()) {
+                    shimmerDevice.stopSDLogging();
+                    Log.d(LOG_TAG, "Stopped Shimmer Logging");
+                } else if (shimmerDevice.isStreaming()) {
+                    shimmerDevice.stopStreaming();
+                    Log.d(LOG_TAG, "Stopped Shimmer Streaming");
+                } else {
+                    shimmerDevice.stopStreamingAndLogging();
+                    Log.d(LOG_TAG, "Stopped Shimmer Streaming and Logging");
+                }
             }
+            btManager.disconnectAllDevices();
+            Log.i(LOG_TAG, "Shimmer DISCONNECTED");
         }
-        btManager.disconnectAllDevices();
-        Log.i(LOG_TAG, "Shimmer DISCONNECTED");
         super.onStop();
     }
 
@@ -790,7 +794,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
-                case 666666 :
+                case 666666:
                     Log.i("voglioandare a casa", "handleMessage: ");
                     showDialogShimmer();
                     break;
