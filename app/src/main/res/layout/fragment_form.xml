@@ -4,7 +4,7 @@
     android:id="@+id/formContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.shimmersensing.fragment.FormFragment" >
+    tools:context="stageunimib.federicoragusa816623.shimmersensing.fragment.FormFragment" >
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/formList"

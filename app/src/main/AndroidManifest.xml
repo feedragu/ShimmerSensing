@@ -10,14 +10,11 @@
     <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission
-        android:name="android.permission.CAMERA"
-        android:required="true" />
     <uses-permission android:name="android.permission.READ_INTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
     <application
-        android:name=".global.GlobalValues"
+        android:name="stageunimib.federicoragusa816623.shimmersensing.global.GlobalValues"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -26,11 +23,11 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name=".activities.EndTrialActivity"></activity>
-        <activity android:name=".activities.TrialRecapActivity" />
-        <activity android:name=".activities.TrialPresentationActivity" />
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.EndTrialActivity"></activity>
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialRecapActivity" />
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialPresentationActivity" />
         <activity
-            android:name=".activities.SplashActivity"
+            android:name="stageunimib.federicoragusa816623.shimmersensing.activities.SplashActivity"
             android:launchMode="singleInstance"
             android:noHistory="true">
             <intent-filter>
@@ -39,14 +36,14 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activities.ShimmerTrialActivity">
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.ShimmerTrialActivity">
 
             <!-- android:theme="@style/Theme.AppCompat.Translucent" -->
 
         </activity>
-        <activity android:name=".activities.ShimmerSpec" />
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.ShimmerSpec" />
         <activity
-            android:name=".activities.MainActivity"
+            android:name="stageunimib.federicoragusa816623.shimmersensing.activities.MainActivity"
             android:theme="@style/Theme.AppCompat.Translucent" />
         <activity
             android:name="com.shimmerresearch.android.guiUtilities.ShimmerBluetoothDialog"

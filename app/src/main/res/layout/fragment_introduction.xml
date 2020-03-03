@@ -4,7 +4,7 @@
     android:id="@+id/introductionContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.shimmersensing.fragment.IntroductionFragment" >
+    tools:context="stageunimib.federicoragusa816623.shimmersensing.fragment.IntroductionFragment" >
 
     <TextView
         android:id="@+id/textView18"
