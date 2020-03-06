@@ -4,6 +4,7 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,15 +13,20 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.shimmersensing.R;
+
 import stageunimib.federicoragusa816623.shimmersensing.global.GlobalValues;
 import stageunimib.federicoragusa816623.shimmersensing.interfaccia.Shimmer_interface;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.QuestionTrial;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerData;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrial;
+import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrialLettura;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrialMusic;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 
@@ -35,6 +41,7 @@ import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Objects;
 
 public class SplashActivity extends AppCompatActivity implements Shimmer_interface {
 
@@ -43,10 +50,12 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
     private GlobalValues globalValues;
     private AlertDialog.Builder alertDialogBuilder;
     private AlertDialog alertDialog;
+    private boolean server_timeout = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i("creating mate", "onCreate: imcreating u bitch");
         setContentView(R.layout.activity_splash);
         globalValues = (GlobalValues) getApplicationContext();
         ImageView shimm_logo = findViewById(R.id.shimmerlogo);
@@ -74,7 +83,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                 .setCancelable(false)
                 .setPositiveButton("OK", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-
+                        finishAffinity();
                     }
                 });
 
@@ -84,7 +93,27 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
     }
 
     public void server_timeout() {
-        alertDialog.show();
+        MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(SplashActivity.this,R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
+                .setTitle("Server timeout")
+                .setMessage("Impossibile connettersi al server")
+                .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int id) {
+                        finishAffinity();
+                    }
+                });
+        androidx.appcompat.app.AlertDialog dialog = dialogBuilderMaterial.create();
+
+
+        Objects.requireNonNull(dialog.getWindow()).getAttributes().windowAnimations = R.style.popup_alert;
+        dialog.show();
+        dialog.setCancelable(false);
+        dialog.getButton(Dialog.BUTTON_POSITIVE).setTextSize(16);
+
+        TextView textView = dialog.findViewById(android.R.id.message);
+        if (textView != null) {
+            textView.setTextSize(16);
+        }
+
     }
 
     public void goAhead() {
@@ -153,10 +182,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
             ArrayList<ShimmerData> list = new ArrayList<>();
             String jsonDB = result;
-            if (jsonDB.equals("")) {
-                goAhead();
-            }
-            if (jsonDB.contains("trial")) {
+            if (jsonDB.contains("trial") | !DEBUG_SHIMMER) {
 
                 shimmertrial = new ArrayList<>();
                 String shimmer_name;
@@ -180,32 +206,96 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         shimmer_mode = curr.getString("mode");
                         url_icon = curr.getString("url_img_cat");
                         description = curr.getString("categoria_descr");
-                        if (shimmer_mode.equals("Musica")) {
-                            String shimmer_audio = curr.getString("mod_file_url");
-                            duration_trial = curr.getString("trial_duration");
-                            domande = curr.getJSONArray("questionario_trial");
-                            for (int k = 0; k < domande.length(); k++) {
-                                JSONObject question = domande.getJSONObject(k);
-                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                        switch (shimmer_mode) {
+                            case "Musica" :  {
+                                String shimmer_audio = curr.getString("mod_file_url");
+                                duration_trial = curr.getString("trial_duration");
+                                domande = curr.getJSONArray("questionario_trial");
+                                for (int k = 0; k < domande.length(); k++) {
+                                    JSONObject question = domande.getJSONObject(k);
+                                    aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                                }
+                                ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_audio);
+                                shimmertrial.add(s);
+                                break;
                             }
-                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_audio);
-                            shimmertrial.add(s);
-                        } else {
-                            duration_trial = curr.getString("trial_duration");
-                            domande = curr.getJSONArray("questionario_trial");
-                            for (int k = 0; k < domande.length(); k++) {
-                                JSONObject question = domande.getJSONObject(k);
-                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                            case "Lettura" :  {
+                                String shimmer_text = curr.getString("mod_file_url");
+                                duration_trial = curr.getString("trial_duration");
+                                domande = curr.getJSONArray("questionario_trial");
+                                for (int k = 0; k < domande.length(); k++) {
+                                    JSONObject question = domande.getJSONObject(k);
+                                    aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                                }
+                                ShimmerTrialLettura s = new ShimmerTrialLettura(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_text);
+                                shimmertrial.add(s);
+                                break;
                             }
-                            ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description);
-                            shimmertrial.add(s);
+                            case "Prompt" :  {
+                                duration_trial = "0";
+                                domande = curr.getJSONArray("questionario_trial");
+                                for (int k = 0; k < domande.length(); k++) {
+                                    JSONObject question = domande.getJSONObject(k);
+                                    aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                                }
+                                ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description);
+                                shimmertrial.add(s);
+                                break;
+                            }
+                            case "Countdown" :  {
+                                duration_trial = curr.getString("trial_duration");
+                                domande = curr.getJSONArray("questionario_trial");
+                                for (int k = 0; k < domande.length(); k++) {
+                                    JSONObject question = domande.getJSONObject(k);
+                                    aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+                                }
+                                ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description);
+                                shimmertrial.add(s);
+                                break;
+                            }
+                            default: {
+                                break;
+                            }
                         }
+//                        if (shimmer_mode.equals("Musica")) {
+//                            String shimmer_audio = curr.getString("mod_file_url");
+//                            duration_trial = curr.getString("trial_duration");
+//                            domande = curr.getJSONArray("questionario_trial");
+//                            for (int k = 0; k < domande.length(); k++) {
+//                                JSONObject question = domande.getJSONObject(k);
+//                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+//                            }
+//                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_audio);
+//                            shimmertrial.add(s);
+//                        }
+//                        else if (shimmer_mode.equals("Lettura")) {
+//                            String shimmer_audio = curr.getString("mod_file_url");
+//                            duration_trial = curr.getString("trial_duration");
+//                            domande = curr.getJSONArray("questionario_trial");
+//                            for (int k = 0; k < domande.length(); k++) {
+//                                JSONObject question = domande.getJSONObject(k);
+//                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+//                            }
+//                            ShimmerTrialMusic s = new ShimmerTrialMusic(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description, shimmer_audio);
+//                            shimmertrial.add(s);
+//                        }
+//                        else {
+//                            duration_trial = curr.getString("trial_duration");
+//                            domande = curr.getJSONArray("questionario_trial");
+//                            for (int k = 0; k < domande.length(); k++) {
+//                                JSONObject question = domande.getJSONObject(k);
+//                                aQuest.add(new QuestionTrial(question.getString("domanda_questionario"), question.getInt("range_domanda")));
+//                            }
+//                            ShimmerTrial s = new ShimmerTrial(shimmer_name, duration_trial, shimmer_mode, url_icon, aQuest, description);
+//                            shimmertrial.add(s);
+//                        }
 
 
                     }
                 } catch (JSONException e) {
                     Log.i("pippobaudoerrorOnPost", "onCreate: ");
                     server_timeout();
+                    server_timeout = true;
                 } finally {
                     try {
                         SharedPreferences.Editor editor = pref.edit();
@@ -217,11 +307,13 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         globalValues.setShimmerTrialArrayList(shimmertrial);
 
                         Log.i("TAG", String.valueOf(shimmertrial.size()));
+                        if (!server_timeout)
+                            goAhead();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
-                    goAhead();
+
                 }
 
 
@@ -275,10 +367,13 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
                 } catch (JSONException e) {
                     Log.i("pippobaudoerrorOnPost", "onCreate: ");
-                    server_timeout();
-                } finally {
+                    server_timeout = true;
 
-                    new GetDBData().execute(URL_SERVER + "trialdetails");
+                } finally {
+                    if (!server_timeout)
+                        new GetDBData().execute(URL_SERVER + "trialdetails");
+                    else
+                        server_timeout();
                 }
 
 

@@ -12,8 +12,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 
 import com.example.shimmersensing.R;
+
+import java.io.Serializable;
+import java.util.ArrayList;
+
+import stageunimib.federicoragusa816623.shimmersensing.utilities.QuestionTrial;
+import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrial;
 
 
 /**
@@ -36,6 +43,8 @@ public class IntroductionFragment extends Fragment {
 
     private OnFragmentInteractionListener mListener;
     private Button startButton;
+    private ShimmerTrial shimmer_trial_intro;
+    private TextView descr_trial, title_trial;
 
     public IntroductionFragment() {
         // Required empty public constructor
@@ -45,18 +54,25 @@ public class IntroductionFragment extends Fragment {
      * Use this factory method to create a new instance of
      * this fragment using the provided parameters.
      *
+     * @param shimmerTrial
      * @return A new instance of fragment IntroductionFragment.
      */
     // TODO: Rename and change types and number of parameters
-    public static IntroductionFragment newInstance() {
+    public static IntroductionFragment newInstance(ShimmerTrial shimmerTrial) {
         IntroductionFragment fragment = new IntroductionFragment();
+        Bundle args = new Bundle();
+        args.putSerializable(ARG_PARAM1, shimmerTrial);
+        fragment.setArguments(args);
         return fragment;
     }
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        if (getArguments() != null) {
+            shimmer_trial_intro = (ShimmerTrial) getArguments().getSerializable(ARG_PARAM1);
 
+        }
     }
 
     @Override
@@ -76,7 +92,11 @@ public class IntroductionFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        title_trial = getView().findViewById(R.id.title_trial);
+        descr_trial = getView().findViewById(R.id.desc_trial);
         startButton = getView().findViewById(R.id.buttonSendForm);
+        title_trial.setText(shimmer_trial_intro.getTrialName());
+        descr_trial.setText(shimmer_trial_intro.getDescritpion());
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

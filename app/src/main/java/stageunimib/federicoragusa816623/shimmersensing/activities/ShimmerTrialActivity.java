@@ -13,11 +13,9 @@ import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.Message;
-import android.transition.Fade;
 import android.transition.Slide;
 import android.transition.Transition;
 import android.transition.TransitionInflater;
-import android.transition.TransitionSet;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.MenuItem;
@@ -35,16 +33,21 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import com.example.shimmersensing.R;
+
 import stageunimib.federicoragusa816623.shimmersensing.fragment.AudioFragment;
 import stageunimib.federicoragusa816623.shimmersensing.fragment.CountDownFragment;
 import stageunimib.federicoragusa816623.shimmersensing.fragment.FormFragment;
 import stageunimib.federicoragusa816623.shimmersensing.fragment.IntroductionFragment;
+import stageunimib.federicoragusa816623.shimmersensing.fragment.LetturaFragment;
+import stageunimib.federicoragusa816623.shimmersensing.fragment.PromptFragment;
 import stageunimib.federicoragusa816623.shimmersensing.global.GlobalValues;
 import stageunimib.federicoragusa816623.shimmersensing.interfaccia.Shimmer_interface;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerData;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrial;
+import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrialLettura;
 import stageunimib.federicoragusa816623.shimmersensing.utilities.ShimmerTrialMusic;
 
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.reflect.TypeToken;
@@ -78,9 +81,13 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 
 public class ShimmerTrialActivity extends AppCompatActivity implements CountDownFragment.OnFragmentInteractionListener,
-        IntroductionFragment.OnFragmentInteractionListener, FormFragment.OnFragmentInteractionListener, AudioFragment.OnFragmentInteractionListener, Shimmer_interface {
+        IntroductionFragment.OnFragmentInteractionListener, FormFragment.OnFragmentInteractionListener,
+        AudioFragment.OnFragmentInteractionListener, LetturaFragment.OnFragmentInteractionListener,
+        PromptFragment.OnFragmentInteractionListener,
+        Shimmer_interface {
 
 
     private FragmentManager mFragmentManager;
@@ -250,7 +257,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     }
 
     private void loadInitialFragment() {
-        initialFragment = IntroductionFragment.newInstance();
+        initialFragment = IntroductionFragment.newInstance(shimmerTrial.get(0));
         FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
         fragmentTransaction.replace(R.id.fragmentContainer, initialFragment);
         fragmentTransaction.commit();
@@ -288,10 +295,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case "Lettura": {
-                long countdown_timer = (long) ((Float.parseFloat(shimmerTrialProgress.get(0).getTrialDuration()) * 1000));
-                msuntilfinish = countdown_timer;
-                nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon(), countdown_timer);
-
+                nextFragment = LetturaFragment.newInstance((ShimmerTrialLettura) shimmerTrialProgress.get(0));
                 Log.i("Lettura", "performTransition: ");
                 break;
             }
@@ -303,9 +307,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case "Prompt": {
-                long countdown_timer = (long) ((Float.parseFloat(shimmerTrialProgress.get(0).getTrialDuration()) * 1000));
-                msuntilfinish = countdown_timer;
-                nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon(), countdown_timer);
+                nextFragment = PromptFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon());
                 Log.i("Prompt", "performTransition: ");
                 break;
             }
@@ -346,40 +348,43 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         if ((shimmerTrial.size() - shimmerTrialProgress.size()) == shimmerTrial.size()) {
             finishAffinity();
             startActivity(new Intent(this, EndTrialActivity.class));
+        } else {
+
+
+            trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
+
+            Log.i("shimmerprogress_orig", "onCreate: " + shimmerTrial.size());
+            Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
+            Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
+            IntroductionFragment nextFragment = IntroductionFragment.newInstance(shimmerTrialProgress.get(0));
+
+            FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
+
+//        // 1. Exit for Previous Fragment
+//        Fade exitFade = new Fade();
+//        exitFade.setDuration(FADE_DEFAULT_TIME);
+//        previousFragment.setExitTransition(exitFade);
+//
+//        // 2. Shared Elements Transition
+//        TransitionSet enterTransitionSet = new TransitionSet();
+//        enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
+//        enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
+//        enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
+//        nextFragment.setSharedElementEnterTransition(enterTransitionSet);
+//
+//        // 3. Enter Transition for New Fragment
+//        Fade enterFade = new Fade();
+//        enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
+//        enterFade.setDuration(FADE_DEFAULT_TIME);
+//        nextFragment.setEnterTransition(enterFade);
+
+            //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
+            fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
+
+            fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
+            fragmentTransaction.commitAllowingStateLoss();
+            msuntilfinish = 10000;
         }
-
-
-        trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
-
-        Log.i("shimmerprogress_orig", "onCreate: " + shimmerTrial.size());
-        Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
-        Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
-        IntroductionFragment nextFragment = IntroductionFragment.newInstance();
-
-        FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
-
-        // 1. Exit for Previous Fragment
-        Fade exitFade = new Fade();
-        exitFade.setDuration(FADE_DEFAULT_TIME);
-        previousFragment.setExitTransition(exitFade);
-
-        // 2. Shared Elements Transition
-        TransitionSet enterTransitionSet = new TransitionSet();
-        enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
-        enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
-        enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
-        nextFragment.setSharedElementEnterTransition(enterTransitionSet);
-
-        // 3. Enter Transition for New Fragment
-        Fade enterFade = new Fade();
-        enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
-        enterFade.setDuration(FADE_DEFAULT_TIME);
-        nextFragment.setEnterTransition(enterFade);
-
-        //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
-        fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
-        fragmentTransaction.commitAllowingStateLoss();
-        msuntilfinish = 10000;
     }
 
     @Override
@@ -407,10 +412,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         // Save UI state changes to the savedInstanceState.
         // This bundle will be passed to onCreate if the process is
         // killed and restarted.
-        savedInstanceState.putBoolean("MyBoolean", true);
-        savedInstanceState.putDouble("myDouble", 1.9);
-        savedInstanceState.putInt("MyInt", 1);
-        savedInstanceState.putString("MyString", "Welcome back to Android");
+//        savedInstanceState.putBoolean("MyBoolean", true);
+//        savedInstanceState.putDouble("myDouble", 1.9);
+//        savedInstanceState.putInt("MyInt", 1);
+//        savedInstanceState.putString("MyString", "Welcome back to Android");
         // etc.
     }
 
@@ -419,10 +424,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         super.onRestoreInstanceState(savedInstanceState);
         // Restore UI state from the savedInstanceState.
         // This bundle has also been passed to onCreate.
-        boolean myBoolean = savedInstanceState.getBoolean("MyBoolean");
-        double myDouble = savedInstanceState.getDouble("myDouble");
-        int myInt = savedInstanceState.getInt("MyInt");
-        String myString = savedInstanceState.getString("MyString");
+//        boolean myBoolean = savedInstanceState.getBoolean("MyBoolean");
+//        double myDouble = savedInstanceState.getDouble("myDouble");
+//        int myInt = savedInstanceState.getInt("MyInt");
+//        String myString = savedInstanceState.getString("MyString");
     }
 
     @Override
@@ -546,6 +551,18 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         fragment_handler(code);
     }
 
+    @Override
+    public void onFragmentInteractionLettura(int code) {
+
+        fragment_handler(code);
+    }
+
+    @Override
+    public void onFragmentInteractionPrompt(int code) {
+        fragment_handler(code);
+    }
+
+
     private void fragment_handler(int event) {
         switch (event) {
             case 1: {
@@ -596,35 +613,37 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 }
                 Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
                 Log.i("cachi", "onFragmentInteraction: " + shimmerTrial.get(0).getN_domande().size());
-                FormFragment nextFragment = FormFragment.newInstance(shimmerTrial.get(0).getN_domande());
+                FormFragment nextFragment = FormFragment.newInstance(shimmerTrialProgress.get(0).getN_domande());
 
                 FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
 
-                // 1. Exit for Previous Fragment
-                Fade exitFade = new Fade();
-                exitFade.setDuration(FADE_DEFAULT_TIME);
-                previousFragment.setExitTransition(exitFade);
-
-                // 2. Shared Elements Transition
-                TransitionSet enterTransitionSet = new TransitionSet();
-                enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
-                enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
-                enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
-                nextFragment.setSharedElementEnterTransition(enterTransitionSet);
+//                // 1. Exit for Previous Fragment
+//                Slide exitFade = new Slide(Gravity.LEFT);
+//                exitFade.setDuration(FADE_DEFAULT_TIME);
+//                previousFragment.setExitTransition(exitFade);
+//
+//                // 2. Shared Elements Transition
+//                TransitionSet enterTransitionSet = new TransitionSet();
+//                enterTransitionSet.addTransition(TransitionInflater.from(this).inflateTransition(android.R.transition.move));
+//                enterTransitionSet.setDuration(MOVE_DEFAULT_TIME);
+//                enterTransitionSet.setStartDelay(FADE_DEFAULT_TIME);
+//                nextFragment.setSharedElementEnterTransition(enterTransitionSet);
 
                 // 3. Enter Transition for New Fragment
-                Fade enterFade = new Fade();
-                enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
-                enterFade.setDuration(FADE_DEFAULT_TIME);
-                nextFragment.setEnterTransition(enterFade);
+//                Slide enterFade = new Slide(Gravity.RIGHT);
+//                enterFade.setStartDelay(MOVE_DEFAULT_TIME + FADE_DEFAULT_TIME);
+//                enterFade.setDuration(FADE_DEFAULT_TIME);
+//                nextFragment.setEnterTransition(enterFade);
 
                 //fragmentTransaction.addSharedElement(logo, logo.getTransitionName());
+                fragmentTransaction.setCustomAnimations(android.R.anim.fade_in, android.R.anim.fade_out, android.R.anim.fade_in, android.R.anim.fade_out);
                 fragmentTransaction.replace(R.id.fragmentContainer, nextFragment);
                 fragmentTransaction.commitAllowingStateLoss();
 
                 break;
             }
             case 69: {
+                Log.i("volare", "onFragmentInteractionLettura: se vola");
                 if (DEBUG_SHIMMER) {
                     cTimer = new CountDownTimer(msuntilfinish, countdowninterval) {
                         @Override
@@ -654,6 +673,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
         }
     }
+
 
     public class SendDeviceDetails extends AsyncTask<String, Void, String> {
         @Override
@@ -709,30 +729,52 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     private void showDialogShimmer() {
         Log.i("ao", "onConnectionException: ");
         alertdialog.dismiss();
-        alertdialog = new AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(ShimmerTrialActivity.this, R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
                 .setTitle("Non connesso")
                 .setMessage("Non è stato possibile connettersi al dispositivo shimmer")
-                .setIcon(R.drawable.s_logo_shimmer)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ShimmerTrialActivity.this.finish();
                     }
-                })
-                .show();
+                });
+        androidx.appcompat.app.AlertDialog dialog = dialogBuilderMaterial.create();
+
+
+        Objects.requireNonNull(dialog.getWindow()).getAttributes().windowAnimations = R.style.popup_alert;
+        dialog.show();
+        dialog.setCancelable(false);
+        dialog.getButton(Dialog.BUTTON_POSITIVE).setTextSize(16);
+
+        TextView textView = dialog.findViewById(android.R.id.message);
+        if (textView != null) {
+            textView.setTextSize(16);
+        }
+
     }
 
     private void showDialogShimmerDisconnetted() {
         alertdialog.dismiss();
-        alertdialog = new AlertDialog.Builder(this)
+        MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(ShimmerTrialActivity.this, R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
                 .setTitle("Shimmer disconnesso")
                 .setMessage("Il dispositivo è stasto disconnesso, prego riprovare")
-                .setIcon(R.drawable.s_logo_shimmer)
                 .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         ShimmerTrialActivity.this.finish();
                     }
-                })
-                .show();
+                });
+        androidx.appcompat.app.AlertDialog dialog = dialogBuilderMaterial.create();
+
+
+        Objects.requireNonNull(dialog.getWindow()).getAttributes().windowAnimations = R.style.popup_alert;
+        dialog.show();
+        dialog.setCancelable(false);
+        dialog.getButton(Dialog.BUTTON_POSITIVE).setTextSize(16);
+
+        TextView textView = dialog.findViewById(android.R.id.message);
+        if (textView != null) {
+            textView.setTextSize(16);
+        }
+
     }
 
     @Override
@@ -740,7 +782,8 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         super.onBackPressed();
         Log.i("stop", "onFragmentInteraction: ");
         if (DEBUG_SHIMMER) {
-            cTimer.cancel();
+            if (cTimer != null)
+                cTimer.cancel();
         } else {
             if (shimmerDevice.isStreaming())
                 shimmerDevice.stopStreaming();

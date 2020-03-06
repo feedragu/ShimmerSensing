@@ -7,19 +7,19 @@
     tools:context="stageunimib.federicoragusa816623.shimmersensing.fragment.IntroductionFragment" >
 
     <TextView
-        android:id="@+id/textView18"
+        android:id="@+id/title_trial"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Benvenuto in questo trial"
         android:textAllCaps="true"
-        android:textSize="18sp"
-        app:layout_constraintBottom_toTopOf="@+id/textView19"
+        android:textSize="21sp"
+        app:layout_constraintBottom_toTopOf="@+id/desc_trial"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textView19"
+        android:id="@+id/desc_trial"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="32dp"
@@ -46,7 +46,7 @@
         android:paddingRight="35dp"
         android:paddingBottom="15dp"
         android:text="Inizia trial"
-        android:stateListAnimator="@anim/pressed_button"
+        android:stateListAnimator="@drawable/pressed_button"
         android:textColor="@color/colorPrimary"
         android:textSize="17sp"
         android:textStyle="normal"
@@ -54,7 +54,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textView19"
+        app:layout_constraintTop_toBottomOf="@+id/desc_trial"
         app:rippleColor="#33AAAAAA"
         app:strokeColor="@color/colorPrimary"
         app:strokeWidth="2dp" />

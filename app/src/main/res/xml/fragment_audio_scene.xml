@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<MotionScene 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:motion="http://schemas.android.com/apk/res-auto">
+
+    <Transition
+        motion:constraintSetEnd="@+id/end"
+        motion:constraintSetStart="@id/start"
+        motion:duration="500"
+        motion:motionInterpolator="easeOut">
+       <KeyFrameSet>
+       </KeyFrameSet>
+    </Transition>
+
+    <ConstraintSet android:id="@+id/start">
+        <Constraint
+            android:id="@+id/linearLayout2"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/textView7"
+            motion:layout_constraintVertical_bias="1.0"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/buttonSendForm"
+            android:elevation="2dp"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintStart_toStartOf="parent"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintVertical_bias="0.100000024"
+            motion:layout_constraintTop_toBottomOf="@+id/imageView2" />
+        <Constraint
+            android:id="@+id/textView7"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/imageView2"
+            motion:layout_constraintVertical_bias="0.97"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/imageView2"
+            motion:layout_constraintEnd_toStartOf="@+id/guideline12"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toTopOf="@+id/guideline11"
+            motion:layout_constraintVertical_bias="0.0"
+            motion:layout_constraintHorizontal_bias="0.0"
+            motion:layout_constraintTop_toTopOf="@+id/guideline13"
+            motion:layout_constraintStart_toStartOf="@+id/guideline14"
+            android:alpha="0.0" />
+        <Constraint
+            android:id="@+id/progressPlayer"
+            motion:layout_constraintEnd_toStartOf="@+id/totalProgress"
+            motion:layout_constraintStart_toEndOf="@+id/minuteProgress"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            motion:layout_constraintBottom_toTopOf="@+id/buttonSendForm"
+            android:layout_marginEnd="32dp"
+            motion:layout_constraintTop_toBottomOf="@+id/audioName"
+            android:alpha="0.0"
+            android:layout_marginStart="32dp"
+            android:visibility="visible" />
+        <Constraint
+            android:id="@+id/audioName"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="invisible"
+            motion:layout_constraintTop_toBottomOf="@+id/imageView2"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="23dp" />
+    </ConstraintSet>
+
+    <ConstraintSet android:id="@+id/end">
+        <Constraint
+            android:id="@+id/audioName"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:visibility="visible"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:layout_marginTop="23dp"
+            motion:layout_constraintBottom_toTopOf="@+id/buttonSendForm"
+            motion:layout_constraintTop_toBottomOf="@+id/imageView2"
+            motion:layout_constraintVertical_bias="0.25" />
+        <Constraint
+            android:id="@+id/guideline11"
+            motion:layout_constraintGuide_percent="0.54"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Constraint
+            android:id="@+id/guideline13"
+            motion:layout_constraintGuide_percent="0.34"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+        <Constraint
+            android:elevation="2dp"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toBottomOf="parent"
+            motion:layout_constraintVertical_bias="0.51"
+            motion:layout_constraintTop_toBottomOf="@+id/imageView2"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/buttonSendForm" />
+        <Constraint
+            android:id="@+id/minuteProgress"
+            motion:layout_constraintEnd_toStartOf="@+id/guideline14"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/buttonSendForm"
+            motion:layout_constraintTop_toBottomOf="@+id/audioName"
+            motion:layout_constraintHorizontal_bias="0.25"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:visibility="visible" />
+        <Constraint
+            android:id="@+id/totalProgress"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/buttonSendForm"
+            motion:layout_constraintTop_toBottomOf="@+id/audioName"
+            motion:layout_constraintHorizontal_bias="0.75"
+            motion:layout_constraintStart_toStartOf="@+id/guideline12"
+            android:visibility="visible" />
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/textView7"
+            motion:layout_constraintVertical_bias="0.78"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/linearLayout2" />
+        <Constraint
+            android:id="@+id/imageView2"
+            motion:layout_constraintEnd_toStartOf="@+id/guideline12"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            motion:layout_constraintBottom_toTopOf="@+id/guideline11"
+            motion:layout_constraintVertical_bias="0.0"
+            motion:layout_constraintHorizontal_bias="0.0"
+            motion:layout_constraintTop_toTopOf="@+id/guideline13"
+            motion:layout_constraintStart_toStartOf="@+id/guideline14"
+            android:alpha="1.0" />
+        <Constraint
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/imageView2"
+            motion:layout_constraintVertical_bias="0.92"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent"
+            android:id="@+id/textView7" />
+        <Constraint
+            android:id="@+id/textView7"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/imageView2"
+            motion:layout_constraintVertical_bias="0.92"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/textView7"
+            motion:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            motion:layout_constraintBottom_toTopOf="@+id/imageView2"
+            motion:layout_constraintVertical_bias="0.92"
+            motion:layout_constraintTop_toTopOf="parent"
+            motion:layout_constraintStart_toStartOf="parent" />
+        <Constraint
+            android:id="@+id/progressPlayer"
+            motion:layout_constraintEnd_toStartOf="@+id/totalProgress"
+            motion:layout_constraintStart_toEndOf="@+id/minuteProgress"
+            android:layout_width="0dp"
+            android:layout_height="25dp"
+            android:visibility="visible"
+            motion:layout_constraintBottom_toTopOf="@+id/buttonSendForm"
+            android:layout_marginEnd="32dp"
+            motion:layout_constraintTop_toBottomOf="@+id/audioName"
+            android:layout_marginStart="32dp"
+            android:alpha="1.0" />
+    </ConstraintSet>
+</MotionScene>

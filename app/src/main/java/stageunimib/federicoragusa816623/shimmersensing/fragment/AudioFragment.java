@@ -8,8 +8,10 @@ import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.fragment.app.Fragment;
 
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.util.Log;
@@ -66,6 +68,7 @@ public class AudioFragment extends Fragment {
         @SuppressLint("SetTextI18n")
         public void run() {
             if (mediaPlayer != null) {
+                Log.i(TAG, "run: testseek");
                 long totalDuration = mediaPlayer.getDuration();
                 long currentDuration = mediaPlayer.getCurrentPosition();
                 // Displaying Total Duration time
@@ -87,6 +90,8 @@ public class AudioFragment extends Fragment {
 
         }
     };
+    private MotionLayout motion_layout;
+    private TextView audio_name;
 
 
     public AudioFragment() {
@@ -129,14 +134,22 @@ public class AudioFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-
+        motion_layout = ((MotionLayout)getView().findViewById(R.id.motionlayout_fragment));
         fButton = getView().findViewById(R.id.buttonSendForm);
         trialNameView = getView().findViewById(R.id.deviceName);
         trialImage = getView().findViewById(R.id.deviceImage);
         trialNameView.setText(shimmer_audio.getTrialName());
+        audio_name = getView().findViewById(R.id.audioName);
         remaining = getView().findViewById(R.id.totalProgress);
         elapsed = getView().findViewById(R.id.minuteProgress);
         seekbar = getView().findViewById(R.id.progressPlayer);
+        int endIndex = shimmer_audio.getUrl_file_audio().lastIndexOf("/");
+        if (endIndex != -1)
+        {
+            String audioname = shimmer_audio.getUrl_file_audio().substring(endIndex+1);
+            audio_name.setText(audioname);
+        }
+
         Picasso.get()
                 .load(Shimmer_interface.URL_FILE.concat(shimmer_audio.getUrl_icon()))
                 .into(trialImage);
@@ -152,8 +165,10 @@ public class AudioFragment extends Fragment {
                     if (mListener != null) {
                         mListener.onFragmentInteractionAudio(2);
                     }
+                    seekHandler.removeCallbacks(updateSeekBar);
                 } else {
                     mediaPlayer.seekTo(actual_pos_media);
+                    seekHandler.postDelayed(updateSeekBar, 15);
                     if (mListener != null) {
                         mListener.onFragmentInteractionAudio(1);
                     }
@@ -164,49 +179,63 @@ public class AudioFragment extends Fragment {
         seekHandler = new Handler();
 
         final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    String url = Shimmer_interface.URL_FILE.concat(shimmer_audio.getUrl_file_audio());
-                    Log.i(TAG, "url : " + url);
-                    mediaPlayer = new MediaPlayer();
-                    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-                    mediaPlayer.setDataSource(url);
-                    mediaPlayer.prepare(); // might take long! (for buffering, etc)
-                    mediaPlayer.start();
-                    seekbar.setProgress(0);
-                    seekbar.setMax(mediaPlayer.getDuration());
 
-                    // Updating progress bar
-                    seekHandler.postDelayed(updateSeekBar, 15);
-                    if (mListener != null) {
-                        mListener.onFragmentInteractionAudio(69);
-                    }
-                    mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
-                        @Override
-                        public void onSeekComplete(MediaPlayer arg0) {
-                            Log.d(TAG, "onSeekComplete() current pos : " + arg0.getCurrentPosition());
-                            SystemClock.sleep(200);
-                            mediaPlayer.start();
-                        }
-                    });
-                    mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
-                        @Override
-                        public void onCompletion(MediaPlayer mp) {
-                            Log.i(TAG, "onCompletion: ");
-                            if (mListener != null) {
-                                mListener.onFragmentInteractionAudio(3);
-                            }
-                            seekHandler.removeCallbacks(updateSeekBar);
-                        }
-                    });
-                    Log.i(TAG, "onViewCreated: " + mediaPlayer.getDuration());
-                } catch (Exception e) {
-                    e.printStackTrace();
+
+        new CountDownTimer(2500, 1000) {
+
+            public void onTick(long millisUntilFinished) {
+                if(millisUntilFinished <= 1501) {
+                    motion_layout.transitionToEnd();
                 }
             }
-        }, 300);
+
+            public void onFinish() {
+                handler.postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            String url = Shimmer_interface.URL_FILE.concat(shimmer_audio.getUrl_file_audio());
+                            Log.i(TAG, "url : " + url);
+                            mediaPlayer = new MediaPlayer();
+                            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+                            mediaPlayer.setDataSource(url);
+                            mediaPlayer.prepare(); // might take long! (for buffering, etc)
+                            mediaPlayer.start();
+                            seekbar.setProgress(0);
+                            seekbar.setMax(mediaPlayer.getDuration());
+
+                            // Updating progress bar
+                            seekHandler.postDelayed(updateSeekBar, 15);
+                            if (mListener != null) {
+                                mListener.onFragmentInteractionAudio(69);
+                            }
+                            mediaPlayer.setOnSeekCompleteListener(new MediaPlayer.OnSeekCompleteListener() {
+                                @Override
+                                public void onSeekComplete(MediaPlayer arg0) {
+                                    Log.d(TAG, "onSeekComplete() current pos : " + arg0.getCurrentPosition());
+                                    SystemClock.sleep(200);
+                                    mediaPlayer.start();
+                                }
+                            });
+                            mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                                @Override
+                                public void onCompletion(MediaPlayer mp) {
+                                    Log.i(TAG, "onCompletion: ");
+                                    if (mListener != null) {
+                                        mListener.onFragmentInteractionAudio(3);
+                                    }
+                                    seekHandler.removeCallbacks(updateSeekBar);
+                                }
+                            });
+                            Log.i(TAG, "onViewCreated: " + mediaPlayer.getDuration());
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, 300);
+            }
+
+        }.start();
 
     }
 
@@ -251,8 +280,11 @@ public class AudioFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        mediaPlayer.stop();
-        mediaPlayer.release();
+        if(mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            seekHandler.removeCallbacks(updateSeekBar);
+        }
         Log.i(TAG, "onDetach: ");
         mListener = null;
     }

@@ -23,7 +23,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
         tools:ignore="GoogleAppIndexingWarning">
-        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.EndTrialActivity"></activity>
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.EndTrialActivity" />
         <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialRecapActivity" />
         <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialPresentationActivity" />
         <activity

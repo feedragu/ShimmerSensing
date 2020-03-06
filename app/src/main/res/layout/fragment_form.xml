@@ -27,7 +27,7 @@
         android:paddingTop="15dp"
         android:paddingRight="35dp"
         android:paddingBottom="15dp"
-        android:stateListAnimator="@anim/pressed_button"
+        android:stateListAnimator="@drawable/pressed_button"
         android:text="Invia form"
         android:textColor="@color/colorPrimary"
         android:textSize="17sp"
