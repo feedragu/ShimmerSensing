@@ -93,7 +93,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
     }
 
     public void server_timeout() {
-        MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(SplashActivity.this,R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
+        MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(SplashActivity.this, R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
                 .setTitle("Server timeout")
                 .setMessage("Impossibile connettersi al server")
                 .setPositiveButton("Ok", new DialogInterface.OnClickListener() {
@@ -207,7 +207,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         url_icon = curr.getString("url_img_cat");
                         description = curr.getString("categoria_descr");
                         switch (shimmer_mode) {
-                            case "Musica" :  {
+                            case "Musica": {
                                 String shimmer_audio = curr.getString("mod_file_url");
                                 duration_trial = curr.getString("trial_duration");
                                 domande = curr.getJSONArray("questionario_trial");
@@ -219,7 +219,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                                 shimmertrial.add(s);
                                 break;
                             }
-                            case "Lettura" :  {
+                            case "Lettura": {
                                 String shimmer_text = curr.getString("mod_file_url");
                                 duration_trial = curr.getString("trial_duration");
                                 domande = curr.getJSONArray("questionario_trial");
@@ -231,7 +231,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                                 shimmertrial.add(s);
                                 break;
                             }
-                            case "Prompt" :  {
+                            case "Prompt": {
                                 duration_trial = "0";
                                 domande = curr.getJSONArray("questionario_trial");
                                 for (int k = 0; k < domande.length(); k++) {
@@ -242,7 +242,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                                 shimmertrial.add(s);
                                 break;
                             }
-                            case "Countdown" :  {
+                            case "Countdown": {
                                 duration_trial = curr.getString("trial_duration");
                                 domande = curr.getJSONArray("questionario_trial");
                                 for (int k = 0; k < domande.length(); k++) {
