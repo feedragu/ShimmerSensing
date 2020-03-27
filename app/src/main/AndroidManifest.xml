@@ -25,14 +25,13 @@
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.EndTrialActivity" />
         <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialRecapActivity" />
-        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.TrialPresentationActivity" />
+        <activity android:name="stageunimib.federicoragusa816623.shimmersensing.activities.HomeActivity" />
         <activity
             android:name="stageunimib.federicoragusa816623.shimmersensing.activities.SplashActivity"
             android:launchMode="singleInstance"
             android:noHistory="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>

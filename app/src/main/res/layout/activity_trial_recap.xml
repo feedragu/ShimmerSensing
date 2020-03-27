@@ -7,7 +7,7 @@
     android:id="@+id/rootContainer"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="stageunimib.federicoragusa816623.shimmersensing.activities.TrialPresentationActivity">
+    tools:context="stageunimib.federicoragusa816623.shimmersensing.activities.HomeActivity">
 
     <ScrollView
         android:layout_width="match_parent"

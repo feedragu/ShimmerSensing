@@ -71,8 +71,7 @@ public class MyViewPagerAdapter extends RecyclerView.Adapter<MyHolder> {
                 gv = (GlobalValues) context.getApplicationContext();
                 gv.setSsd(shimmerSensor.get(position));
 
-                Log.i("boh", "OnBtClickListener: diobono");
-                Log.i("boh", "OnBtClickListener: " + gv.getSsd().toString());
+
                 context.startActivity(intent, optionsCompat.toBundle());
             }
         });

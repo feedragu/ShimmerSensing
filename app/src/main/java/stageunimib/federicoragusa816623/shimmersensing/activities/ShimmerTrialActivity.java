@@ -189,19 +189,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         trialProgress = findViewById(R.id.trialProgress);
 
         gv = (GlobalValues) getApplicationContext();
-        pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
 
 
         shimmerTrial = gv.getShimmerTrialArrayList();
-        try {
-            Gson gson = new Gson();
-            String response = pref.getString("shimmerdata", "");
-            shimmerData = gson.fromJson(response,
-                    new TypeToken<List<ShimmerData>>() {
-                    }.getType());
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+
         if (shimmerTrialProgress == null) {
             try {
                 shimmerTrialProgress = cloneList(shimmerTrial);
@@ -209,7 +200,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 e.printStackTrace();
             }
             trialProgress.setMax(shimmerTrial.size());
-            Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
         }
 
 
@@ -221,19 +211,16 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 btManager.setConnectionExceptionListener(new ConnectionExceptionListener() {
                     @Override
                     public void onConnectionStart(String connectionHandle) {
-                        Log.i("test_listner1", "onConnectionException: ");
 
                     }
 
                     @Override
                     public void onConnectionException(Exception exception) {
                         exception.printStackTrace();
-                        Log.i("test_listner2", "onConnectionException: ");
                     }
 
                     @Override
                     public void onConnectStartException(String connectionHandle) {
-                        Log.i("test_listner3", "onConnectionException: ");
                         btManager.getHandler().sendEmptyMessage(666666);
 
                     }
@@ -243,9 +230,19 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
                 alertdialog = alertD.show();
                 alertdialog.setCanceledOnTouchOutside(false);
-                Log.i("testconnection", "onCreate: " + gv.getSsd().getMacAddress());
             } catch (Exception e) {
                 Log.e("test_conn", "Couldn't create ShimmerBluetoothManagerAndroid. Error: " + e);
+            }
+        } else {
+            pref = getApplicationContext().getSharedPreferences("ShimmerSensingSamplingConfig", 0);
+            try {
+                Gson gson = new Gson();
+                String response = pref.getString("shimmerdata", "");
+                shimmerData = gson.fromJson(response,
+                        new TypeToken<List<ShimmerData>>() {
+                        }.getType());
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
 
@@ -267,13 +264,11 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     @Override
     protected void onResume() {
         super.onResume();
-        Log.i("provaResume", "onResume: ");
     }
 
     @Override
     protected void onRestart() {
         super.onRestart();
-        Log.i("provaRestart", "onRestart: ");
     }
 
     @SuppressLint("ShowToast")
@@ -285,30 +280,28 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 //            shimmerDevice.startStreaming();
 
         Fragment nextFragment = null;
-        Log.i("test_mode", "performTransition: " + shimmerTrialProgress.get(0).getMode());
         Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
         switch (shimmerTrialProgress.get(0).getMode()) {
             case "Musica": {
                 nextFragment = AudioFragment.newInstance((ShimmerTrialMusic) shimmerTrialProgress.get(0));
 
-                Log.i("Musica", "performTransition: ");
                 break;
             }
             case "Lettura": {
                 nextFragment = LetturaFragment.newInstance((ShimmerTrialLettura) shimmerTrialProgress.get(0));
-                Log.i("Lettura", "performTransition: ");
+
                 break;
             }
             case "Countdown": {
                 long countdown_timer = (long) ((Float.parseFloat(shimmerTrialProgress.get(0).getTrialDuration()) * 1000));
                 msuntilfinish = countdown_timer;
                 nextFragment = CountDownFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon(), countdown_timer);
-                Log.i("CountDown", "performTransition: ");
+
                 break;
             }
             case "Prompt": {
                 nextFragment = PromptFragment.newInstance(shimmerTrialProgress.get(0).getTrialName(), shimmerTrialProgress.get(0).getUrl_icon());
-                Log.i("Prompt", "performTransition: ");
+
                 break;
             }
             default: {
@@ -353,8 +346,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
             trialProgress.setProgress((shimmerTrial.size() - shimmerTrialProgress.size()), true);
 
-            Log.i("shimmerprogress_orig", "onCreate: " + shimmerTrial.size());
-            Log.i("shimmerprogress", "onCreate: " + shimmerTrialProgress.size());
             Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
             IntroductionFragment nextFragment = IntroductionFragment.newInstance(shimmerTrialProgress.get(0));
 
@@ -470,9 +461,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             jArray.add(String.valueOf(obj));
             new SendDeviceDetails().execute(URL_SERVER + "insertdatashimmer", String.valueOf(obj));
 
-            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
             shimmerDataProgress.clear();
-            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -515,9 +504,7 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
             jArray.add(String.valueOf(obj));
             new SendDeviceDetails().execute(URL_SERVER + "update", String.valueOf(jobjInnerDate));
 
-            Log.i("im sending 2", "run: send " + shimmerDataProgress.size());
             shimmerDataProgress.clear();
-            Log.i("im sending 3", "run: send " + shimmerDataProgress.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -534,7 +521,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     public void onFragmentInteractionForm(int[] voti) {
         values = voti;
         for (int i : voti) {
-            Log.i("caac", "onFragmentInteractionForm: " + i);
         }
         if (shimmerProgress == 1) {
             sendShimmerDataInitial();
@@ -566,7 +552,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     private void fragment_handler(int event) {
         switch (event) {
             case 1: {
-                Log.i("play", "onFragmentInteraction: ");
                 if (DEBUG_SHIMMER) {
                     cTimer = new CountDownTimer(msuntilfinish, countdowninterval) {
                         @Override
@@ -575,7 +560,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             double tsLong = System.currentTimeMillis() / 1000;
                             shimmerData.get(counterShimmerDEBUG).setTimestamp_shimmer(tsLong);
                             shimmerDataProgress.add(shimmerData.get(counterShimmerDEBUG));
-                            Log.i("shimmerdatadebug", shimmerDataProgress.get(counterShimmerDEBUG).toString());
                             counterShimmerDEBUG++;
                             if (counterShimmerDEBUG == shimmerData.size() - 1)
                                 counterShimmerDEBUG = 0;
@@ -838,10 +822,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         public void handleMessage(Message msg) {
 
             switch (msg.what) {
-                case 666666:
-                    Log.i("voglioandare a casa", "handleMessage: ");
-                    showDialogShimmer();
-                    break;
                 case ShimmerBluetooth.MSG_IDENTIFIER_DATA_PACKET:
                     if ((msg.obj instanceof ObjectCluster)) {
 

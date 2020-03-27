@@ -14,7 +14,6 @@ import android.util.Log;
 import android.view.animation.AnimationUtils;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.shimmersensing.R;
 
@@ -67,9 +66,9 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
             if (!DEBUG_SHIMMER)
                 new GetDBData().execute(URL_SERVER + "trialdetails");
             else
-                new GetDBData().execute(URL_SERVER + "get");
+                new GetDBData().execute(URL_SERVER + "getshimmerdatatest");
         } catch (Exception e) {
-            Log.i("pippobaudoerror", "onCreate: ");
+            Log.i("error", "onCreate: ");
         }
 
         alertDialogBuilder = new AlertDialog.Builder(SplashActivity.this);
@@ -118,7 +117,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
     public void goAhead() {
 
-        Intent intent = new Intent(SplashActivity.this, TrialPresentationActivity.class);
+        Intent intent = new Intent(SplashActivity.this, HomeActivity.class);
         startActivity(intent);
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
 
@@ -139,7 +138,7 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
                 httpURLConnection.setRequestMethod("GET");
                 httpURLConnection.setDoOutput(true);
-                httpURLConnection.setConnectTimeout(2000);
+                httpURLConnection.setConnectTimeout(4000);
 
                 try {
                     Log.e("trycatch", "onCreate: ");

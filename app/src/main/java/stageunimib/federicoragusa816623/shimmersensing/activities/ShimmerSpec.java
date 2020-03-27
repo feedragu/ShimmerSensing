@@ -156,7 +156,6 @@ public class ShimmerSpec extends AppCompatActivity {
                 super.setEpicenterCallback(new Transition.EpicenterCallback() {
                     @Override
                     public Rect onGetEpicenter(Transition transition) {
-                        Log.i("prova", "funziona");
                         return epicenter;
                     }
 
@@ -173,7 +172,6 @@ public class ShimmerSpec extends AppCompatActivity {
                 new TypeToken<List<ShimmerData>>() {
                 }.getType());
 
-        Log.i("listsize", "onCreate: "+list.size());
 
         graph = findViewById(R.id.graph);
 
@@ -334,8 +332,6 @@ public class ShimmerSpec extends AppCompatActivity {
          //                        tsLong);
          //                list.add(sData);
          //            }
-         //        }
-         //        Log.i("prova", "onCreate: " + list.size());
          **/
 
     }
@@ -370,7 +366,6 @@ public class ShimmerSpec extends AppCompatActivity {
 //                mSeriesGsr.appendData(new DataPoint(timestamp , list.get(counterCsv).getGsrResistance()), true, 10000);
 //                //mSeriesGsrResistance.appendData(new DataPoint(timestamp , list.get(counterCsv).getGsrResistance()), true, 10000);
 //                counterCsv++;
-//                Log.i("counter", "run: "+counterCsv+" PPG data: "+list.get(counterCsv).getPPG());
 //                handlerTest.postDelayed(runnable, hztoms);
 //            }
 //        }, hztoms);
@@ -403,7 +398,6 @@ public class ShimmerSpec extends AppCompatActivity {
 //        }
 //
 //        JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-//        Log.i("prova_json", "run: " + jsonElements);
 //        list.clear();
 //
 
@@ -560,7 +554,6 @@ public class ShimmerSpec extends AppCompatActivity {
             }
         }
         btManager.disconnectAllDevices();
-        Log.i(LOG_TAG, "Shimmer DISCONNECTED");
         super.onStop();
     }
 
@@ -571,12 +564,12 @@ public class ShimmerSpec extends AppCompatActivity {
             if (!shimmerDevice.isStreaming() && !shimmerDevice.isSDLogging()) {
                 //ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, MainActivity.this);
                 ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, ShimmerSpec.this, btManager);
-                Log.i("the end", "done");
+
             } else {
                 shimmerDevice.stopStreaming();
                 onpause = true;
                 ShimmerDialogConfigurations.buildShimmerSensorEnableDetails(shimmerDevice, ShimmerSpec.this, btManager);
-                Log.i("the end", "done");
+
 
             }
         } else {
@@ -624,7 +617,6 @@ public class ShimmerSpec extends AppCompatActivity {
                         Collection<FormatCluster> allFormats = objectCluster.getCollectionOfFormatClusters(Configuration.Shimmer3.ObjectClusterSensorName.TIMESTAMP);
                         FormatCluster formatCluster = ((FormatCluster) ObjectCluster.returnFormatCluster(allFormats, "CAL"));
 //                        double timeStampData = formatCluster.mData;
-//                        Log.i(LOG_TAG, "Time Stamp: " + timeStampData);
                         timestamp = formatCluster.mData;
                         double dataPPG = 0;
                         allFormats = objectCluster.getCollectionOfFormatClusters("PPG_A13");
@@ -788,10 +780,8 @@ public class ShimmerSpec extends AppCompatActivity {
 
                     switch (state) {
                         case CONNECTED:
-                            Log.i(LOG_TAG, "Shimmer [" + macAddress + "] is now CONNECTED");
                             shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
                             if (shimmerDevice != null) {
-                                Log.i(LOG_TAG, "Got the ShimmerDevice!");
                                 if (not_config_yet) {
                                     sampleRate = shimmerDevice.getSamplingRateShimmer();
                                     connected = true;
@@ -803,15 +793,12 @@ public class ShimmerSpec extends AppCompatActivity {
                                             SharedPreferences.Editor editor = pref.edit();
                                             Gson gson = new Gson();
                                             JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-                                            Log.i("prova_json", "run: " + jsonElements);
                                             editor.putString("shimmerdata", String.valueOf(jsonElements));
                                             editor.apply();
 //                                            try {
 //                                                new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
 //
-//                                                Log.i("im sending 2", "run: send " + list.size());
 //                                                list.clear();
-//                                                Log.i("im sending 3", "run: send " + list.size());
 //                                            } catch (Exception e) {
 //                                                e.printStackTrace();
 //                                            }
@@ -832,7 +819,7 @@ public class ShimmerSpec extends AppCompatActivity {
                                 macAddr.setText(shimmerBtAdd);
                                 connect_start.setText("Start streaming");
                             } else {
-                                Log.i(LOG_TAG, "ShimmerDevice returned is NULL!");
+                                //error on connecting with Shimmer device
                             }
                             break;
                         case CONNECTING:
@@ -897,10 +884,7 @@ public class ShimmerSpec extends AppCompatActivity {
         try {
             JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
             new SendDeviceDetails().execute("http://192.168.1.16:5000/api/v1/resources/shimmersensing/sensordata", String.valueOf(jsonElements));
-
-            Log.i("im sending 2", "run: send " + list.size());
             list.clear();
-            Log.i("im sending 3", "run: send " + list.size());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -931,7 +915,6 @@ public class ShimmerSpec extends AppCompatActivity {
                     e.printStackTrace();
                 }
 
-                Log.i("mannag", "doInBackground: " + data.toString());
             } catch (Exception e) {
                 e.printStackTrace();
             } finally {

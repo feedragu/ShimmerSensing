@@ -12,34 +12,10 @@ import java.util.ArrayList;
 public class GlobalValues extends Application {
     private String name, surname, date;
     private String _id;
-    private ShimmerDevice shimmerDevice = null;
     private ArrayList<ShimmerTrial> shimmerTrialArrayList;
     private ShimmerSensorDevice ssd;
-    private ShimmerBluetoothManagerAndroid btManager;
 
     public GlobalValues() {
-    }
-
-
-    public void setBtManager(ShimmerBluetoothManagerAndroid btManager) {
-        this.btManager = btManager;
-    }
-
-    public ShimmerBluetoothManagerAndroid getBtManager() {
-        return btManager;
-    }
-
-
-    public boolean isShimmerDeviceConnected() {
-        return shimmerDevice != null;
-    }
-
-    public void setShimmerDevice(ShimmerDevice shimmerDevice) {
-        this.shimmerDevice = shimmerDevice;
-    }
-
-    public ShimmerDevice getShimmerDevice() {
-        return shimmerDevice;
     }
 
 

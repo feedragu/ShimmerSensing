@@ -51,7 +51,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
-public class TrialPresentationActivity extends AppCompatActivity implements BtShimmerRecyclerAdapter.OnBtClickListener {
+public class HomeActivity extends AppCompatActivity implements BtShimmerRecyclerAdapter.OnBtClickListener {
 
     ViewGroup rootContainer;
     Scene scene1, scene2, scene3;
@@ -110,7 +110,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
 
 
         sceneOn = pref.getInt("scene_on", 1);
-        Log.i("onCreate", "onCreate: " + sceneOn);
+
         sceneOn = 1;
         storedScene(sceneOn);
         attachAdapter();
@@ -146,12 +146,10 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                 // Get the BluetoothDevice object from the Intent
                 BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
                 if (device.getName() != null) {
-                    Log.i("tiprego", "onReceive: bella " + device.getName());
-                } else {
-                    Log.i("tiprego", "onReceive: bella " + device.getAddress());
+                    btListDev.add(device);
+                    btAdapter.notifyDataSetChanged();
                 }
-                btListDev.add(device);
-                btAdapter.notifyDataSetChanged();
+
             }
 
             // When discovery cycle finished
@@ -220,7 +218,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
 
 
     private void setDialog(boolean show) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(TrialPresentationActivity.this);
+        AlertDialog.Builder builder = new AlertDialog.Builder(HomeActivity.this);
         builder.setView(R.layout.progress_dialog);
         Dialog dialog = builder.create();
         if (show) dialog.show();
@@ -285,11 +283,11 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                 scene3.enter();
                 //Turn on Bluetooth
                 if (myBlueToothAdapter == null)
-                    Toast.makeText(TrialPresentationActivity.this, "Your device doesnot support Bluetooth", Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, "Your device doesnot support Bluetooth", Toast.LENGTH_LONG).show();
                 else if (!myBlueToothAdapter.isEnabled()) {
                     Intent BtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
                     startActivityForResult(BtIntent, 0);
-                    Toast.makeText(TrialPresentationActivity.this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, "Turning on Bluetooth", Toast.LENGTH_LONG).show();
                 }
 
 
@@ -307,7 +305,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                     if (myBlueToothAdapter != null) {
                         myBlueToothAdapter.startDiscovery();
                     }
-                    Toast.makeText(TrialPresentationActivity.this, "Scanning Devices", Toast.LENGTH_LONG).show();
+                    Toast.makeText(HomeActivity.this, "Scanning Devices", Toast.LENGTH_LONG).show();
 
                     try {
 
@@ -332,7 +330,7 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
                 btList.setLayoutManager(recyce);
                 btList.setNestedScrollingEnabled(false);
 
-                btAdapter = new BtShimmerRecyclerAdapter(TrialPresentationActivity.this, btListDev, TrialPresentationActivity.this);
+                btAdapter = new BtShimmerRecyclerAdapter(HomeActivity.this, btListDev, HomeActivity.this);
                 DividerItemDecoration itemDecor = new DividerItemDecoration(btList.getContext(), DividerItemDecoration.VERTICAL);
                 btList.addItemDecoration(itemDecor);
                 btList.setAdapter(btAdapter);
@@ -390,7 +388,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
     public void onBackPressed() {
         myBlueToothAdapter.cancelDiscovery();
         sceneOn = pref.getInt("scene_on", 1);
-        Log.i("onBackPressed", "onBackPressed: " + sceneOn);
         switch (sceneOn) {
             case 1:
                 finish();
@@ -431,7 +428,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         SharedPreferences.Editor editor = pref.edit();
         editor.putInt("scene_on", sceneOn);
         editor.apply();
-        Log.i("onDestroy", "onDestroy: " + sceneOn);
         try {
 
             unregisterReceiver(FoundReceiver);
@@ -469,8 +465,6 @@ public class TrialPresentationActivity extends AppCompatActivity implements BtSh
         String json = gson.toJson(s);
 
         gv.setSsd(s);
-        Log.i("boh", "OnBtClickListener: diobono");
-        Log.i("boh", "OnBtClickListener: " + gv.getSsd().toString());
 
         startActivity(intent);
     }
