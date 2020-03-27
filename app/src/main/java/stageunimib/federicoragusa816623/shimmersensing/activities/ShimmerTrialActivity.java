@@ -577,7 +577,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case 2: {
-                Log.i("stop", "onFragmentInteraction: ");
                 if (DEBUG_SHIMMER) {
                     cTimer.cancel();
                 } else {
@@ -596,7 +595,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                         finish();
                 }
                 Fragment previousFragment = mFragmentManager.findFragmentById(R.id.fragmentContainer);
-                Log.i("cachi", "onFragmentInteraction: " + shimmerTrial.get(0).getN_domande().size());
                 FormFragment nextFragment = FormFragment.newInstance(shimmerTrialProgress.get(0).getN_domande());
 
                 FragmentTransaction fragmentTransaction = mFragmentManager.beginTransaction();
@@ -627,7 +625,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 break;
             }
             case 69: {
-                Log.i("volare", "onFragmentInteractionLettura: se vola");
                 if (DEBUG_SHIMMER) {
                     cTimer = new CountDownTimer(msuntilfinish, countdowninterval) {
                         @Override
@@ -636,7 +633,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             double tsLong = System.currentTimeMillis() / 1000;
                             shimmerData.get(counterShimmerDEBUG).setTimestamp_shimmer(tsLong);
                             shimmerDataProgress.add(shimmerData.get(counterShimmerDEBUG));
-                            Log.i("shimmerdatadebug", shimmerDataProgress.get(counterShimmerDEBUG).toString());
                             counterShimmerDEBUG++;
                             if (counterShimmerDEBUG == shimmerData.size() - 1)
                                 counterShimmerDEBUG = 0;
@@ -663,7 +659,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
         @Override
         protected String doInBackground(String... params) {
             String data = "";
-            Log.i("Prova", "cachi");
             HttpURLConnection httpURLConnection = null;
             try {
 
@@ -673,7 +668,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
 
                 DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
                 String s = params[1];
-                Log.i("mannag", "doInBackground: " + s);
                 wr.writeBytes("postdata=" + s);
                 wr.flush();
                 wr.close();
@@ -706,12 +700,10 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                 gv.set_id(result);
             }
             shimmerProgress++;
-            Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
         }
     }
 
     private void showDialogShimmer() {
-        Log.i("ao", "onConnectionException: ");
         alertdialog.dismiss();
         MaterialAlertDialogBuilder dialogBuilderMaterial = new MaterialAlertDialogBuilder(ShimmerTrialActivity.this, R.style.DialogServerTheme_MaterialComponents_MaterialAlertDialog)
                 .setTitle("Non connesso")
@@ -764,7 +756,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        Log.i("stop", "onFragmentInteraction: ");
         if (DEBUG_SHIMMER) {
             if (cTimer != null)
                 cTimer.cancel();
@@ -999,7 +990,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                             shimmerDevice = btManager.getShimmerDeviceBtConnectedFromMac(shimmerBtAdd);
                             if (shimmerDevice != null) {
 
-                                Log.i(LOG_TAG, "Got the ShimmerDevice!");
                                 if (not_config_yet) {
                                     alertdialog.dismiss();
                                     loadInitialFragment();
@@ -1014,7 +1004,6 @@ public class ShimmerTrialActivity extends AppCompatActivity implements CountDown
                                     try {
                                         mLPFilter = new Filter(Filter.LOW_PASS, sampleRate, mLPFc);
                                     } catch (Exception e) {
-                                        Log.i("test_error", "handleMessage: ");
                                         e.printStackTrace();
                                     }
 

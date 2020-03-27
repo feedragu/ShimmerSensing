@@ -13,7 +13,6 @@ public class SendDeviceDetails extends AsyncTask<String, Void, String> {
     @Override
     protected String doInBackground(String... params) {
         String data = "";
-        Log.i("Prova", "cachi");
         HttpURLConnection httpURLConnection = null;
         try {
 
@@ -23,7 +22,6 @@ public class SendDeviceDetails extends AsyncTask<String, Void, String> {
 
             DataOutputStream wr = new DataOutputStream(httpURLConnection.getOutputStream());
             String s=params[1];
-            Log.i("mannag", "doInBackground: "+s);
             wr.writeBytes("postdata="+ s);
             wr.flush();
             wr.close();
@@ -51,6 +49,5 @@ public class SendDeviceDetails extends AsyncTask<String, Void, String> {
     @Override
     protected void onPostExecute(String result) {
         super.onPostExecute(result);
-        Log.i("TAG", result); // this is expecting a response code to be sent from your server upon receiving the POST data
     }
 }

@@ -77,7 +77,6 @@ public class PromptFragment extends Fragment implements Shimmer_interface {
         @SuppressLint("SetTextI18n")
         public void run() {
             if (!isRunning) {
-                Log.i(TAG, "run: testiltemposcorrefiga");
             } else {
                 counterRun++;
                 timerCountdown.setText(String.valueOf(counterRun));
@@ -187,7 +186,6 @@ public class PromptFragment extends Fragment implements Shimmer_interface {
     }
 
     private void timerResume() {
-        Log.i("Sec", Long.toString(lastSeconds));
         timerStart(lastSeconds);
     }
 

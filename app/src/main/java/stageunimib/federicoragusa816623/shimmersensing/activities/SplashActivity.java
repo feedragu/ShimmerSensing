@@ -54,7 +54,6 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Log.i("creating mate", "onCreate: imcreating u bitch");
         setContentView(R.layout.activity_splash);
         globalValues = (GlobalValues) getApplicationContext();
         ImageView shimm_logo = findViewById(R.id.shimmerlogo);
@@ -68,7 +67,6 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
             else
                 new GetDBData().execute(URL_SERVER + "getshimmerdatatest");
         } catch (Exception e) {
-            Log.i("error", "onCreate: ");
         }
 
         alertDialogBuilder = new AlertDialog.Builder(SplashActivity.this);
@@ -161,10 +159,8 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
                 }
 
-                Log.i("shimmer", "doInBackground: " + data.toString());
             } catch (IOException e) {
 
-                Log.i("caccapupu", "onCreate: ");
             } finally {
                 if (httpURLConnection != null) {
                     httpURLConnection.disconnect();
@@ -292,7 +288,6 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
 
                     }
                 } catch (JSONException e) {
-                    Log.i("pippobaudoerrorOnPost", "onCreate: ");
                     server_timeout();
                     server_timeout = true;
                 } finally {
@@ -300,12 +295,10 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         SharedPreferences.Editor editor = pref.edit();
                         Gson gson = new Gson();
                         JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(shimmertrial);
-                        Log.i("shimmertrial", "run: " + jsonElements);
                         editor.putString("shimmertrial", String.valueOf(jsonElements));
                         editor.apply();
                         globalValues.setShimmerTrialArrayList(shimmertrial);
 
-                        Log.i("TAG", String.valueOf(shimmertrial.size()));
                         if (!server_timeout)
                             goAhead();
                     } catch (Exception e) {
@@ -354,18 +347,15 @@ public class SplashActivity extends AppCompatActivity implements Shimmer_interfa
                         SharedPreferences.Editor editor = pref.edit();
                         Gson gson = new Gson();
                         JsonArray jsonElements = (JsonArray) new Gson().toJsonTree(list);
-                        Log.i("prova_json", "run: " + jsonElements);
                         editor.putString("shimmerdata", String.valueOf(jsonElements));
                         editor.apply();
 
-                        Log.i("TAG", String.valueOf(list.size()));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
 
 
                 } catch (JSONException e) {
-                    Log.i("pippobaudoerrorOnPost", "onCreate: ");
                     server_timeout = true;
 
                 } finally {

@@ -126,7 +126,6 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         shimmerSensor = gv.getSsd();
 
 //        String audioArray= pref.getString("shimmeraudio", "");
-//        Log.i("onCreate", "onCreate: " + audioArray);
 //        byte[] array = Base64.decode(audioArray, Base64.DEFAULT);
 //
         mediaPlayer = new MediaPlayer();
@@ -190,12 +189,9 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
                 getSupportActionBar().setTitle("");
                 finishAfterTransition();
                 if (mediaPlayer.isPlaying()) {
-                    Log.i("tarantella", "onBackPressed: isplaying");
                     mediaPlayer.stop();
                     mediaPlayer.release();
                     mediaPlayer = null;
-                } else {
-                    Log.i("ciumbia", "onBackPressed: isnotplaying");
                 }
                 return true;
 
@@ -215,12 +211,9 @@ public class TrialRecapActivity extends AppCompatActivity implements TrialRecycl
         getSupportActionBar().setTitle("");
         finishAfterTransition();
         if (mediaPlayer.isPlaying()) {
-            Log.i("tarantella", "onBackPressed: isplaying");
             mediaPlayer.stop();
             mediaPlayer.release();
             mediaPlayer = null;
-        } else {
-            Log.i("ciumbia", "onBackPressed: isnotplaying");
         }
 
     }

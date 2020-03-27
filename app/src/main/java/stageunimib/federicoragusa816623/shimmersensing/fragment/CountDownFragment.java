@@ -133,13 +133,11 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
 
                 if (isRunning) {
                     isRunning = false;
-                    Log.i(TAG, "stopPlay: ");
                     if (mListener != null) {
                         mListener.onFragmentInteraction(2);
                     }
                     timerPause();
                 } else {
-                    Log.i(TAG, "resumePlay: ");
                     timerResume();
                     if (mListener != null) {
                         mListener.onFragmentInteraction(1);
@@ -202,7 +200,6 @@ public class CountDownFragment extends Fragment implements Shimmer_interface {
     }
 
     private void timerResume() {
-        Log.i("Sec", Long.toString(lastSeconds));
         timerStart(lastSeconds);
     }
 

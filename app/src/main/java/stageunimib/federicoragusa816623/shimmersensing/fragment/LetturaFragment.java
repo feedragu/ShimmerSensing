@@ -158,7 +158,6 @@ public class LetturaFragment extends Fragment {
 //
 //                    actual_pos_media = mediaPlayer.getCurrentPosition();
 //                    mediaPlayer.pause();
-//                    Log.i(TAG, "onClick: " + actual_pos_media);
 //                    if (mListener != null) {
 //                        mListener.onFragmentInteractionAudio(2);
 //                    }
@@ -197,7 +196,6 @@ public class LetturaFragment extends Fragment {
                         content.append(line + "\n");
                     }
                     bufferedReader.close();
-                    Log.i(TAG, "run: "+content.toString());
                     updateText();
                 }
                 catch(Exception e)
@@ -212,7 +210,6 @@ public class LetturaFragment extends Fragment {
 
             @Override
             public void run() {
-                Log.i(TAG, "run: "+Shimmer_interface.URL_FILE.concat(shimmer_lettura.getUrl_file_text()));
                 text_lettura.setText(content.toString());
 
             }
@@ -276,7 +273,6 @@ public class LetturaFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        Log.i(TAG, "onDetach: ");
         mListener = null;
     }
 

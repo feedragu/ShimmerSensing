@@ -68,7 +68,6 @@ public class AudioFragment extends Fragment {
         @SuppressLint("SetTextI18n")
         public void run() {
             if (mediaPlayer != null) {
-                Log.i(TAG, "run: testseek");
                 long totalDuration = mediaPlayer.getDuration();
                 long currentDuration = mediaPlayer.getCurrentPosition();
                 // Displaying Total Duration time
@@ -161,7 +160,6 @@ public class AudioFragment extends Fragment {
 
                     actual_pos_media = mediaPlayer.getCurrentPosition();
                     mediaPlayer.pause();
-                    Log.i(TAG, "onClick: " + actual_pos_media);
                     if (mListener != null) {
                         mListener.onFragmentInteractionAudio(2);
                     }
@@ -195,7 +193,6 @@ public class AudioFragment extends Fragment {
                     public void run() {
                         try {
                             String url = Shimmer_interface.URL_FILE.concat(shimmer_audio.getUrl_file_audio());
-                            Log.i(TAG, "url : " + url);
                             mediaPlayer = new MediaPlayer();
                             mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
                             mediaPlayer.setDataSource(url);
@@ -220,14 +217,12 @@ public class AudioFragment extends Fragment {
                             mediaPlayer.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
                                 @Override
                                 public void onCompletion(MediaPlayer mp) {
-                                    Log.i(TAG, "onCompletion: ");
                                     if (mListener != null) {
                                         mListener.onFragmentInteractionAudio(3);
                                     }
                                     seekHandler.removeCallbacks(updateSeekBar);
                                 }
                             });
-                            Log.i(TAG, "onViewCreated: " + mediaPlayer.getDuration());
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -285,7 +280,6 @@ public class AudioFragment extends Fragment {
             mediaPlayer.release();
             seekHandler.removeCallbacks(updateSeekBar);
         }
-        Log.i(TAG, "onDetach: ");
         mListener = null;
     }
 

@@ -44,7 +44,6 @@ public class FormRecyclerAdapter extends RecyclerView.Adapter<FormRecyclerAdapte
         for (int i = 0; i < formTrial.get(position).getRange(); i++) {
             final RadioButton radioButton = new RadioButton(mContext);
             radioButton.setText("");
-            Log.i(TAG, "onBindViewHolder: "+i);
             radioButton.setId(i);
             holder.radioGroup.addView(radioButton);
 
